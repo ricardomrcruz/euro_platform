@@ -25,6 +25,9 @@ export class User {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
+  @Column({ name: 'token_version', default: 0 })
+  tokenVersion!: number;
+
   checkPassword(password: string): boolean {
     return bcrypt.compareSync(password, this.password);
   }

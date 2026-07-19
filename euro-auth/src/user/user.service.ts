@@ -33,6 +33,10 @@ export class UserService {
         return this.userRepository.findByEmail(email);
     }
 
+    findById(id: number): Promise<User | null>{
+        return this.userRepository.findById(id);
+    }
+
     private toResponseDto(user: User): UserResponseDto{
         return{
             id: user.id,

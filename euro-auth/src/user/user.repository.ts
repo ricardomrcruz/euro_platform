@@ -10,5 +10,9 @@ export class UserRepository extends Repository<User>{
 
     findByEmail(email:string): Promise <User|null> {
         return this.findOneBy({ email });
-    } 
+    }
+
+    findById(id: number): Promise<User | null> {
+        return this.findOneBy({ id });
+    }
 }
