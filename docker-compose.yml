@@ -7,6 +7,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     healthcheck:
@@ -47,6 +48,8 @@ services:
       DB_NAME: ${POSTGRES_DB}
       DB_SCHEMA: public
       AUTH_SERVICE_URL: http://euro-auth:3000
+      CARAPI_API_TOKEN: ${CARAPI_API_TOKEN}
+      CARAPI_API_SECRET: ${CARAPI_API_SECRET}
     depends_on:
       postgres:
         condition: service_healthy
