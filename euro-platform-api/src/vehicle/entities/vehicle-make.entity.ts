@@ -18,6 +18,12 @@ export class VehicleMake {
   @Column({ name: 'external_id', nullable: true })
   externalId?: number;
 
+  // World Manufacturer Identifier(s) -- first 3 characters of a VIN. A make can have
+  // several (different plants/regions), so this is an array, not a single value. Used by
+  // VehicleFactoryService.resolveByVin() for best-effort make recognition from a VIN.
+  @Column('text', { name: 'wmi_codes', array: true, nullable: true })
+  wmiCodes?: string[];
+
   @OneToMany(() => VehicleModel, (model) => model.make)
   models!: VehicleModel[];
 }

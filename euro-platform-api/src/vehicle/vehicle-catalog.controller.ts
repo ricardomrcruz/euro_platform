@@ -1,18 +1,26 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
 import { VehicleFactoryService } from './vehicle-factory.service';
 
 @Controller('vehicles')
 export class VehicleCatalogController {
   constructor(private readonly vehicleFactory: VehicleFactoryService) {}
 
+  @Get('vin-lookup')
+  lookupVin(@Query('vin') vin?: string) {
+    if (!vin) {
+      throw new BadRequestException('vin query param is required');
+    }
+    return this.vehicleFactory.resolveByVin(vin);
+  }
+
   @Get('makes')
-  getMakes(@Query('year') year?: string) {
-    return this.vehicleFactory.listMakes(year ? Number(year) : undefined);
+  getMakes() {
+    return this.vehicleFactory.listMakes();
   }
 
   @Get('models')
-  getModels(@Query('make') make: string, @Query('year') year?: string) {
-    return this.vehicleFactory.listModels(make, year ? Number(year) : undefined);
+  getModels(@Query('make') make: string) {
+    return this.vehicleFactory.listModels(make);
   }
 
   @Get('trims')

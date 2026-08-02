@@ -24,6 +24,9 @@ export class VehicleModel {
   @Column({ name: 'external_id', nullable: true })
   externalId?: number;
 
+  @Column({ name: 'image_url', nullable: true })
+  imageUrl?: string;
+
   @ManyToOne(() => VehicleMake, (make) => make.models)
   make!: VehicleMake;
 
