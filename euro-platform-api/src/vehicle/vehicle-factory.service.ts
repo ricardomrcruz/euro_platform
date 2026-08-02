@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { VehicleMake } from './entities/vehicle-make.entity';
 import { VehicleModel } from './entities/vehicle-model.entity';
 import { VehicleTrim } from './entities/vehicle-trim.entity';
+import { Vehicle } from './entities/vehicle.entity';
 import { decodeModelYear } from './vin-year.util';
 
 export interface VinLookupResult {
@@ -11,6 +12,19 @@ export interface VinLookupResult {
   wmi: string;
   make: VehicleMake | null;
   modelYear?: number;
+}
+
+export interface CreateVehicleInput {
+  makeId: number;
+  modelId: number;
+  trimId?: number;
+  vin?: string;
+  year: number;
+  exteriorColor?: string;
+  interiorColor?: string;
+  mileage?: number;
+  numberOfOwners?: number;
+  plateCountry?: string;
 }
 
 // The design doc's Factory pattern for 6.2.1 "Creer une annonce": queries the catalog.
@@ -26,6 +40,8 @@ export class VehicleFactoryService {
     private readonly modelRepository: Repository<VehicleModel>,
     @InjectRepository(VehicleTrim)
     private readonly trimRepository: Repository<VehicleTrim>,
+    @InjectRepository(Vehicle)
+    private readonly vehicleRepository: Repository<Vehicle>,
   ) {}
 
   listMakes(): Promise<VehicleMake[]> {
@@ -58,8 +74,9 @@ export class VehicleFactoryService {
     });
   }
 
-  // Best-effort VIN recognition (design doc 6.2.1: "VIN reconnu" / "VIN non reconnu, limite
-  // atteinte"). Only the WMI (first 3 chars -> manufacturer) and the model-year code are
+  // Best-effort VIN recognition (design doc 6.2.1.1 "VIN reconnu" -- a separate scenario
+  // from 6.2.1.2 "limite atteinte", which is the active-ad cap enforced in AdService, not a
+  // VIN fallback). Only the WMI (first 3 chars -> manufacturer) and the model-year code are
   // actually decodable from data we have -- the rest of a VIN is manufacturer-proprietary
   // encoding we don't have access to. "Recognized" here means "we identified the make";
   // the caller still needs to pick model/trim from the catalog, same as any other listing.
@@ -76,5 +93,43 @@ export class VehicleFactoryService {
       make,
       modelYear: decodeModelYear(vin),
     };
+  }
+
+  // Called by AdService when creating an ad (design doc 6.2.1: the Factory service is what
+  // actually creates the Vehicle row, not AdModule directly).
+  async createVehicle(input: CreateVehicleInput): Promise<Vehicle> {
+    const make = await this.makeRepository.findOneBy({ id: input.makeId });
+    if (!make) {
+      throw new NotFoundException('Vehicle make not found');
+    }
+
+    const model = await this.modelRepository.findOneBy({ id: input.modelId });
+    if (!model) {
+      throw new NotFoundException('Vehicle model not found');
+    }
+
+    let trim: VehicleTrim | undefined;
+    if (input.trimId) {
+      const found = await this.trimRepository.findOneBy({ id: input.trimId });
+      if (!found) {
+        throw new NotFoundException('Vehicle trim not found');
+      }
+      trim = found;
+    }
+
+    return this.vehicleRepository.save(
+      this.vehicleRepository.create({
+        make,
+        model,
+        trim,
+        vin: input.vin,
+        year: input.year,
+        exteriorColor: input.exteriorColor,
+        interiorColor: input.interiorColor,
+        mileage: input.mileage,
+        numberOfOwners: input.numberOfOwners,
+        plateCountry: input.plateCountry,
+      }),
+    );
   }
 }

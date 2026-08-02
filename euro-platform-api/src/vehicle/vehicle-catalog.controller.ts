@@ -1,6 +1,11 @@
 import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
 import { VehicleFactoryService } from './vehicle-factory.service';
+import { Public } from '../auth/decorators/public.decorator';
 
+// Every endpoint here is public browsing -- applied at class level since nothing in this
+// controller should ever require auth. Without this, the new global AuthGuard would start
+// blocking catalog browsing, which used to be unauthenticated by default (no guard existed).
+@Public()
 @Controller('vehicles')
 export class VehicleCatalogController {
   constructor(private readonly vehicleFactory: VehicleFactoryService) {}
