@@ -12,9 +12,7 @@ import { AdStatus } from '../enums/ad-status.enum';
 import { VehicleCondition } from '../enums/vehicle-condition.enum';
 import { AdPhoto } from './ad-photo.entity';
 
-// Design doc 8.2: State Pattern for Ad/Auction is implemented as an enum + guard methods on
-// the entity (not a class per state) -- same approach already used for User.checkPassword()
-// in euro-auth. The entity owns its own valid transitions; AdService just calls these.
+// State transitions are guarded here, not in a separate class-per-state hierarchy.
 @Entity('ads')
 export class Ad {
   @PrimaryGeneratedColumn()
@@ -53,8 +51,7 @@ export class Ad {
   @Column('text', { name: 'rejection_message', nullable: true })
   rejectionMessage?: string;
 
-  // Opaque reference into euro-auth's users table -- no enforced FK, per the
-  // no-cross-service-coupling decision (separate schemas, separate services).
+  // Opaque reference into euro-auth's users table, no enforced FK.
   @Column({ name: 'seller_id' })
   sellerId!: number;
 

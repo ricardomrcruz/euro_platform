@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -12,6 +13,9 @@ import { AuthModule } from './auth/auth.module';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { AdModule } from './ad/ad.module';
+import { NotificationModule } from './notification/notification.module';
+import { AuctionModule } from './auction/auction.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
 
 @Module({
   imports: [
@@ -20,9 +24,13 @@ import { AdModule } from './ad/ad.module';
       inject: [typeormConfig.KEY],
       useFactory: (config: ConfigType<typeof typeormConfig>) => config,
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     VehicleModule,
+    NotificationModule,
     AdModule,
+    AuctionModule,
+    SchedulerModule,
   ],
   controllers: [AppController],
   providers: [

@@ -40,8 +40,7 @@ export class CreateAdDto {
   @IsString()
   location?: string;
 
-  // Vehicle selection -- creates the underlying Vehicle row via VehicleFactoryService in
-  // the same request (design doc 6.2.1: Ad creation is what invokes the Factory).
+  // Vehicle fields create the underlying Vehicle row via VehicleFactoryService.
   @IsInt()
   @IsPositive()
   makeId!: number;

@@ -2,9 +2,7 @@ import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } f
 import { UserRole } from '../../auth/enums/user-role.enum';
 import { Ad } from './ad.entity';
 
-// Ongoing admin<->seller conversation on an ad (e.g. "needs a photo of the rear lights to
-// validate") -- separate from the one-shot rejectionMessage field on Ad, though a reject
-// call also posts its message here as the first entry (see AdService.rejectAd).
+// Chat thread on an ad, between its seller and admins.
 @Entity('ad_messages')
 export class AdMessage {
   @PrimaryGeneratedColumn()
@@ -13,13 +11,11 @@ export class AdMessage {
   @Column('text')
   message!: string;
 
-  // Opaque reference into euro-auth's users table, same pattern as Ad.sellerId -- no
-  // enforced FK across services.
+  // Opaque reference into euro-auth's users table, no enforced FK.
   @Column({ name: 'sender_id' })
   senderId!: number;
 
-  // Stored redundantly (not looked up) so the thread renders "Admin"/"Seller" without
-  // calling back into euro-auth.
+  // Stored redundantly to avoid a lookup back into euro-auth.
   @Column({ name: 'sender_role', type: 'enum', enum: UserRole })
   senderRole!: UserRole;
 

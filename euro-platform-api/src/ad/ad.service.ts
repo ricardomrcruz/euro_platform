@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { VehicleFactoryService } from '../vehicle/vehicle-factory.service';
+import { NotificationService } from '../notification/notification.service';
 import type { RequestUser } from '../auth/interfaces/authenticated-request.interface';
 import { UserRole } from '../auth/enums/user-role.enum';
 import { Ad } from './entities/ad.entity';
@@ -11,8 +12,7 @@ import { AdStatus } from './enums/ad-status.enum';
 import { CreateAdDto } from './dto/create-ad.dto';
 import { CreateAdPhotoDto } from './dto/create-ad-photo.dto';
 
-// Design doc 6.2.1.2 "limite atteinte": a cap on how many ads a seller can have active at
-// once, not a VIN-lookup fallback (see VehicleFactoryService.resolveByVin for that one).
+// Cap on active (DRAFT/REVIEW/VALIDATED) ads per seller.
 const MAX_ACTIVE_ADS_PER_SELLER = 5;
 const ACTIVE_STATUSES = [AdStatus.DRAFT, AdStatus.REVIEW, AdStatus.VALIDATED];
 
@@ -31,6 +31,7 @@ export class AdService {
     @InjectRepository(AdMessage)
     private readonly adMessageRepository: Repository<AdMessage>,
     private readonly vehicleFactory: VehicleFactoryService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async createAd(sellerId: number, dto: CreateAdDto): Promise<Ad> {
@@ -81,7 +82,9 @@ export class AdService {
   async validateAd(adId: number): Promise<Ad> {
     const ad = await this.findByIdOrThrow(adId);
     ad.validate();
-    return this.adRepository.save(ad);
+    const saved = await this.adRepository.save(ad);
+    this.notificationService.notifyAdValidated(saved.sellerId, saved.title);
+    return saved;
   }
 
   async rejectAd(admin: RequestUser, adId: number, message: string): Promise<Ad> {
@@ -89,8 +92,7 @@ export class AdService {
     ad.reject(message);
     const saved = await this.adRepository.save(ad);
 
-    // The rejection reason becomes the first chat entry too, so the admin isn't typing the
-    // same explanation twice and the thread has continuity from the moment of rejection.
+    // Rejection reason also becomes the ad's first chat entry.
     await this.adMessageRepository.save(
       this.adMessageRepository.create({
         ad: saved,
@@ -127,9 +129,7 @@ export class AdService {
     });
   }
 
-  // Public read: a validated ad is visible to anyone; a non-validated one only to its
-  // owner or an admin. Returns 404 rather than 403 for anything else, so we don't leak
-  // the existence of other sellers' drafts.
+  // 404, not 403, for a non-owner/admin so we don't leak that a draft ad exists.
   async findVisible(id: number, currentUser?: RequestUser): Promise<Ad> {
     const ad = await this.adRepository.findOne({ where: { id }, relations: AD_RELATIONS });
     if (!ad) {
@@ -143,8 +143,7 @@ export class AdService {
     return ad;
   }
 
-  // Chat thread is private (owner or any admin), unlike public photos -- same access rule
-  // used for both posting and reading it.
+  // Chat thread is private (owner or admin only), unlike photos.
   async addMessage(currentUser: RequestUser, adId: number, text: string): Promise<AdMessage> {
     const ad = await this.findByIdOrThrow(adId);
     if (!this.isOwnerOrAdmin(ad, currentUser)) {
