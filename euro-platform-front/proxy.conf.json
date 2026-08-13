@@ -1,0 +1,9 @@
+{
+  "/api": {
+    "target": "http://euro-platform-api:3000",
+    "secure": false,
+    "pathRewrite": {
+      "^/api": ""
+    }
+  }
+}

@@ -1,0 +1,167 @@
+{
+  "nav": {
+    "auctions": "Enchères",
+    "sellCar": "Vendre une voiture",
+    "aboutUs": "À propos",
+    "searchPlaceholder": "Rechercher une voiture (ex. BMW, Audi, Ford)",
+    "signIn": "Connexion"
+  },
+  "card": {
+    "bid": "Enchère",
+    "noReserve": "SANS RÉSERVE"
+  },
+  "countdown": {
+    "ended": "Terminée",
+    "day": "Jour",
+    "days": "Jours"
+  },
+  "auctions": {
+    "heading": "Enchères",
+    "filters": {
+      "anyYear": "Toute année",
+      "year2020": "2020+",
+      "year2015": "2015-2019",
+      "year2010": "2010-2014",
+      "beforeYear2010": "Avant 2010",
+      "anyTransmission": "Toute transmission",
+      "manual": "Manuelle",
+      "automatic": "Automatique",
+      "anyBodyStyle": "Tout type de carrosserie",
+      "coupe": "Coupé",
+      "sedan": "Berline",
+      "convertible": "Cabriolet",
+      "wagon": "Break",
+      "suv": "SUV"
+    },
+    "sort": {
+      "endingSoon": "Fin imminente",
+      "newlyListed": "Récemment ajoutées",
+      "noReserve": "Sans réserve",
+      "lowestMileage": "Kilométrage le plus bas",
+      "closestToMe": "Les plus proches"
+    }
+  },
+  "footer": {
+    "why": {
+      "heading": "Pourquoi EuroCars ?",
+      "auctionsCompleted": "Enchères terminées",
+      "sellThroughRate": "Taux de vente",
+      "valueSold": "Valeur des voitures vendues",
+      "members": "Membres inscrits"
+    },
+    "reviews": {
+      "heading": "Nos clients nous adorent !",
+      "quote": "Du début à la fin, tout a été simple et sans stress. Je recommande vivement !"
+    },
+    "newsletter": {
+      "heading": "Recevez l'email quotidien",
+      "emailPlaceholder": "Adresse e-mail",
+      "subscribe": "S'abonner"
+    },
+    "howItWorks": {
+      "heading": "Comment ça marche",
+      "buying": "Acheter une voiture",
+      "selling": "Vendre une voiture",
+      "finalizing": "Finaliser la vente",
+      "shipping": "Livraison",
+      "faqs": "FAQ"
+    },
+    "sellers": {
+      "heading": "Vendeurs",
+      "submitCar": "Soumettre votre voiture",
+      "dashboard": "Tableau de bord",
+      "photoGuide": "Guide photo"
+    },
+    "helpfulLinks": {
+      "heading": "Liens utiles",
+      "browse": "Parcourir",
+      "aboutUs": "À propos",
+      "careers": "Carrières",
+      "support": "Support"
+    },
+    "copyright": "© Copyright {{year}} EuroCars.",
+    "termsOfUse": "Conditions d'utilisation",
+    "privacyPolicy": "Politique de confidentialité"
+  },
+  "lang": {
+    "fr": "FR",
+    "en": "EN"
+  },
+  "auctionDetail": {
+    "notFound": "Enchère introuvable.",
+    "bidPanel": {
+      "seller": "Vendeur",
+      "ending": "Fin",
+      "bids": "Enchères",
+      "views": "Vues",
+      "watching": "Suivis",
+      "placeBid": "Enchérir",
+      "watch": "Suivre",
+      "reserve": "Avec réserve",
+      "noReserve": "Sans réserve",
+      "currentBid": "Enchère actuelle"
+    },
+    "specs": {
+      "heading": "Détails du véhicule",
+      "make": "Marque",
+      "model": "Modèle",
+      "engine": "Moteur",
+      "drivetrain": "Transmission",
+      "mileage": "Kilométrage",
+      "transmission": "Boîte de vitesses",
+      "vin": "VIN",
+      "bodyStyle": "Carrosserie",
+      "titleStatus": "Statut du titre",
+      "exteriorColor": "Couleur extérieure",
+      "interiorColor": "Couleur intérieure",
+      "location": "Localisation",
+      "sellerType": "Type de vendeur",
+      "sellerTypeDealer": "Professionnel",
+      "sellerTypePrivate": "Particulier"
+    },
+    "gallery": {
+      "seeAllPhotos": "Voir les {{count}} photos"
+    },
+    "quickStats": {
+      "timeLeft": "Temps restant",
+      "highBid": "Meilleure enchère",
+      "bids": "Enchères",
+      "comments": "Commentaires",
+      "placeBid": "Enchérir"
+    },
+    "bidHistory": {
+      "heading": "Historique des enchères",
+      "noBids": "Aucune enchère pour le moment."
+    },
+    "sections": {
+      "description": "Description",
+      "highlights": "Points forts",
+      "equipment": "Équipements",
+      "modifications": "Modifications",
+      "knownFlaws": "Défauts connus",
+      "recentServiceHistory": "Historique d'entretien récent",
+      "otherItemsIncluded": "Autres éléments inclus dans la vente",
+      "ownershipHistory": "Historique de propriété",
+      "sellerNotes": "Remarques du vendeur"
+    },
+    "video": {
+      "heading": "Vidéo"
+    },
+    "otherAuctions": {
+      "heading": "Autres enchères"
+    },
+    "comments": {
+      "heading": "Commentaires et enchères",
+      "addCommentPlaceholder": "Ajouter un commentaire...",
+      "submit": "Envoyer",
+      "sortNewest": "Plus récents",
+      "sortMostUpvoted": "Les plus votés",
+      "sortSellerComments": "Commentaires du vendeur",
+      "sortBidHistory": "Historique des enchères",
+      "reply": "Répondre",
+      "flagInappropriate": "Signaler comme inapproprié",
+      "bidPrefix": "Enchère",
+      "sellerBadge": "Vendeur"
+    }
+  }
+}

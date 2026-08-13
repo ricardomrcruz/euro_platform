@@ -1,0 +1,71 @@
+<div class="bg-surface-700 p-4">
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <h2 class="text-lg font-bold text-white">{{ 'auctionDetail.comments.heading' | translate }}</h2>
+    <div class="flex flex-wrap items-center gap-4 text-sm">
+      @for (tab of sortTabs; track tab.key) {
+        <button
+          type="button"
+          (click)="selectSort(tab.key)"
+          class="font-medium"
+          [class.text-primary]="activeSort() === tab.key"
+          [class.underline]="activeSort() === tab.key"
+          [class.text-surface-300]="activeSort() !== tab.key"
+        >
+          {{ tab.labelKey | translate }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="mt-4 flex gap-2">
+    <input
+      type="text"
+      pInputText
+      [pSize]="'small'"
+      [placeholder]="'auctionDetail.comments.addCommentPlaceholder' | translate"
+      class="w-full"
+    />
+    <p-button [label]="'auctionDetail.comments.submit' | translate" [size]="'small'" />
+  </div>
+
+  <div class="mt-6 space-y-5">
+    @for (comment of visibleComments(); track comment.id) {
+      <div class="flex gap-3">
+        <div class="flex h-9 w-9 shrink-0 items-center justify-center bg-surface-500 text-xs font-semibold text-white">
+          {{ initials(comment.author) }}
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-wrap items-center gap-2 text-sm">
+            <span class="font-semibold text-white">{{ comment.author }}</span>
+            @if (comment.isSeller) {
+              <span class="bg-primary px-1.5 py-0.5 text-xs font-medium text-white">
+                {{ 'auctionDetail.comments.sellerBadge' | translate }}
+              </span>
+            }
+            <span class="text-xs text-surface-400">{{ comment.timeAgo }}</span>
+          </div>
+
+          @if (comment.kind === 'bid') {
+            <p class="mt-1 text-sm font-semibold text-white">
+              {{ 'auctionDetail.comments.bidPrefix' | translate }}
+              {{ comment.bidAmount | currency: 'EUR' : 'symbol' : '1.0-0' }}
+            </p>
+          } @else {
+            <p class="mt-1 text-sm text-surface-200">
+              @if (comment.replyToAuthor) {
+                <span class="text-primary">{{ 'auctionDetail.comments.reply' | translate }} {{ comment.replyToAuthor }}: </span>
+              }
+              {{ comment.body }}
+            </p>
+          }
+
+          <div class="mt-1 flex items-center gap-3 text-xs text-surface-400">
+            <span><i class="pi pi-arrow-up text-[0.65rem]"></i> {{ comment.upvotes }}</span>
+            <button type="button" class="hover:text-primary">{{ 'auctionDetail.comments.reply' | translate }}</button>
+            <button type="button" class="hover:text-primary">{{ 'auctionDetail.comments.flagInappropriate' | translate }}</button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,47 @@
+<header class="border-b border-surface-700 bg-surface-800">
+  <div class="mx-auto flex h-12 max-w-7xl items-center gap-6 px-4 sm:px-6 lg:px-8">
+    <a href="#" class="text-xl font-bold text-white">
+      Euro<span class="text-primary">Cars</span>
+    </a>
+
+    <nav class="hidden items-center gap-6 md:flex">
+      <a href="#" class="flex h-8 items-center text-sm font-medium text-surface-300 hover:text-white">{{ 'nav.auctions' | translate }}</a>
+      <a
+        href="#"
+        class="flex h-8 items-center border border-primary px-3 text-sm font-medium text-primary hover:bg-primary hover:text-white"
+      >
+        {{ 'nav.sellCar' | translate }}
+      </a>
+      <a href="#" class="flex h-8 items-center text-sm font-medium text-surface-300 hover:text-white">{{ 'nav.aboutUs' | translate }}</a>
+    </nav>
+
+    <div class="ml-auto flex items-center gap-4">
+      <div class="flex items-center gap-1 text-xs font-medium text-surface-400">
+        @for (lang of langs; track lang; let last = $last) {
+          <button
+            type="button"
+            (click)="switchLang(lang)"
+            [class.text-primary]="currentLang() === lang"
+            [class.text-surface-400]="currentLang() !== lang"
+          >
+            {{ 'lang.' + lang | translate }}
+          </button>
+          @if (!last) {
+            <span class="opacity-60">|</span>
+          }
+        }
+      </div>
+      <p-iconfield class="hidden sm:block">
+        <p-inputicon class="pi pi-search" />
+        <input
+          type="text"
+          pInputText
+          [pSize]="'small'"
+          [placeholder]="'nav.searchPlaceholder' | translate"
+          class="w-72"
+        />
+      </p-iconfield>
+      <p-button [label]="'nav.signIn' | translate" [size]="'small'" />
+    </div>
+  </div>
+</header>

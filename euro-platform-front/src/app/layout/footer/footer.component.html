@@ -1,0 +1,124 @@
+<footer class="mt-16">
+  <!-- Stats / testimonial / newsletter band -->
+  <div class="bg-surface-700">
+    <div
+      class="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-12 sm:px-6 md:grid-cols-3 lg:px-8"
+    >
+      <div>
+        <h3 class="font-semibold text-white">{{ 'footer.why.heading' | translate }}</h3>
+        <div class="mt-4 grid grid-cols-2 gap-4">
+          <div>
+            <div class="font-semibold text-white underline decoration-primary">500+</div>
+            <div class="text-sm text-surface-300">{{ 'footer.why.auctionsCompleted' | translate }}</div>
+          </div>
+          <div>
+            <div class="font-semibold text-white underline decoration-primary">78%+</div>
+            <div class="text-sm text-surface-300">{{ 'footer.why.sellThroughRate' | translate }}</div>
+          </div>
+          <div>
+            <div class="font-semibold text-white underline decoration-primary">€12M+</div>
+            <div class="text-sm text-surface-300">{{ 'footer.why.valueSold' | translate }}</div>
+          </div>
+          <div>
+            <div class="font-semibold text-white underline decoration-primary">3K+</div>
+            <div class="text-sm text-surface-300">{{ 'footer.why.members' | translate }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="font-semibold text-white">{{ 'footer.reviews.heading' | translate }}</h3>
+        <div class="mt-4">
+          <div class="flex items-center gap-2">
+            @for (star of [1, 2, 3, 4, 5]; track star) {
+              <i class="pi pi-star-fill text-sm text-amber-400"></i>
+            }
+            <span class="font-semibold text-white">Mark W.</span>
+            <span class="text-sm text-surface-300">Jul 2026</span>
+          </div>
+          <p class="mt-2 text-sm text-surface-300">
+            {{ 'footer.reviews.quote' | translate }}
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="font-semibold text-white">{{ 'footer.newsletter.heading' | translate }}</h3>
+        <div class="mt-4 flex gap-2">
+          <input
+            type="email"
+            pInputText
+            [pSize]="'small'"
+            [placeholder]="'footer.newsletter.emailPlaceholder' | translate"
+            class="w-full"
+          />
+          <p-button [label]="'footer.newsletter.subscribe' | translate" [size]="'small'" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link band -->
+  <div class="bg-surface-800">
+    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 gap-8 md:grid-cols-5">
+        <div class="col-span-2 md:col-span-1">
+          <a href="#" class="text-lg font-bold text-white">
+            Euro<span class="text-primary">Cars</span>
+          </a>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-semibold uppercase tracking-wide text-surface-400">
+            {{ 'footer.howItWorks.heading' | translate }}
+          </h4>
+          <ul class="mt-3 space-y-2 text-sm">
+            <li><a href="#" class="text-surface-300 hover:text-primary">{{ 'footer.howItWorks.buying' | translate }}</a></li>
+            <li><a href="#" class="text-surface-300 hover:text-primary">{{ 'footer.howItWorks.selling' | translate }}</a></li>
+            <li><a href="#" class="text-surface-300 hover:text-primary">{{ 'footer.howItWorks.finalizing' | translate }}</a></li>
+            <li><a href="#" class="text-surface-300 hover:text-primary">{{ 'footer.howItWorks.shipping' | translate }}</a></li>
+            <li><a href="#" class="text-surface-300 hover:text-primary">{{ 'footer.howItWorks.faqs' | translate }}</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-semibold uppercase tracking-wide text-surface-400">{{ 'footer.sellers.heading' | translate }}</h4>
+          <ul class="mt-3 space-y-2 text-sm">
+            <li><a href="#" class="text-surface-300 hover:text-primary">{{ 'footer.sellers.submitCar' | translate }}</a></li>
+            <li><a href="#" class="text-surface-300 hover:text-primary">{{ 'footer.sellers.dashboard' | translate }}</a></li>
+            <li><a href="#" class="text-surface-300 hover:text-primary">{{ 'footer.sellers.photoGuide' | translate }}</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-semibold uppercase tracking-wide text-surface-400">
+            {{ 'footer.helpfulLinks.heading' | translate }}
+          </h4>
+          <ul class="mt-3 space-y-2 text-sm">
+            <li><a href="#" class="text-surface-300 hover:text-primary">{{ 'footer.helpfulLinks.browse' | translate }}</a></li>
+            <li><a href="#" class="text-surface-300 hover:text-primary">{{ 'footer.helpfulLinks.aboutUs' | translate }}</a></li>
+            <li><a href="#" class="text-surface-300 hover:text-primary">{{ 'footer.helpfulLinks.careers' | translate }}</a></li>
+            <li><a href="#" class="text-surface-300 hover:text-primary">{{ 'footer.helpfulLinks.support' | translate }}</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div
+        class="mt-10 flex flex-col items-start justify-between gap-4 border-t border-surface-700 pt-6 sm:flex-row sm:items-center"
+      >
+        <div class="flex items-center gap-4 text-surface-400">
+          <i class="pi pi-youtube"></i>
+          <i class="pi pi-instagram"></i>
+          <i class="pi pi-facebook"></i>
+          <i class="pi pi-tiktok"></i>
+          <i class="pi pi-twitter"></i>
+        </div>
+        <div class="text-sm text-surface-400">
+          {{ 'footer.copyright' | translate: { year } }}
+          <a href="#" class="hover:text-primary">{{ 'footer.termsOfUse' | translate }}</a>
+          <a href="#" class="ml-2 hover:text-primary">{{ 'footer.privacyPolicy' | translate }}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

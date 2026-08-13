@@ -1,0 +1,167 @@
+{
+  "nav": {
+    "auctions": "Auctions",
+    "sellCar": "Sell a Car",
+    "aboutUs": "About Us",
+    "searchPlaceholder": "Search for cars (ex. BMW, Audi, Ford)",
+    "signIn": "Sign In"
+  },
+  "card": {
+    "bid": "Bid",
+    "noReserve": "NO RESERVE"
+  },
+  "countdown": {
+    "ended": "Ended",
+    "day": "Day",
+    "days": "Days"
+  },
+  "auctions": {
+    "heading": "Auctions",
+    "filters": {
+      "anyYear": "Any year",
+      "year2020": "2020+",
+      "year2015": "2015-2019",
+      "year2010": "2010-2014",
+      "beforeYear2010": "Before 2010",
+      "anyTransmission": "Any transmission",
+      "manual": "Manual",
+      "automatic": "Automatic",
+      "anyBodyStyle": "Any body style",
+      "coupe": "Coupe",
+      "sedan": "Sedan",
+      "convertible": "Convertible",
+      "wagon": "Wagon",
+      "suv": "SUV"
+    },
+    "sort": {
+      "endingSoon": "Ending soon",
+      "newlyListed": "Newly listed",
+      "noReserve": "No reserve",
+      "lowestMileage": "Lowest mileage",
+      "closestToMe": "Closest to me"
+    }
+  },
+  "footer": {
+    "why": {
+      "heading": "Why EuroCars?",
+      "auctionsCompleted": "Auctions completed",
+      "sellThroughRate": "Sell-through rate",
+      "valueSold": "Value of cars sold",
+      "members": "Registered members"
+    },
+    "reviews": {
+      "heading": "Our customers love us!",
+      "quote": "Seamless start to finish. Everything was easy and low stress. Highly recommend!"
+    },
+    "newsletter": {
+      "heading": "Get the Daily Email",
+      "emailPlaceholder": "Email address",
+      "subscribe": "Subscribe"
+    },
+    "howItWorks": {
+      "heading": "How It Works",
+      "buying": "Buying a Car",
+      "selling": "Selling a Car",
+      "finalizing": "Finalizing the Sale",
+      "shipping": "Shipping",
+      "faqs": "FAQs"
+    },
+    "sellers": {
+      "heading": "Sellers",
+      "submitCar": "Submit Your Car",
+      "dashboard": "Dashboard",
+      "photoGuide": "Photo Guide"
+    },
+    "helpfulLinks": {
+      "heading": "Helpful Links",
+      "browse": "Browse",
+      "aboutUs": "About Us",
+      "careers": "Careers",
+      "support": "Support"
+    },
+    "copyright": "© Copyright {{year}} EuroCars.",
+    "termsOfUse": "Terms of Use",
+    "privacyPolicy": "Privacy Policy"
+  },
+  "lang": {
+    "fr": "FR",
+    "en": "EN"
+  },
+  "auctionDetail": {
+    "notFound": "Auction not found.",
+    "bidPanel": {
+      "seller": "Seller",
+      "ending": "Ending",
+      "bids": "Bids",
+      "views": "Views",
+      "watching": "Watching",
+      "placeBid": "Place Bid",
+      "watch": "Watch",
+      "reserve": "Reserve",
+      "noReserve": "No Reserve",
+      "currentBid": "Current Bid"
+    },
+    "specs": {
+      "heading": "Vehicle Details",
+      "make": "Make",
+      "model": "Model",
+      "engine": "Engine",
+      "drivetrain": "Drivetrain",
+      "mileage": "Mileage",
+      "transmission": "Transmission",
+      "vin": "VIN",
+      "bodyStyle": "Body Style",
+      "titleStatus": "Title Status",
+      "exteriorColor": "Exterior Color",
+      "interiorColor": "Interior Color",
+      "location": "Location",
+      "sellerType": "Seller Type",
+      "sellerTypeDealer": "Dealer",
+      "sellerTypePrivate": "Private Party"
+    },
+    "gallery": {
+      "seeAllPhotos": "See all {{count}} photos"
+    },
+    "quickStats": {
+      "timeLeft": "Time Left",
+      "highBid": "High Bid",
+      "bids": "Bids",
+      "comments": "Comments",
+      "placeBid": "Place Bid"
+    },
+    "bidHistory": {
+      "heading": "Bid History",
+      "noBids": "No bids yet."
+    },
+    "sections": {
+      "description": "Description",
+      "highlights": "Highlights",
+      "equipment": "Equipment",
+      "modifications": "Modifications",
+      "knownFlaws": "Known Flaws",
+      "recentServiceHistory": "Recent Service History",
+      "otherItemsIncluded": "Other Items Included in Sale",
+      "ownershipHistory": "Ownership History",
+      "sellerNotes": "Seller Notes"
+    },
+    "video": {
+      "heading": "Video"
+    },
+    "otherAuctions": {
+      "heading": "Other Auctions"
+    },
+    "comments": {
+      "heading": "Comments & Bids",
+      "addCommentPlaceholder": "Add a Comment...",
+      "submit": "Submit",
+      "sortNewest": "Newest",
+      "sortMostUpvoted": "Most Upvoted",
+      "sortSellerComments": "Seller Comments",
+      "sortBidHistory": "Bid History",
+      "reply": "Reply",
+      "flagInappropriate": "Flag as inappropriate",
+      "bidPrefix": "Bid",
+      "sellerBadge": "Seller"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+<div class="bg-surface-700 p-4">
+  <h2 class="text-lg font-bold text-white">{{ 'auctionDetail.specs.heading' | translate }}</h2>
+  <dl class="mt-3 grid grid-cols-1 gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
+    @for (row of rows(); track row.labelKey) {
+      <div class="flex items-center justify-between border-b border-surface-600 py-2">
+        <dt class="text-surface-300">{{ row.labelKey | translate }}</dt>
+        <dd class="font-medium text-white">{{ row.value ?? (row.valueKey! | translate) }}</dd>
+      </div>
+    }
+  </dl>
+</div>

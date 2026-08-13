@@ -1,0 +1,78 @@
+<div class="mx-auto max-w-7xl px-3 py-6 sm:px-5 lg:px-6">
+  @if (detail(); as d) {
+    <div class="mb-3 flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-white">{{ d.title }}</h1>
+        <p class="mt-1 text-sm text-surface-300">{{ d.subtitle }}</p>
+      </div>
+      <p-button
+        [label]="'auctionDetail.bidPanel.watch' | translate"
+        icon="pi pi-star"
+        [size]="'small'"
+        styleClass="!bg-surface-500 !text-white !border-surface-500"
+      />
+    </div>
+
+    <app-auction-gallery
+      [title]="d.title"
+      [mainPhotoUrl]="d.mainPhotoUrl"
+      [thumbnailUrls]="d.thumbnailUrls"
+      [totalPhotoCount]="d.totalPhotoCount"
+    />
+
+    <!-- Inlined rather than its own component: any component boundary wrapping only this
+         bar collapses to exactly the bar's own height, which breaks position: sticky --
+         it needs a genuinely tall direct parent (this page container) to have room to stick. -->
+    <div class="sticky top-0 z-10 mt-2 flex flex-wrap items-center justify-between gap-4 bg-surface-700 px-4 py-3 shadow-md">
+      <div class="flex flex-wrap items-center gap-6 text-sm">
+        <div>
+          <div class="text-xs text-surface-300">{{ 'auctionDetail.quickStats.timeLeft' | translate }}</div>
+          <div class="font-semibold text-white"><app-countdown [endDate]="d.endDate" /></div>
+        </div>
+        <div>
+          <div class="text-xs text-surface-300">{{ 'auctionDetail.quickStats.highBid' | translate }}</div>
+          <div class="font-semibold text-white">{{ d.currentBid | currency: 'EUR' : 'symbol' : '1.0-0' }}</div>
+        </div>
+        <div class="hidden sm:block">
+          <div class="text-xs text-surface-300">{{ 'auctionDetail.quickStats.bids' | translate }}</div>
+          <div class="font-semibold text-white">{{ d.bidsCount }}</div>
+        </div>
+        <div class="hidden sm:block">
+          <div class="text-xs text-surface-300">{{ 'auctionDetail.quickStats.comments' | translate }}</div>
+          <div class="font-semibold text-white">{{ commentsOnlyCount() }}</div>
+        </div>
+      </div>
+
+      <p-button [label]="'auctionDetail.quickStats.placeBid' | translate" [size]="'small'" />
+    </div>
+
+    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div class="space-y-6 lg:col-span-2">
+        <app-auction-specs [specs]="d.specs" [sellerType]="d.sellerType" />
+        <app-auction-detail-sections [sections]="d.detailSections" />
+        <app-auction-videos [videos]="d.videos" />
+        <app-auction-bid-history [comments]="d.comments" />
+        <app-auction-comments [comments]="d.comments" />
+      </div>
+
+      <div class="lg:col-span-1">
+        <div class="sticky top-6 space-y-6">
+          <app-auction-bid-panel [detail]="d" />
+
+          @if (otherAuctions().length > 0) {
+            <div class="bg-surface-700 p-4">
+              <h2 class="text-lg font-bold text-white">{{ 'auctionDetail.otherAuctions.heading' | translate }}</h2>
+              <div class="mt-4 space-y-6">
+                @for (auction of otherAuctions(); track auction.id) {
+                  <app-auction-card [data]="auction" />
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  } @else {
+    <p class="py-16 text-center text-white">{{ 'auctionDetail.notFound' | translate }}</p>
+  }
+</div>

@@ -1,0 +1,48 @@
+@if (detail(); as d) {
+  <div class="bg-surface-700 p-4">
+    <div class="flex items-center justify-between gap-2">
+      <h1 class="text-lg font-bold text-white">{{ d.title }}</h1>
+      <p-tag
+        [value]="(d.reserveStatus === 'no-reserve' ? 'auctionDetail.bidPanel.noReserve' : 'auctionDetail.bidPanel.reserve') | translate"
+        [styleClass]="d.reserveStatus === 'no-reserve' ? '!bg-primary !text-white !text-xs' : '!bg-surface-500 !text-white !text-xs'"
+      />
+    </div>
+
+    <div class="mt-4">
+      <div class="text-xs font-medium uppercase tracking-wide text-surface-300">
+        {{ 'auctionDetail.bidPanel.currentBid' | translate }}
+      </div>
+      <div class="text-3xl font-bold text-white">
+        {{ d.currentBid | currency: 'EUR' : 'symbol' : '1.0-0' }}
+      </div>
+    </div>
+
+    <dl class="mt-4 divide-y divide-surface-600 border-t border-surface-600 text-sm">
+      <div class="flex items-center justify-between py-2">
+        <dt class="text-surface-300">{{ 'auctionDetail.bidPanel.seller' | translate }}</dt>
+        <dd class="font-medium text-white">{{ d.sellerName }}</dd>
+      </div>
+      <div class="flex items-center justify-between py-2">
+        <dt class="text-surface-300">{{ 'auctionDetail.bidPanel.ending' | translate }}</dt>
+        <dd class="font-medium text-white"><app-countdown [endDate]="d.endDate" /></dd>
+      </div>
+      <div class="flex items-center justify-between py-2">
+        <dt class="text-surface-300">{{ 'auctionDetail.bidPanel.bids' | translate }}</dt>
+        <dd class="font-medium text-white">{{ d.bidsCount }}</dd>
+      </div>
+      <div class="flex items-center justify-between py-2">
+        <dt class="text-surface-300">{{ 'auctionDetail.bidPanel.views' | translate }}</dt>
+        <dd class="font-medium text-white">{{ d.viewsCount }}</dd>
+      </div>
+      <div class="flex items-center justify-between py-2">
+        <dt class="text-surface-300">{{ 'auctionDetail.bidPanel.watching' | translate }}</dt>
+        <dd class="font-medium text-white">{{ d.watchingCount }}</dd>
+      </div>
+    </dl>
+
+    <div class="mt-4 flex gap-2">
+      <p-button [label]="'auctionDetail.bidPanel.placeBid' | translate" [size]="'small'" class="flex-1" styleClass="w-full" />
+      <p-button [label]="'auctionDetail.bidPanel.watch' | translate" [size]="'small'" [outlined]="true" class="flex-1" styleClass="w-full" />
+    </div>
+  </div>
+}

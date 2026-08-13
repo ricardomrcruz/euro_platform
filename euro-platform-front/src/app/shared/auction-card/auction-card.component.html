@@ -1,0 +1,23 @@
+<article class="cursor-pointer" [routerLink]="['/auctions', data().id]">
+  <div class="relative aspect-[4/3] overflow-hidden bg-surface-200">
+    <img [src]="data().photoUrl" [alt]="data().title" class="h-full w-full object-cover" />
+
+    <div
+      class="absolute bottom-2 left-2 flex items-center gap-2 bg-surface-900/80 px-2 py-1 text-xs font-medium text-white"
+    >
+      <i class="pi pi-clock text-[0.7rem]"></i>
+      <app-countdown [endDate]="data().endDate" />
+      <span class="opacity-60">|</span>
+      <span>{{ 'card.bid' | translate }} {{ data().currentBid | currency: 'EUR' : 'symbol' : '1.0-0' }}</span>
+    </div>
+  </div>
+
+  <div class="mt-3">
+    @if (data().badge === 'NO RESERVE') {
+      <p-tag [value]="'card.noReserve' | translate" styleClass="!bg-primary !text-white !text-xs mb-1" />
+    }
+    <h3 class="font-semibold text-white">{{ data().title }}</h3>
+    <p class="mt-1 line-clamp-2 text-sm text-surface-300">{{ data().highlights }}</p>
+    <p class="mt-1 text-sm text-surface-300">{{ data().location }}</p>
+  </div>
+</article>

@@ -1,0 +1,15 @@
+# Auto-merged by `docker compose` alongside docker-compose.yml -- local dev only.
+# Switches euro-platform-front from the static nginx build to the Angular dev server
+# against a bind-mounted source tree, so editing a file + refreshing the browser is enough,
+# no rebuild step. Delete or ignore this file for a production-like run of docker-compose.yml
+# alone (still builds and serves the real nginx/static-file setup on port 80, per the design
+# doc's container topology).
+services:
+  euro-platform-front:
+    build:
+      target: dev
+    volumes:
+      - ./euro-platform-front:/app
+      - /app/node_modules
+    ports:
+      - "4200:4200"

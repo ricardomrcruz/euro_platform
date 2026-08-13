@@ -1,0 +1,32 @@
+@if (cars[index()]; as car) {
+  <div class="grid grid-cols-1 gap-2 lg:grid-cols-5">
+    <div
+      class="relative col-span-3 aspect-[16/10] cursor-pointer overflow-hidden bg-surface-200"
+      [routerLink]="['/auctions', car.id]"
+    >
+      <img [src]="car.mainPhotoUrl" [alt]="car.title" class="h-full w-full object-cover" />
+
+      <div class="absolute right-3 top-3 text-right text-white drop-shadow">
+        <div class="text-lg font-semibold">{{ car.title }}</div>
+        <div class="text-sm">{{ car.subtitle }}</div>
+      </div>
+
+      <div
+        class="absolute bottom-3 left-3 flex items-center gap-2 bg-surface-900/80 px-3 py-1.5 text-sm font-medium text-white"
+      >
+        <i class="pi pi-clock"></i>
+        <app-countdown [endDate]="car.endDate" />
+        <span class="opacity-60">|</span>
+        <span>{{ 'card.bid' | translate }} {{ car.currentBid | currency: 'EUR' : 'symbol' : '1.0-0' }}</span>
+      </div>
+    </div>
+
+    <div class="col-span-2 grid grid-cols-2 grid-rows-2 gap-2">
+      @for (photo of car.detailPhotoUrls; track photo) {
+        <div class="overflow-hidden bg-surface-200">
+          <img [src]="photo" alt="" class="h-full w-full object-cover" />
+        </div>
+      }
+    </div>
+  </div>
+}
