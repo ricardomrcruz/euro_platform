@@ -3,10 +3,11 @@ import { RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { NavbarComponent } from './layout/navbar/navbar.component';
 import { FooterComponent } from './layout/footer/footer.component';
+import { LoginDialogComponent } from './auth/login/login-dialog.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, FooterComponent],
+  imports: [RouterOutlet, NavbarComponent, FooterComponent, LoginDialogComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

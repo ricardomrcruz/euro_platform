@@ -1,0 +1,41 @@
+<p-dialog
+  [visible]="visible()"
+  (visibleChange)="onVisibleChange($event)"
+  [modal]="true"
+  [header]="'auth.login.heading' | translate"
+  [style]="{ width: '24rem' }"
+>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="space-y-3">
+      <div>
+        <label class="mb-1 block text-sm text-surface-600">{{ 'auth.email' | translate }}</label>
+        <input type="email" pInputText [pSize]="'small'" formControlName="email" class="w-full" />
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <p class="mt-1 text-xs text-red-500">
+            {{ (form.controls.email.errors?.['required'] ? 'auth.validation.required' : 'auth.validation.invalidEmail') | translate }}
+          </p>
+        }
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm text-surface-600">{{ 'auth.password' | translate }}</label>
+        <input type="password" pInputText [pSize]="'small'" formControlName="password" class="w-full" />
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <p class="mt-1 text-xs text-red-500">{{ 'auth.validation.required' | translate }}</p>
+        }
+      </div>
+    </div>
+
+    @if (errorKey()) {
+      <p class="mt-3 text-sm text-red-500">{{ errorKey()! | translate }}</p>
+    }
+
+    <p-button
+      type="submit"
+      [label]="'auth.login.submit' | translate"
+      [size]="'small'"
+      [loading]="submitting()"
+      styleClass="mt-4 w-full"
+    />
+  </form>
+</p-dialog>

@@ -41,7 +41,29 @@
           class="w-72"
         />
       </p-iconfield>
-      <p-button [label]="'nav.signIn' | translate" [size]="'small'" />
+
+      @if (currentUser(); as user) {
+        <a
+          [routerLink]="identityRoute()"
+          class="flex h-8 items-center gap-2 text-sm font-medium text-surface-300 hover:text-white"
+        >
+          @if (user.role === 'ADMIN') {
+            <span class="bg-primary px-1.5 py-0.5 text-xs font-semibold text-white">{{ 'nav.adminBadge' | translate }}</span>
+          }
+          <span>{{ displayName() }}</span>
+        </a>
+        <p-button
+          [label]="'nav.signOut' | translate"
+          [size]="'small'"
+          [outlined]="true"
+          (onClick)="signOut()"
+        />
+      } @else {
+        <a routerLink="/register" class="hidden text-sm font-medium text-surface-300 hover:text-white sm:block">
+          {{ 'nav.register' | translate }}
+        </a>
+        <p-button [label]="'nav.signIn' | translate" [size]="'small'" (onClick)="openLoginDialog()" />
+      }
     </div>
   </div>
 </header>

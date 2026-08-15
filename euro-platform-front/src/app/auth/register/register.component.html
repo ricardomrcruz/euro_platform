@@ -1,0 +1,68 @@
+<div class="mx-auto max-w-md px-3 py-12 sm:px-5">
+  @if (registered()) {
+    <div class="bg-surface-700 p-6 text-center">
+      <h1 class="text-xl font-bold text-white">{{ 'auth.register.successHeading' | translate }}</h1>
+      <p class="mt-2 text-sm text-surface-300">{{ 'auth.register.successMessage' | translate }}</p>
+      <p-button
+        [label]="'auth.register.signInButton' | translate"
+        [size]="'small'"
+        styleClass="mt-4"
+        (onClick)="openLoginDialog()"
+      />
+    </div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="submit()" class="bg-surface-700 p-6">
+      <h1 class="text-xl font-bold text-white">{{ 'auth.register.heading' | translate }}</h1>
+
+      <div class="mt-4 space-y-3">
+        <div>
+          <label class="mb-1 block text-sm text-surface-300">{{ 'auth.email' | translate }}</label>
+          <input type="email" pInputText [pSize]="'small'" formControlName="email" class="w-full" />
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+            <p class="mt-1 text-xs text-red-400">
+              {{ (form.controls.email.errors?.['required'] ? 'auth.validation.required' : 'auth.validation.invalidEmail') | translate }}
+            </p>
+          }
+        </div>
+
+        <div>
+          <label class="mb-1 block text-sm text-surface-300">{{ 'auth.password' | translate }}</label>
+          <input type="password" pInputText [pSize]="'small'" formControlName="password" class="w-full" />
+          @if (form.controls.password.touched && form.controls.password.invalid) {
+            <p class="mt-1 text-xs text-red-400">
+              {{ (form.controls.password.errors?.['required'] ? 'auth.validation.required' : 'auth.validation.passwordTooShort') | translate }}
+            </p>
+          }
+        </div>
+
+        <div>
+          <label class="mb-1 block text-sm text-surface-300">{{ 'auth.firstName' | translate }}</label>
+          <input type="text" pInputText [pSize]="'small'" formControlName="firstName" class="w-full" />
+          @if (form.controls.firstName.touched && form.controls.firstName.invalid) {
+            <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
+          }
+        </div>
+
+        <div>
+          <label class="mb-1 block text-sm text-surface-300">{{ 'auth.lastName' | translate }}</label>
+          <input type="text" pInputText [pSize]="'small'" formControlName="lastName" class="w-full" />
+          @if (form.controls.lastName.touched && form.controls.lastName.invalid) {
+            <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
+          }
+        </div>
+      </div>
+
+      @if (errorKey()) {
+        <p class="mt-3 text-sm text-red-400">{{ errorKey()! | translate }}</p>
+      }
+
+      <p-button
+        type="submit"
+        [label]="'auth.register.submit' | translate"
+        [size]="'small'"
+        [loading]="submitting()"
+        styleClass="mt-4 w-full"
+      />
+    </form>
+  }
+</div>

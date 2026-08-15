@@ -4,7 +4,10 @@
     "sellCar": "Sell a Car",
     "aboutUs": "About Us",
     "searchPlaceholder": "Search for cars (ex. BMW, Audi, Ford)",
-    "signIn": "Sign In"
+    "signIn": "Sign In",
+    "register": "Register",
+    "signOut": "Sign Out",
+    "adminBadge": "ADMIN"
   },
   "card": {
     "bid": "Bid",
@@ -163,5 +166,42 @@
       "bidPrefix": "Bid",
       "sellerBadge": "Seller"
     }
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "register": {
+      "heading": "Create an account",
+      "submit": "Create account",
+      "successHeading": "Account created",
+      "successMessage": "Your account has been created. You can now sign in.",
+      "signInButton": "Sign in",
+      "emailTakenError": "This email is already registered.",
+      "genericError": "Something went wrong. Please try again."
+    },
+    "login": {
+      "heading": "Sign in",
+      "submit": "Sign in",
+      "invalidCredentialsError": "Incorrect email or password.",
+      "genericError": "Something went wrong. Please try again."
+    },
+    "validation": {
+      "required": "This field is required.",
+      "invalidEmail": "Enter a valid email address.",
+      "passwordTooShort": "Password must be at least 8 characters."
+    }
+  },
+  "profile": {
+    "heading": "My Profile",
+    "role": "Role",
+    "myAdsHeading": "My Ads & Auctions",
+    "comingSoon": "Coming soon."
+  },
+  "admin": {
+    "heading": "Admin Backoffice",
+    "pendingAdsHeading": "Ads Pending Review",
+    "comingSoon": "Coming soon."
   }
 }
