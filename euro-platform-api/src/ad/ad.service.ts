@@ -68,6 +68,7 @@ export class AdService {
       location: dto.location,
       sellerId,
       vehicle,
+      photos: [],
     });
 
     return this.adRepository.save(ad);
@@ -126,6 +127,23 @@ export class AdService {
       where: { status: AdStatus.VALIDATED },
       relations: AD_RELATIONS,
       order: { createdAt: 'DESC' },
+    });
+  }
+
+  // Every status, not just VALIDATED -- unlike listPublic(), this is the seller's own view.
+  findMine(sellerId: number): Promise<Ad[]> {
+    return this.adRepository.find({
+      where: { sellerId },
+      relations: AD_RELATIONS,
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  findPending(): Promise<Ad[]> {
+    return this.adRepository.find({
+      where: { status: AdStatus.REVIEW },
+      relations: AD_RELATIONS,
+      order: { createdAt: 'ASC' },
     });
   }
 

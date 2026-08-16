@@ -12,5 +12,6 @@ import { AdController } from './ad.controller';
   imports: [TypeOrmModule.forFeature([Ad, AdPhoto, AdMessage]), VehicleModule, NotificationModule],
   controllers: [AdController],
   providers: [AdService],
+  exports: [AdService],
 })
 export class AdModule {}

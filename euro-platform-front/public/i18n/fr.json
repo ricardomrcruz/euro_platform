@@ -197,11 +197,83 @@
     "heading": "Mon Profil",
     "role": "Rôle",
     "myAdsHeading": "Mes Annonces et Enchères",
-    "comingSoon": "Bientôt disponible."
+    "comingSoon": "Bientôt disponible.",
+    "tabs": {
+      "myAds": "Mes annonces",
+      "myBids": "Mes enchères",
+      "watchlist": "Liste de suivi"
+    },
+    "myAds": {
+      "empty": "Vous n'avez encore créé aucune annonce.",
+      "submitForReview": "Soumettre à la revue",
+      "rejectionReason": "Motif du rejet"
+    }
   },
   "admin": {
     "heading": "Back-office Admin",
     "pendingAdsHeading": "Annonces en attente de validation",
-    "comingSoon": "Bientôt disponible."
+    "comingSoon": "Bientôt disponible.",
+    "empty": "Aucune annonce en attente de validation.",
+    "validate": "Valider",
+    "reject": "Rejeter",
+    "rejectReasonPlaceholder": "Expliquez pourquoi cette annonce est rejetée...",
+    "rejectReasonRequired": "Un motif est requis pour rejeter une annonce.",
+    "confirmReject": "Confirmer le rejet",
+    "cancel": "Annuler",
+    "messagesHeading": "Messages",
+    "replyPlaceholder": "Écrire un message...",
+    "send": "Envoyer"
+  },
+  "ad": {
+    "status": {
+      "DRAFT": "Brouillon",
+      "REVIEW": "En attente de validation",
+      "VALIDATED": "En ligne",
+      "REJECTED": "Rejetée"
+    },
+    "create": {
+      "heading": "Vendre une voiture",
+      "vehicleSection": "Véhicule",
+      "detailsSection": "Détails de l'annonce",
+      "vin": "VIN (optionnel)",
+      "vinLookup": "Rechercher",
+      "vinRecognized": "Marque reconnue à partir du VIN.",
+      "vinNotRecognized": "VIN non reconnu -- sélectionnez la marque manuellement.",
+      "make": "Marque",
+      "model": "Modèle",
+      "trim": "Finition (optionnel)",
+      "selectMake": "Sélectionnez une marque",
+      "selectModel": "Sélectionnez un modèle",
+      "selectTrim": "Sélectionnez une finition",
+      "year": "Année",
+      "exteriorColor": "Couleur extérieure",
+      "interiorColor": "Couleur intérieure",
+      "mileage": "Kilométrage (km)",
+      "numberOfOwners": "Nombre de propriétaires",
+      "plateCountry": "Pays d'immatriculation",
+      "title": "Titre",
+      "description": "Description",
+      "condition": "État",
+      "conditionExcellent": "Excellent",
+      "conditionGood": "Bon",
+      "conditionFair": "Correct",
+      "conditionPoor": "Mauvais",
+      "highlights": "Points forts",
+      "knownFlaws": "Défauts connus",
+      "modifications": "Modifications",
+      "serviceHistory": "Historique d'entretien",
+      "location": "Localisation",
+      "submit": "Créer le brouillon",
+      "activeAdLimitError": "Vous avez atteint la limite de 5 annonces actives.",
+      "genericError": "Une erreur est survenue. Veuillez réessayer.",
+      "draftCreatedHeading": "Brouillon créé",
+      "draftCreatedMessage": "Ajoutez quelques photos, puis soumettez votre annonce à la revue.",
+      "photoUrl": "URL de la photo",
+      "photoCaption": "Légende (optionnel)",
+      "addPhoto": "Ajouter la photo",
+      "photosAdded": "Photos ajoutées",
+      "submitForReview": "Soumettre à la revue",
+      "submittedMessage": "Votre annonce a été soumise à la revue."
+    }
   }
 }

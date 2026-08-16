@@ -197,11 +197,83 @@
     "heading": "My Profile",
     "role": "Role",
     "myAdsHeading": "My Ads & Auctions",
-    "comingSoon": "Coming soon."
+    "comingSoon": "Coming soon.",
+    "tabs": {
+      "myAds": "My Ads",
+      "myBids": "My Bids",
+      "watchlist": "Watchlist"
+    },
+    "myAds": {
+      "empty": "You haven't created any ads yet.",
+      "submitForReview": "Submit for Review",
+      "rejectionReason": "Rejection reason"
+    }
   },
   "admin": {
     "heading": "Admin Backoffice",
     "pendingAdsHeading": "Ads Pending Review",
-    "comingSoon": "Coming soon."
+    "comingSoon": "Coming soon.",
+    "empty": "No ads waiting for review.",
+    "validate": "Validate",
+    "reject": "Reject",
+    "rejectReasonPlaceholder": "Explain why this ad is being rejected...",
+    "rejectReasonRequired": "A reason is required to reject an ad.",
+    "confirmReject": "Confirm Rejection",
+    "cancel": "Cancel",
+    "messagesHeading": "Messages",
+    "replyPlaceholder": "Write a message...",
+    "send": "Send"
+  },
+  "ad": {
+    "status": {
+      "DRAFT": "Draft",
+      "REVIEW": "Pending Review",
+      "VALIDATED": "Live",
+      "REJECTED": "Rejected"
+    },
+    "create": {
+      "heading": "Sell a Car",
+      "vehicleSection": "Vehicle",
+      "detailsSection": "Listing Details",
+      "vin": "VIN (optional)",
+      "vinLookup": "Look up",
+      "vinRecognized": "Make recognized from VIN.",
+      "vinNotRecognized": "VIN not recognized -- select the make manually.",
+      "make": "Make",
+      "model": "Model",
+      "trim": "Trim (optional)",
+      "selectMake": "Select a make",
+      "selectModel": "Select a model",
+      "selectTrim": "Select a trim",
+      "year": "Year",
+      "exteriorColor": "Exterior Color",
+      "interiorColor": "Interior Color",
+      "mileage": "Mileage (km)",
+      "numberOfOwners": "Number of Owners",
+      "plateCountry": "Plate Country",
+      "title": "Title",
+      "description": "Description",
+      "condition": "Condition",
+      "conditionExcellent": "Excellent",
+      "conditionGood": "Good",
+      "conditionFair": "Fair",
+      "conditionPoor": "Poor",
+      "highlights": "Highlights",
+      "knownFlaws": "Known Flaws",
+      "modifications": "Modifications",
+      "serviceHistory": "Service History",
+      "location": "Location",
+      "submit": "Create Draft",
+      "activeAdLimitError": "You've reached the limit of 5 active ads.",
+      "genericError": "Something went wrong. Please try again.",
+      "draftCreatedHeading": "Draft created",
+      "draftCreatedMessage": "Add some photos, then submit your ad for review.",
+      "photoUrl": "Photo URL",
+      "photoCaption": "Caption (optional)",
+      "addPhoto": "Add Photo",
+      "photosAdded": "Photos added",
+      "submitForReview": "Submit for Review",
+      "submittedMessage": "Your ad has been submitted for review."
+    }
   }
 }

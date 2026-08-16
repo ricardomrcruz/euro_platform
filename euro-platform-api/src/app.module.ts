@@ -16,6 +16,7 @@ import { AdModule } from './ad/ad.module';
 import { NotificationModule } from './notification/notification.module';
 import { AuctionModule } from './auction/auction.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { MeModule } from './me/me.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { SchedulerModule } from './scheduler/scheduler.module';
     AdModule,
     AuctionModule,
     SchedulerModule,
+    MeModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,0 +1,238 @@
+<div class="mx-auto max-w-3xl px-3 py-8 sm:px-5">
+  <h1 class="text-2xl font-bold text-white">{{ 'ad.create.heading' | translate }}</h1>
+
+  @switch (stage()) {
+    @case ('form') {
+      <form [formGroup]="form" (ngSubmit)="submitForm()" class="mt-4 space-y-6">
+        <div class="bg-surface-700 p-6">
+          <h2 class="text-lg font-bold text-white">{{ 'ad.create.vehicleSection' | translate }}</h2>
+
+          <div class="mt-4 flex flex-wrap items-end gap-2">
+            <div class="flex-1">
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.vin' | translate }}</label>
+              <input type="text" pInputText [pSize]="'small'" formControlName="vin" class="w-full" />
+            </div>
+            <p-button
+              type="button"
+              [label]="'ad.create.vinLookup' | translate"
+              [size]="'small'"
+              [outlined]="true"
+              [loading]="vinLoading()"
+              (onClick)="lookupVin()"
+            />
+          </div>
+          @if (vinResultKey()) {
+            <p class="mt-1 text-xs text-surface-300">{{ vinResultKey()! | translate }}</p>
+          }
+
+          <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.make' | translate }}</label>
+              <p-select
+                formControlName="make"
+                [options]="makes()"
+                optionLabel="name"
+                [placeholder]="'ad.create.selectMake' | translate"
+                [size]="'small'"
+                class="w-full"
+                styleClass="w-full"
+              />
+              @if (form.controls.make.touched && form.controls.make.invalid) {
+                <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
+              }
+            </div>
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.model' | translate }}</label>
+              <p-select
+                formControlName="model"
+                [options]="models()"
+                optionLabel="name"
+                [placeholder]="'ad.create.selectModel' | translate"
+                [size]="'small'"
+                class="w-full"
+                styleClass="w-full"
+              />
+              @if (form.controls.model.touched && form.controls.model.invalid) {
+                <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
+              }
+            </div>
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.trim' | translate }}</label>
+              <p-select
+                formControlName="trim"
+                [options]="trims()"
+                optionLabel="name"
+                [placeholder]="'ad.create.selectTrim' | translate"
+                [size]="'small'"
+                class="w-full"
+                styleClass="w-full"
+              />
+            </div>
+          </div>
+
+          <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.year' | translate }}</label>
+              <input type="number" pInputText [pSize]="'small'" formControlName="year" class="w-full" />
+              @if (form.controls.year.touched && form.controls.year.invalid) {
+                <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
+              }
+            </div>
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.exteriorColor' | translate }}</label>
+              <input type="text" pInputText [pSize]="'small'" formControlName="exteriorColor" class="w-full" />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.interiorColor' | translate }}</label>
+              <input type="text" pInputText [pSize]="'small'" formControlName="interiorColor" class="w-full" />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.mileage' | translate }}</label>
+              <input type="number" pInputText [pSize]="'small'" formControlName="mileage" class="w-full" />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.numberOfOwners' | translate }}</label>
+              <input type="number" pInputText [pSize]="'small'" formControlName="numberOfOwners" class="w-full" />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.plateCountry' | translate }}</label>
+              <input type="text" pInputText [pSize]="'small'" formControlName="plateCountry" class="w-full" />
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-surface-700 p-6">
+          <h2 class="text-lg font-bold text-white">{{ 'ad.create.detailsSection' | translate }}</h2>
+
+          <div class="mt-4 space-y-3">
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.title' | translate }}</label>
+              <input type="text" pInputText [pSize]="'small'" formControlName="title" class="w-full" />
+              @if (form.controls.title.touched && form.controls.title.invalid) {
+                <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
+              }
+            </div>
+
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.description' | translate }}</label>
+              <textarea pInputTextarea formControlName="description" rows="4" class="w-full"></textarea>
+              @if (form.controls.description.touched && form.controls.description.invalid) {
+                <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
+              }
+            </div>
+
+            <div class="max-w-xs">
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.condition' | translate }}</label>
+              <p-select
+                formControlName="condition"
+                [options]="conditionOptions"
+                optionLabel="labelKey"
+                optionValue="value"
+                [placeholder]="'ad.create.condition' | translate"
+                [size]="'small'"
+                class="w-full"
+                styleClass="w-full"
+              >
+                <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+                <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+              </p-select>
+              @if (form.controls.condition.touched && form.controls.condition.invalid) {
+                <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
+              }
+            </div>
+
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.highlights' | translate }}</label>
+              <textarea pInputTextarea formControlName="highlights" rows="3" class="w-full"></textarea>
+            </div>
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.knownFlaws' | translate }}</label>
+              <textarea pInputTextarea formControlName="knownFlaws" rows="3" class="w-full"></textarea>
+            </div>
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.modifications' | translate }}</label>
+              <textarea pInputTextarea formControlName="modifications" rows="3" class="w-full"></textarea>
+            </div>
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.serviceHistory' | translate }}</label>
+              <textarea pInputTextarea formControlName="serviceHistory" rows="3" class="w-full"></textarea>
+            </div>
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.location' | translate }}</label>
+              <input type="text" pInputText [pSize]="'small'" formControlName="location" class="w-full" />
+            </div>
+          </div>
+        </div>
+
+        @if (errorKey()) {
+          <p class="text-sm text-red-400">{{ errorKey()! | translate }}</p>
+        }
+
+        <p-button
+          type="submit"
+          [label]="'ad.create.submit' | translate"
+          [size]="'small'"
+          [loading]="submitting()"
+        />
+      </form>
+    }
+
+    @case ('draft') {
+      <div class="mt-4 bg-surface-700 p-6">
+        <h2 class="text-lg font-bold text-white">{{ 'ad.create.draftCreatedHeading' | translate }}</h2>
+        <p class="mt-1 text-sm text-surface-300">{{ 'ad.create.draftCreatedMessage' | translate }}</p>
+
+        @if (createdAd(); as ad) {
+          @if (ad.photos.length > 0) {
+            <div class="mt-4">
+              <div class="text-sm text-surface-300">{{ 'ad.create.photosAdded' | translate }}</div>
+              <ul class="mt-1 space-y-1 text-sm text-white">
+                @for (photo of ad.photos; track photo.id) {
+                  <li>{{ photo.url }}</li>
+                }
+              </ul>
+            </div>
+          }
+        }
+
+        <form [formGroup]="photoForm" (ngSubmit)="addPhoto()" class="mt-4 flex flex-wrap items-end gap-2">
+          <div class="flex-1">
+            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.photoUrl' | translate }}</label>
+            <input type="text" pInputText [pSize]="'small'" formControlName="url" class="w-full" />
+          </div>
+          <div class="flex-1">
+            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.photoCaption' | translate }}</label>
+            <input type="text" pInputText [pSize]="'small'" formControlName="caption" class="w-full" />
+          </div>
+          <p-button
+            type="submit"
+            [label]="'ad.create.addPhoto' | translate"
+            [size]="'small'"
+            [outlined]="true"
+            [loading]="addingPhoto()"
+          />
+        </form>
+
+        <p-button
+          [label]="'ad.create.submitForReview' | translate"
+          [size]="'small'"
+          [loading]="submitting()"
+          styleClass="mt-6"
+          (onClick)="submitForReview()"
+        />
+      </div>
+    }
+
+    @case ('submitted') {
+      <div class="mt-4 bg-surface-700 p-6 text-center">
+        <p class="text-sm text-white">{{ 'ad.create.submittedMessage' | translate }}</p>
+        <p-button
+          [label]="'profile.tabs.myAds' | translate"
+          [size]="'small'"
+          styleClass="mt-4"
+          routerLink="/profile"
+        />
+      </div>
+    }
+  }
+</div>

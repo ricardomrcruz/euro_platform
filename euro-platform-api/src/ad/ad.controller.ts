@@ -55,6 +55,14 @@ export class AdController {
     return this.adService.listPublic();
   }
 
+  // Declared above @Get(':id') deliberately -- NestJS matches routes in declaration order
+  // within a controller, so ':id' would otherwise swallow "pending" as a literal id value.
+  @Roles(UserRole.ADMIN)
+  @Get('pending')
+  listPending() {
+    return this.adService.findPending();
+  }
+
   @Public()
   @Get(':id')
   findOne(@CurrentUser() user: RequestUser | undefined, @Param('id', ParseIntPipe) id: number) {
