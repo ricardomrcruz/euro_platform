@@ -206,7 +206,21 @@
     "myAds": {
       "empty": "Vous n'avez encore créé aucune annonce.",
       "submitForReview": "Soumettre à la revue",
-      "rejectionReason": "Motif du rejet"
+      "rejectionReason": "Motif du rejet",
+      "launch": {
+        "action": "Lancer l'enchère",
+        "heading": "Lancer l'enchère",
+        "endDate": "Date de fin",
+        "reservePrice": "Prix de réserve (EUR)",
+        "buyNowPrice": "Prix d'achat immédiat (EUR, optionnel)",
+        "sellerPrice": "Le vendeur reçoit",
+        "commission": "Commission EuroCars",
+        "totalForBuyer": "Total pour l'acheteur",
+        "confirm": "Lancer",
+        "cancel": "Annuler",
+        "alreadyLaunchedError": "Une enchère existe déjà pour cette annonce.",
+        "genericError": "Une erreur est survenue. Veuillez réessayer."
+      }
     }
   },
   "admin": {

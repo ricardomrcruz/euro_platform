@@ -206,7 +206,21 @@
     "myAds": {
       "empty": "You haven't created any ads yet.",
       "submitForReview": "Submit for Review",
-      "rejectionReason": "Rejection reason"
+      "rejectionReason": "Rejection reason",
+      "launch": {
+        "action": "Launch Auction",
+        "heading": "Launch Auction",
+        "endDate": "End Date",
+        "reservePrice": "Reserve Price (EUR)",
+        "buyNowPrice": "Buy Now Price (EUR, optional)",
+        "sellerPrice": "Seller receives",
+        "commission": "EuroCars commission",
+        "totalForBuyer": "Total for buyer",
+        "confirm": "Launch",
+        "cancel": "Cancel",
+        "alreadyLaunchedError": "An auction already exists for this ad.",
+        "genericError": "Something went wrong. Please try again."
+      }
     }
   },
   "admin": {

@@ -25,7 +25,164 @@
   </div>
 
   <div class="mt-6 bg-surface-700 p-6">
-    <h2 class="text-lg font-bold text-white">{{ 'profile.myAdsHeading' | translate }}</h2>
-    <p class="mt-2 text-sm text-surface-300">{{ 'profile.comingSoon' | translate }}</p>
+    <p-tabs [value]="activeTab()" (valueChange)="setActiveTab($event)">
+      <p-tablist>
+        <p-tab value="myAds">{{ 'profile.tabs.myAds' | translate }}</p-tab>
+        <p-tab value="myBids">{{ 'profile.tabs.myBids' | translate }}</p-tab>
+        <p-tab value="watchlist">{{ 'profile.tabs.watchlist' | translate }}</p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <p-tabpanel value="myAds">
+          @if (loadingMyAds()) {
+            <p class="py-4 text-sm text-surface-500">...</p>
+          } @else if (myAds().length === 0) {
+            <p class="py-4 text-sm text-surface-500">{{ 'profile.myAds.empty' | translate }}</p>
+          } @else {
+            <ul class="divide-y divide-surface-200">
+              @for (ad of myAds(); track ad.id) {
+                <li class="py-4">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="font-medium text-surface-900">{{ ad.title }}</span>
+                    <p-tag
+                      [value]="('ad.status.' + ad.status) | translate"
+                      [severity]="statusSeverity(ad.status)"
+                    />
+                  </div>
+                  <p class="mt-1 text-sm text-surface-500">
+                    {{ ad.vehicle.year }} {{ ad.vehicle.make.name }} {{ ad.vehicle.model.name }}
+                  </p>
+
+                  @if (ad.status === 'REJECTED' && ad.rejectionMessage) {
+                    <p class="mt-2 text-sm text-red-600">
+                      <span class="font-medium">{{ 'profile.myAds.rejectionReason' | translate }}:</span>
+                      {{ ad.rejectionMessage }}
+                    </p>
+                  }
+
+                  @if (ad.status === 'DRAFT' || ad.status === 'REJECTED') {
+                    <p-button
+                      [label]="'profile.myAds.submitForReview' | translate"
+                      [size]="'small'"
+                      [outlined]="true"
+                      [loading]="submittingAdId() === ad.id"
+                      styleClass="mt-2"
+                      (onClick)="submitForReview(ad)"
+                    />
+                  }
+
+                  @if (ad.status === 'VALIDATED' && launchDraftAdId() !== ad.id) {
+                    <p-button
+                      [label]="'profile.myAds.launch.action' | translate"
+                      [size]="'small'"
+                      styleClass="mt-2"
+                      (onClick)="openLaunch(ad)"
+                    />
+                  }
+
+                  @if (launchDraftAdId() === ad.id) {
+                    <div class="mt-3 bg-surface-100 p-4">
+                      <h3 class="text-sm font-semibold text-surface-900">
+                        {{ 'profile.myAds.launch.heading' | translate }}
+                      </h3>
+
+                      <form [formGroup]="launchForm" (ngSubmit)="confirmLaunch(ad)" class="mt-3 space-y-3">
+                        <div>
+                          <label class="mb-1 block text-sm text-surface-600">
+                            {{ 'profile.myAds.launch.endDate' | translate }}
+                          </label>
+                          <input
+                            type="datetime-local"
+                            pInputText
+                            [pSize]="'small'"
+                            formControlName="endDate"
+                            class="w-full"
+                          />
+                        </div>
+                        <div>
+                          <label class="mb-1 block text-sm text-surface-600">
+                            {{ 'profile.myAds.launch.reservePrice' | translate }}
+                          </label>
+                          <input
+                            type="number"
+                            pInputText
+                            [pSize]="'small'"
+                            formControlName="reservePrice"
+                            class="w-full"
+                          />
+                        </div>
+                        <div>
+                          <label class="mb-1 block text-sm text-surface-600">
+                            {{ 'profile.myAds.launch.buyNowPrice' | translate }}
+                          </label>
+                          <input
+                            type="number"
+                            pInputText
+                            [pSize]="'small'"
+                            formControlName="buyNowPrice"
+                            class="w-full"
+                          />
+                        </div>
+
+                        @if (commissionPreview(); as commission) {
+                          <div class="bg-surface-200 p-3 text-sm">
+                            <div class="flex justify-between">
+                              <span class="text-surface-600">{{ 'profile.myAds.launch.sellerPrice' | translate }}</span>
+                              <span class="font-medium text-surface-900">
+                                {{ launchForm.controls.buyNowPrice.value | currency: 'EUR' : 'symbol' : '1.0-0' }}
+                              </span>
+                            </div>
+                            <div class="mt-1 flex justify-between">
+                              <span class="text-surface-600">{{ 'profile.myAds.launch.commission' | translate }}</span>
+                              <span class="font-medium text-surface-900">
+                                {{ commission | currency: 'EUR' : 'symbol' : '1.0-0' }}
+                              </span>
+                            </div>
+                            <div class="mt-1 flex justify-between border-t border-surface-300 pt-1">
+                              <span class="font-medium text-surface-900">{{ 'profile.myAds.launch.totalForBuyer' | translate }}</span>
+                              <span class="font-bold text-surface-900">
+                                {{ totalForBuyerPreview() | currency: 'EUR' : 'symbol' : '1.0-0' }}
+                              </span>
+                            </div>
+                          </div>
+                        }
+
+                        @if (launchErrorKey()) {
+                          <p class="text-sm text-red-600">{{ launchErrorKey()! | translate }}</p>
+                        }
+
+                        <div class="flex gap-2">
+                          <p-button
+                            type="submit"
+                            [label]="'profile.myAds.launch.confirm' | translate"
+                            [size]="'small'"
+                            [loading]="launching()"
+                          />
+                          <p-button
+                            type="button"
+                            [label]="'profile.myAds.launch.cancel' | translate"
+                            [size]="'small'"
+                            [outlined]="true"
+                            (onClick)="cancelLaunch()"
+                          />
+                        </div>
+                      </form>
+                    </div>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </p-tabpanel>
+
+        <p-tabpanel value="myBids">
+          <p class="py-4 text-sm text-surface-500">{{ 'profile.comingSoon' | translate }}</p>
+        </p-tabpanel>
+
+        <p-tabpanel value="watchlist">
+          <p class="py-4 text-sm text-surface-500">{{ 'profile.comingSoon' | translate }}</p>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
   </div>
 </div>
