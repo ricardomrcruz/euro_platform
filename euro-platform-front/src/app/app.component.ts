@@ -1,5 +1,6 @@
 import { Component, effect, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { ToastModule } from 'primeng/toast';
 import { TranslateService } from '@ngx-translate/core';
 import { NavbarComponent } from './layout/navbar/navbar.component';
 import { FooterComponent } from './layout/footer/footer.component';
@@ -7,7 +8,7 @@ import { LoginDialogComponent } from './auth/login/login-dialog.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, FooterComponent, LoginDialogComponent],
+  imports: [RouterOutlet, NavbarComponent, FooterComponent, LoginDialogComponent, ToastModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

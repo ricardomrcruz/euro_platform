@@ -205,13 +205,17 @@
     },
     "myAds": {
       "empty": "You haven't created any ads yet.",
+      "edit": "Edit",
       "submitForReview": "Submit for Review",
       "rejectionReason": "Rejection reason",
       "launch": {
-        "action": "Launch Auction",
-        "heading": "Launch Auction",
+        "action": "Create Auction",
+        "heading": "Create Auction",
+        "summaryHeading": "Ad Summary",
+        "paramsHeading": "Auction Settings",
         "endDate": "End Date",
         "reservePrice": "Reserve Price (EUR)",
+        "reservePriceHelp": "The minimum you'll accept. If bidding doesn't reach this amount, the auction ends with no sale.",
         "buyNowPrice": "Buy Now Price (EUR, optional)",
         "sellerPrice": "Seller receives",
         "commission": "EuroCars commission",
@@ -219,7 +223,11 @@
         "confirm": "Launch",
         "cancel": "Cancel",
         "alreadyLaunchedError": "An auction already exists for this ad.",
-        "genericError": "Something went wrong. Please try again."
+        "genericError": "Something went wrong. Please try again.",
+        "live": "Live",
+        "endsIn": "Ends in",
+        "toastSummary": "Auction launched",
+        "toastDetail": "🎉 Your auction is now live!"
       }
     }
   },
@@ -242,11 +250,12 @@
     "status": {
       "DRAFT": "Draft",
       "REVIEW": "Pending Review",
-      "VALIDATED": "Live",
+      "VALIDATED": "Approved",
       "REJECTED": "Rejected"
     },
     "create": {
       "heading": "Sell a Car",
+      "editHeading": "Edit Ad",
       "vehicleSection": "Vehicle",
       "detailsSection": "Listing Details",
       "vin": "VIN (optional)",
@@ -277,17 +286,20 @@
       "modifications": "Modifications",
       "serviceHistory": "Service History",
       "location": "Location",
-      "submit": "Create Draft",
+      "photosSection": "Photos",
+      "existingPhotos": "Already added",
       "activeAdLimitError": "You've reached the limit of 5 active ads.",
       "genericError": "Something went wrong. Please try again.",
-      "draftCreatedHeading": "Draft created",
-      "draftCreatedMessage": "Add some photos, then submit your ad for review.",
       "photoUrl": "Photo URL",
       "photoCaption": "Caption (optional)",
       "addPhoto": "Add Photo",
-      "photosAdded": "Photos added",
+      "removePhoto": "Remove",
+      "saveDraft": "Save Draft",
       "submitForReview": "Submit for Review",
-      "submittedMessage": "Your ad has been submitted for review."
+      "toastDraftSummary": "Draft saved",
+      "toastDraftDetail": "Your ad has been saved as a draft.",
+      "toastSubmittedSummary": "Ad submitted",
+      "toastSubmittedDetail": "🎉 Your ad has been submitted for review!"
     }
   }
 }

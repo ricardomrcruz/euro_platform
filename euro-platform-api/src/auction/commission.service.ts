@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 const RATE = 0.05;
-const MIN_COMMISSION = 250;
+export const MIN_COMMISSION = 250;
 const MAX_COMMISSION = 7500;
 
 // One fixed rate for now; Strategy pattern only worth it if rates diversify.

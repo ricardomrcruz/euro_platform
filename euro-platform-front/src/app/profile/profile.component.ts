@@ -1,16 +1,14 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
-import { InputText } from 'primeng/inputtext';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../auth/auth.service';
 import { AdService, Ad, AdStatus } from '../ad/ad.service';
-import { AuctionService } from '../auction/auction.service';
-import { calculateCommission } from '../auction/commission.util';
+import { AuctionService, Auction } from '../auction/auction.service';
+import { CountdownComponent } from '../shared/countdown/countdown.component';
 
 type ProfileTab = 'myAds' | 'myBids' | 'watchlist';
 
@@ -28,7 +26,7 @@ const STATUS_SEVERITY: Record<AdStatus, 'secondary' | 'warn' | 'success' | 'dang
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
+    RouterLink,
     Tabs,
     TabList,
     Tab,
@@ -36,16 +34,19 @@ const STATUS_SEVERITY: Record<AdStatus, 'secondary' | 'warn' | 'success' | 'dang
     TabPanel,
     ButtonModule,
     TagModule,
-    InputText,
     TranslatePipe,
+    CountdownComponent,
   ],
   templateUrl: './profile.component.html',
+  // PrimeNG's tablist renders its own white background on an internal .p-tablist-tab-list
+  // div that isn't reachable via the host element's class list -- override it directly so
+  // the tab strip matches the dark panel below it instead of clashing.
+  styles: [':host ::ng-deep .p-tablist-tab-list { background: transparent !important; }'],
 })
 export class ProfileComponent {
   private readonly authService = inject(AuthService);
   private readonly adService = inject(AdService);
   private readonly auctionService = inject(AuctionService);
-  private readonly fb = inject(FormBuilder);
 
   readonly currentUser = this.authService.currentUser;
 
@@ -54,29 +55,12 @@ export class ProfileComponent {
   readonly loadingMyAds = signal(true);
   readonly submittingAdId = signal<number | null>(null);
 
-  // Only one ad's launch-auction panel is open at a time.
-  readonly launchDraftAdId = signal<number | null>(null);
-  readonly launching = signal(false);
-  readonly launchErrorKey = signal<string | null>(null);
-
-  readonly launchForm = this.fb.group({
-    endDate: ['', Validators.required],
-    reservePrice: this.fb.control<number | null>(null, [Validators.required, Validators.min(1)]),
-    buyNowPrice: this.fb.control<number | null>(null, Validators.min(1)),
-  });
-
-  // Buy Now Price is the only field with a concrete, guaranteed sale amount -- the reserve
-  // is just a bidding floor, not itself a price the buyer would actually pay.
-  private readonly buyNowPriceValue = signal<number | null>(null);
-  readonly commissionPreview = computed(() => {
-    const price = this.buyNowPriceValue();
-    return price && price > 0 ? calculateCommission(price) : null;
-  });
-  readonly totalForBuyerPreview = computed(() => {
-    const price = this.buyNowPriceValue();
-    const commission = this.commissionPreview();
-    return price && commission ? price + commission : null;
-  });
+  // Keyed by adId -- lets a VALIDATED ad that already has a real LIVE auction show a
+  // countdown instead of the "Create Auction" link. Ad has no relation back to Auction on
+  // the backend, so this cross-references the public auctions list by ad id; it won't catch
+  // a SOLD/EXPIRED/CANCELLED auction for the same ad, a real edge case launch() itself still
+  // guards against with a 409.
+  readonly liveAuctionByAdId = signal<Partial<Record<number, Auction>>>({});
 
   readonly statusSeverity = (status: AdStatus) => STATUS_SEVERITY[status];
 
@@ -86,8 +70,12 @@ export class ProfileComponent {
       .then((ads) => this.myAds.set(ads))
       .finally(() => this.loadingMyAds.set(false));
 
-    this.launchForm.controls.buyNowPrice.valueChanges.subscribe((value) => {
-      this.buyNowPriceValue.set(value);
+    this.auctionService.listLive().then((auctions) => {
+      const byId: Partial<Record<number, Auction>> = {};
+      for (const auction of auctions) {
+        byId[auction.ad.id] = auction;
+      }
+      this.liveAuctionByAdId.set(byId);
     });
   }
 
@@ -101,43 +89,11 @@ export class ProfileComponent {
     }
   }
 
-  openLaunch(ad: Ad): void {
-    this.launchDraftAdId.set(ad.id);
-    this.launchForm.reset();
-    this.launchErrorKey.set(null);
-  }
-
-  cancelLaunch(): void {
-    this.launchDraftAdId.set(null);
-  }
-
-  async confirmLaunch(ad: Ad): Promise<void> {
-    if (this.launchForm.invalid) {
-      this.launchForm.markAllAsTouched();
-      return;
-    }
-
-    const { endDate, reservePrice, buyNowPrice } = this.launchForm.getRawValue();
-    this.launching.set(true);
-    this.launchErrorKey.set(null);
-    try {
-      await this.auctionService.launch(ad.id, {
-        endDate: new Date(endDate!).toISOString(),
-        reservePrice: reservePrice!,
-        buyNowPrice: buyNowPrice ?? undefined,
-      });
-      this.launchDraftAdId.set(null);
-    } catch (error) {
-      const status = error instanceof HttpErrorResponse ? error.status : 0;
-      this.launchErrorKey.set(
-        status === 409 ? 'profile.myAds.launch.alreadyLaunchedError' : 'profile.myAds.launch.genericError',
-      );
-    } finally {
-      this.launching.set(false);
-    }
-  }
-
   setActiveTab(value: string | number): void {
     this.activeTab.set(value as ProfileTab);
+  }
+
+  endDateOf(auction: Auction): Date {
+    return new Date(auction.endDate);
   }
 }

@@ -10,6 +10,7 @@ import { AdPhoto } from './entities/ad-photo.entity';
 import { AdMessage } from './entities/ad-message.entity';
 import { AdStatus } from './enums/ad-status.enum';
 import { CreateAdDto } from './dto/create-ad.dto';
+import { UpdateAdDto } from './dto/update-ad.dto';
 import { CreateAdPhotoDto } from './dto/create-ad-photo.dto';
 
 // Cap on active (DRAFT/REVIEW/VALIDATED) ads per seller.
@@ -70,6 +71,41 @@ export class AdService {
       vehicle,
       photos: [],
     });
+
+    return this.adRepository.save(ad);
+  }
+
+  // Only DRAFT/REJECTED ads are editable (ad.canEdit()) -- replaces every field, including
+  // the vehicle (a new Vehicle row is created via the same factory path as createAd; the old
+  // one is left orphaned, same tolerance as elsewhere in this module).
+  async updateAd(sellerId: number, adId: number, dto: UpdateAdDto): Promise<Ad> {
+    const ad = await this.findOwnedOrThrow(adId, sellerId);
+    if (!ad.canEdit()) {
+      throw new ForbiddenException('Ad cannot be edited in its current status');
+    }
+
+    const vehicle = await this.vehicleFactory.createVehicle({
+      makeId: dto.makeId,
+      modelId: dto.modelId,
+      trimId: dto.trimId,
+      vin: dto.vin,
+      year: dto.year,
+      exteriorColor: dto.exteriorColor,
+      interiorColor: dto.interiorColor,
+      mileage: dto.mileage,
+      numberOfOwners: dto.numberOfOwners,
+      plateCountry: dto.plateCountry,
+    });
+
+    ad.title = dto.title;
+    ad.description = dto.description;
+    ad.condition = dto.condition;
+    ad.highlights = dto.highlights;
+    ad.knownFlaws = dto.knownFlaws;
+    ad.modifications = dto.modifications;
+    ad.serviceHistory = dto.serviceHistory;
+    ad.location = dto.location;
+    ad.vehicle = vehicle;
 
     return this.adRepository.save(ad);
   }

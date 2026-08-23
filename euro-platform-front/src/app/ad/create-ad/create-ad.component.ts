@@ -1,22 +1,21 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Select } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { InputTextarea } from 'primeng/inputtextarea';
-import { TranslatePipe } from '@ngx-translate/core';
-import { AdService, Ad, VehicleCondition } from '../ad.service';
+import { MessageService } from 'primeng/api';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { AdService, AdPhoto, VehicleCondition } from '../ad.service';
 import {
   VehicleCatalogService,
   VehicleMake,
   VehicleModel,
   VehicleTrim,
 } from '../../vehicle/vehicle-catalog.service';
-
-type Stage = 'form' | 'draft' | 'submitted';
 
 interface ConditionOption {
   value: VehicleCondition;
@@ -30,12 +29,13 @@ const CONDITION_OPTIONS: ConditionOption[] = [
   { value: 'POOR', labelKey: 'ad.create.conditionPoor' },
 ];
 
+type PhotoRow = FormGroup<{ url: import('@angular/forms').FormControl<string>; caption: import('@angular/forms').FormControl<string> }>;
+
 @Component({
   selector: 'app-create-ad',
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     ReactiveFormsModule,
     Select,
     ButtonModule,
@@ -49,11 +49,18 @@ export class CreateAdComponent {
   private readonly fb = inject(FormBuilder);
   private readonly adService = inject(AdService);
   private readonly catalog = inject(VehicleCatalogService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly messageService = inject(MessageService);
+  private readonly translate = inject(TranslateService);
 
-  readonly stage = signal<Stage>('form');
-  readonly submitting = signal(false);
+  readonly editingAdId = signal<number | null>(null);
+  readonly loadingExisting = signal(false);
+  readonly existingPhotos = signal<AdPhoto[]>([]);
+
+  readonly savingDraft = signal(false);
+  readonly savingAndSubmitting = signal(false);
   readonly errorKey = signal<string | null>(null);
-  readonly createdAd = signal<Ad | null>(null);
 
   readonly conditionOptions = CONDITION_OPTIONS;
 
@@ -91,15 +98,11 @@ export class CreateAdComponent {
     location: [''],
   });
 
-  readonly photoForm = this.fb.group({
-    url: ['', Validators.required],
-    caption: [''],
-  });
-  readonly addingPhoto = signal(false);
+  // Photo rows are entirely optional -- no validator on url, blank rows are just skipped on
+  // save rather than blocking the form.
+  readonly photoRows = this.fb.array<PhotoRow>([]);
 
   constructor() {
-    this.catalog.listMakes().then((makes) => this.makes.set(makes));
-
     this.form.controls.make.valueChanges.subscribe((make) => {
       this.form.controls.model.setValue(null);
       this.form.controls.trim.setValue(null);
@@ -124,6 +127,86 @@ export class CreateAdComponent {
         this.trims.set([]);
       }
     });
+
+    this.catalog.listMakes().then(async (makes) => {
+      this.makes.set(makes);
+      const idParam = this.route.snapshot.paramMap.get('id');
+      if (idParam) {
+        await this.loadForEdit(Number(idParam));
+      } else {
+        this.addPhotoRow();
+      }
+    });
+  }
+
+  private newPhotoRow(): PhotoRow {
+    return this.fb.group({
+      url: this.fb.nonNullable.control(''),
+      caption: this.fb.nonNullable.control(''),
+    });
+  }
+
+  addPhotoRow(): void {
+    this.photoRows.push(this.newPhotoRow());
+  }
+
+  removePhotoRow(index: number): void {
+    this.photoRows.removeAt(index);
+  }
+
+  // Sets every cascade level with emitEvent: false and fetches models/trims manually --
+  // avoids racing the valueChanges-driven cascade above, which would otherwise reset
+  // model/trim back to null right after we set them.
+  private async loadForEdit(id: number): Promise<void> {
+    this.editingAdId.set(id);
+    this.loadingExisting.set(true);
+    try {
+      const ad = await this.adService.getOne(id);
+      this.existingPhotos.set(ad.photos);
+
+      const make = this.makes().find((m) => m.id === ad.vehicle.make.id) ?? null;
+      this.form.controls.make.setValue(make, { emitEvent: false });
+
+      if (make) {
+        const models = await this.catalog.listModels(make.name);
+        this.models.set(models);
+        this.form.controls.model.enable();
+        const model = models.find((m) => m.id === ad.vehicle.model.id) ?? null;
+        this.form.controls.model.setValue(model, { emitEvent: false });
+
+        if (model) {
+          const trims = await this.catalog.listTrims(make.name, model.name);
+          this.trims.set(trims);
+          this.form.controls.trim.enable();
+          const trim = ad.vehicle.trim
+            ? (trims.find((t) => t.id === ad.vehicle.trim!.id) ?? null)
+            : null;
+          this.form.controls.trim.setValue(trim, { emitEvent: false });
+        }
+      }
+
+      this.form.patchValue({
+        vin: ad.vehicle.vin ?? '',
+        year: ad.vehicle.year,
+        exteriorColor: ad.vehicle.exteriorColor ?? '',
+        interiorColor: ad.vehicle.interiorColor ?? '',
+        mileage: ad.vehicle.mileage ?? null,
+        numberOfOwners: ad.vehicle.numberOfOwners ?? null,
+        plateCountry: ad.vehicle.plateCountry ?? '',
+        title: ad.title,
+        description: ad.description,
+        condition: ad.condition,
+        highlights: ad.highlights ?? '',
+        knownFlaws: ad.knownFlaws ?? '',
+        modifications: ad.modifications ?? '',
+        serviceHistory: ad.serviceHistory ?? '',
+        location: ad.location ?? '',
+      });
+
+      this.addPhotoRow();
+    } finally {
+      this.loadingExisting.set(false);
+    }
   }
 
   async lookupVin(): Promise<void> {
@@ -147,81 +230,86 @@ export class CreateAdComponent {
     }
   }
 
-  async submitForm(): Promise<void> {
+  async saveDraft(): Promise<void> {
+    await this.persistAndMaybeSubmit(false, this.savingDraft);
+  }
+
+  async saveAndSubmit(): Promise<void> {
+    await this.persistAndMaybeSubmit(true, this.savingAndSubmitting);
+  }
+
+  private async persistAndMaybeSubmit(
+    thenSubmit: boolean,
+    loadingSignal: ReturnType<typeof signal<boolean>>,
+  ): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
     const v = this.form.getRawValue();
-    this.submitting.set(true);
+    const payload = {
+      title: v.title!,
+      description: v.description!,
+      condition: v.condition!,
+      highlights: v.highlights || undefined,
+      knownFlaws: v.knownFlaws || undefined,
+      modifications: v.modifications || undefined,
+      serviceHistory: v.serviceHistory || undefined,
+      location: v.location || undefined,
+      makeId: v.make!.id,
+      modelId: v.model!.id,
+      trimId: v.trim?.id,
+      vin: v.vin || undefined,
+      year: v.year!,
+      exteriorColor: v.exteriorColor || undefined,
+      interiorColor: v.interiorColor || undefined,
+      mileage: v.mileage ?? undefined,
+      numberOfOwners: v.numberOfOwners ?? undefined,
+      plateCountry: v.plateCountry || undefined,
+    };
+
+    loadingSignal.set(true);
     this.errorKey.set(null);
     try {
-      const ad = await this.adService.create({
-        title: v.title!,
-        description: v.description!,
-        condition: v.condition!,
-        highlights: v.highlights || undefined,
-        knownFlaws: v.knownFlaws || undefined,
-        modifications: v.modifications || undefined,
-        serviceHistory: v.serviceHistory || undefined,
-        location: v.location || undefined,
-        makeId: v.make!.id,
-        modelId: v.model!.id,
-        trimId: v.trim?.id,
-        vin: v.vin || undefined,
-        year: v.year!,
-        exteriorColor: v.exteriorColor || undefined,
-        interiorColor: v.interiorColor || undefined,
-        mileage: v.mileage ?? undefined,
-        numberOfOwners: v.numberOfOwners ?? undefined,
-        plateCountry: v.plateCountry || undefined,
-      });
-      this.createdAd.set(ad);
-      this.stage.set('draft');
+      const existingId = this.editingAdId();
+      const ad = existingId
+        ? await this.adService.update(existingId, payload)
+        : await this.adService.create(payload);
+
+      const newPhotoRows = this.photoRows.controls.filter((row) => row.controls.url.value.trim());
+      for (const row of newPhotoRows) {
+        await this.adService.addPhoto(ad.id, {
+          url: row.controls.url.value.trim(),
+          caption: row.controls.caption.value.trim() || undefined,
+        });
+      }
+
+      if (thenSubmit) {
+        await this.adService.submit(ad.id);
+        this.messageService.add({
+          severity: 'success',
+          summary: this.translate.instant('ad.create.toastSubmittedSummary'),
+          detail: this.translate.instant('ad.create.toastSubmittedDetail'),
+          life: 5000,
+        });
+      } else {
+        this.messageService.add({
+          severity: 'success',
+          summary: this.translate.instant('ad.create.toastDraftSummary'),
+          detail: this.translate.instant('ad.create.toastDraftDetail'),
+          life: 5000,
+        });
+      }
+
+      this.router.navigateByUrl('/profile');
     } catch (error) {
       const status = error instanceof HttpErrorResponse ? error.status : 0;
       this.errorKey.set(
         status === 403 ? 'ad.create.activeAdLimitError' : 'ad.create.genericError',
       );
     } finally {
-      this.submitting.set(false);
-    }
-  }
-
-  async addPhoto(): Promise<void> {
-    const ad = this.createdAd();
-    if (!ad || this.photoForm.invalid) {
-      this.photoForm.markAllAsTouched();
-      return;
-    }
-
-    const { url, caption } = this.photoForm.getRawValue();
-    this.addingPhoto.set(true);
-    try {
-      const photo = await this.adService.addPhoto(ad.id, {
-        url: url!,
-        caption: caption || undefined,
-      });
-      this.createdAd.update((current) =>
-        current ? { ...current, photos: [...current.photos, photo] } : current,
-      );
-      this.photoForm.reset();
-    } finally {
-      this.addingPhoto.set(false);
-    }
-  }
-
-  async submitForReview(): Promise<void> {
-    const ad = this.createdAd();
-    if (!ad) return;
-
-    this.submitting.set(true);
-    try {
-      await this.adService.submit(ad.id);
-      this.stage.set('submitted');
-    } finally {
-      this.submitting.set(false);
+      loadingSignal.set(false);
     }
   }
 }

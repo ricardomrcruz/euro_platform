@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { AdService } from './ad.service';
 import { CreateAdDto } from './dto/create-ad.dto';
+import { UpdateAdDto } from './dto/update-ad.dto';
 import { RejectAdDto } from './dto/reject-ad.dto';
 import { CreateAdPhotoDto } from './dto/create-ad-photo.dto';
 import { CreateAdMessageDto } from './dto/create-ad-message.dto';
@@ -17,6 +18,15 @@ export class AdController {
   @Post()
   create(@CurrentUser() user: RequestUser, @Body() dto: CreateAdDto) {
     return this.adService.createAd(user.id, dto);
+  }
+
+  @Patch(':id')
+  update(
+    @CurrentUser() user: RequestUser,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateAdDto,
+  ) {
+    return this.adService.updateAd(user.id, id, dto);
   }
 
   @Post(':id/submit')

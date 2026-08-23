@@ -205,13 +205,17 @@
     },
     "myAds": {
       "empty": "Vous n'avez encore créé aucune annonce.",
+      "edit": "Modifier",
       "submitForReview": "Soumettre à la revue",
       "rejectionReason": "Motif du rejet",
       "launch": {
-        "action": "Lancer l'enchère",
-        "heading": "Lancer l'enchère",
+        "action": "Créer l'enchère",
+        "heading": "Créer l'enchère",
+        "summaryHeading": "Résumé de l'annonce",
+        "paramsHeading": "Paramètres de l'enchère",
         "endDate": "Date de fin",
         "reservePrice": "Prix de réserve (EUR)",
+        "reservePriceHelp": "Le montant minimum que vous accepterez. Si les enchères n'atteignent pas ce montant, l'enchère se termine sans vente.",
         "buyNowPrice": "Prix d'achat immédiat (EUR, optionnel)",
         "sellerPrice": "Le vendeur reçoit",
         "commission": "Commission EuroCars",
@@ -219,7 +223,11 @@
         "confirm": "Lancer",
         "cancel": "Annuler",
         "alreadyLaunchedError": "Une enchère existe déjà pour cette annonce.",
-        "genericError": "Une erreur est survenue. Veuillez réessayer."
+        "genericError": "Une erreur est survenue. Veuillez réessayer.",
+        "live": "En ligne",
+        "endsIn": "Se termine dans",
+        "toastSummary": "Enchère lancée",
+        "toastDetail": "🎉 Votre enchère est maintenant en ligne !"
       }
     }
   },
@@ -242,11 +250,12 @@
     "status": {
       "DRAFT": "Brouillon",
       "REVIEW": "En attente de validation",
-      "VALIDATED": "En ligne",
+      "VALIDATED": "Approuvée",
       "REJECTED": "Rejetée"
     },
     "create": {
       "heading": "Vendre une voiture",
+      "editHeading": "Modifier l'annonce",
       "vehicleSection": "Véhicule",
       "detailsSection": "Détails de l'annonce",
       "vin": "VIN (optionnel)",
@@ -277,17 +286,20 @@
       "modifications": "Modifications",
       "serviceHistory": "Historique d'entretien",
       "location": "Localisation",
-      "submit": "Créer le brouillon",
+      "photosSection": "Photos",
+      "existingPhotos": "Déjà ajoutées",
       "activeAdLimitError": "Vous avez atteint la limite de 5 annonces actives.",
       "genericError": "Une erreur est survenue. Veuillez réessayer.",
-      "draftCreatedHeading": "Brouillon créé",
-      "draftCreatedMessage": "Ajoutez quelques photos, puis soumettez votre annonce à la revue.",
       "photoUrl": "URL de la photo",
       "photoCaption": "Légende (optionnel)",
       "addPhoto": "Ajouter la photo",
-      "photosAdded": "Photos ajoutées",
+      "removePhoto": "Retirer",
+      "saveDraft": "Enregistrer le brouillon",
       "submitForReview": "Soumettre à la revue",
-      "submittedMessage": "Votre annonce a été soumise à la revue."
+      "toastDraftSummary": "Brouillon enregistré",
+      "toastDraftDetail": "Votre annonce a été enregistrée comme brouillon.",
+      "toastSubmittedSummary": "Annonce soumise",
+      "toastSubmittedDetail": "🎉 Votre annonce a été soumise à la revue !"
     }
   }
 }

@@ -10,6 +10,12 @@ import {
 import { Ad } from '../../ad/entities/ad.entity';
 import { AuctionState } from '../enums/auction-state.enum';
 import { Bid } from './bid.entity';
+import { MIN_COMMISSION } from '../commission.service';
+
+// A €1 opening bid would still trigger the flat €MIN_COMMISSION buyer's premium, netting the
+// seller almost nothing -- the first bid must clear double the commission floor so both the
+// seller's cut and the platform's minimum commission are actually meaningful.
+const MIN_STARTING_BID = MIN_COMMISSION * 2;
 
 // State transitions are guarded here, not in a separate class-per-state hierarchy.
 @Entity('auctions')
@@ -46,6 +52,9 @@ export class Auction {
   registerBid(amount: number): void {
     if (this.state !== AuctionState.LIVE) {
       throw new BadRequestException(`Cannot bid on an auction in state ${this.state}`);
+    }
+    if (this.currentHighestBid == null && amount < MIN_STARTING_BID) {
+      throw new BadRequestException(`First bid must be at least €${MIN_STARTING_BID}`);
     }
     if (this.currentHighestBid != null && amount <= this.currentHighestBid) {
       throw new BadRequestException('Bid must be higher than the current highest bid');

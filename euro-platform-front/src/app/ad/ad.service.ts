@@ -41,6 +41,8 @@ export interface AdVehicleSummary {
   exteriorColor?: string;
   interiorColor?: string;
   mileage?: number;
+  numberOfOwners?: number;
+  plateCountry?: string;
   make: { id: number; name: string };
   model: { id: number; name: string };
   trim?: { id: number; name: string };
@@ -85,6 +87,15 @@ export class AdService {
 
   create(payload: CreateAdPayload): Promise<Ad> {
     return firstValueFrom(this.http.post<Ad>('/api/ads', payload));
+  }
+
+  // Only valid while ad.canEdit() on the backend (DRAFT or REJECTED) -- 403s otherwise.
+  update(id: number, payload: CreateAdPayload): Promise<Ad> {
+    return firstValueFrom(this.http.patch<Ad>(`/api/ads/${id}`, payload));
+  }
+
+  getOne(id: number): Promise<Ad> {
+    return firstValueFrom(this.http.get<Ad>(`/api/ads/${id}`));
   }
 
   submit(id: number): Promise<Ad> {
