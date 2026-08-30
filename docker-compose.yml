@@ -50,6 +50,11 @@ services:
       AUTH_SERVICE_URL: http://euro-auth:3000
       CARAPI_API_TOKEN: ${CARAPI_API_TOKEN}
       CARAPI_API_SECRET: ${CARAPI_API_SECRET}
+      GCS_BUCKET_NAME: ${GCS_BUCKET_NAME}
+      GCS_PROJECT_ID: ${GCS_PROJECT_ID}
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/gcs/service-account.json
+    volumes:
+      - ./euro-platform-api/secrets/gcs-service-account.json:/secrets/gcs/service-account.json:ro
     depends_on:
       postgres:
         condition: service_healthy

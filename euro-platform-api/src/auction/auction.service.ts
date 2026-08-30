@@ -5,30 +5,26 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { LessThanOrEqual, Repository } from 'typeorm';
-import { Ad } from '../ad/entities/ad.entity';
+import { AdRepository } from '../ad/ad.repository';
 import { AdStatus } from '../ad/enums/ad-status.enum';
 import { UserRole } from '../auth/enums/user-role.enum';
 import type { RequestUser } from '../auth/interfaces/authenticated-request.interface';
 import { NotificationService } from '../notification/notification.service';
+import { AuctionRepository } from './auction.repository';
 import { Auction } from './entities/auction.entity';
-import { AuctionState } from './enums/auction-state.enum';
 import { LaunchAuctionDto } from './dto/launch-auction.dto';
 
 // Lifecycle only; bidding and buy-now live in BidService.
 @Injectable()
 export class AuctionService {
   constructor(
-    @InjectRepository(Auction)
-    private readonly auctionRepository: Repository<Auction>,
-    @InjectRepository(Ad)
-    private readonly adRepository: Repository<Ad>,
+    private readonly auctionRepository: AuctionRepository,
+    private readonly adRepository: AdRepository,
     private readonly notificationService: NotificationService,
   ) {}
 
   async launch(currentUser: RequestUser, adId: number, dto: LaunchAuctionDto): Promise<Auction> {
-    const ad = await this.adRepository.findOneBy({ id: adId });
+    const ad = await this.adRepository.findById(adId);
     if (!ad) {
       throw new NotFoundException('Ad not found');
     }
@@ -39,7 +35,7 @@ export class AuctionService {
       throw new ForbiddenException('Not authorized to launch an auction for this ad');
     }
 
-    const existing = await this.auctionRepository.findOne({ where: { ad: { id: adId } } });
+    const existing = await this.auctionRepository.findExistingForAd(adId);
     if (existing) {
       throw new ConflictException('An auction already exists for this ad');
     }
@@ -74,10 +70,7 @@ export class AuctionService {
 
   // Called by SchedulerService's @Cron, not directly by any controller.
   async closeExpired(): Promise<void> {
-    const expired = await this.auctionRepository.find({
-      where: { state: AuctionState.LIVE, endDate: LessThanOrEqual(new Date()) },
-      relations: { ad: true },
-    });
+    const expired = await this.auctionRepository.findExpiredLive();
 
     for (const auction of expired) {
       auction.finalize();
@@ -87,11 +80,7 @@ export class AuctionService {
   }
 
   listLive(): Promise<Auction[]> {
-    return this.auctionRepository.find({
-      where: { state: AuctionState.LIVE },
-      relations: { ad: true },
-      order: { endDate: 'ASC' },
-    });
+    return this.auctionRepository.findLive();
   }
 
   findOne(id: number): Promise<Auction> {
@@ -99,10 +88,7 @@ export class AuctionService {
   }
 
   private async findByIdOrThrow(id: number): Promise<Auction> {
-    const auction = await this.auctionRepository.findOne({
-      where: { id },
-      relations: { ad: true },
-    });
+    const auction = await this.auctionRepository.findByIdWithRelations(id);
     if (!auction) {
       throw new NotFoundException('Auction not found');
     }

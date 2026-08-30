@@ -3,5 +3,6 @@ conception_doc.pdf
 .env
 .env.local
 CLAUDE.md
+euro-platform-api/secrets/
 .vscode
 EUROCARS.postman_collection.json

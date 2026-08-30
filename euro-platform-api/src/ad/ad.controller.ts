@@ -4,6 +4,7 @@ import { CreateAdDto } from './dto/create-ad.dto';
 import { UpdateAdDto } from './dto/update-ad.dto';
 import { RejectAdDto } from './dto/reject-ad.dto';
 import { CreateAdPhotoDto } from './dto/create-ad-photo.dto';
+import { RequestPhotoUploadUrlDto } from './dto/request-photo-upload-url.dto';
 import { CreateAdMessageDto } from './dto/create-ad-message.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Public } from '../auth/decorators/public.decorator';
@@ -57,6 +58,15 @@ export class AdController {
     @Body() dto: CreateAdPhotoDto,
   ) {
     return this.adService.addPhoto(user.id, id, dto);
+  }
+
+  @Post(':id/photos/upload-url')
+  requestPhotoUploadUrl(
+    @CurrentUser() user: RequestUser,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: RequestPhotoUploadUrlDto,
+  ) {
+    return this.adService.requestPhotoUploadUrl(user.id, id, dto);
   }
 
   @Public()

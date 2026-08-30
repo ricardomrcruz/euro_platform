@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import authConfig from './config/auth.config';
 import typeormConfig from './config/typeorm.config';
 import carApiConfig from './vehicle/car-api/car-api.config';
+import storageConfig from './storage/storage.config';
 import { VehicleModule } from './vehicle/vehicle.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthGuard } from './auth/guards/auth.guard';
@@ -20,7 +21,10 @@ import { MeModule } from './me/me.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, load: [typeormConfig, authConfig, carApiConfig] }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [typeormConfig, authConfig, carApiConfig, storageConfig],
+    }),
     TypeOrmModule.forRootAsync({
       inject: [typeormConfig.KEY],
       useFactory: (config: ConfigType<typeof typeormConfig>) => config,

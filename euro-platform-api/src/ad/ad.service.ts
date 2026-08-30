@@ -1,44 +1,38 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
 import { VehicleFactoryService } from '../vehicle/vehicle-factory.service';
 import { NotificationService } from '../notification/notification.service';
+import { StorageService, SignedUpload } from '../storage/storage.service';
 import type { RequestUser } from '../auth/interfaces/authenticated-request.interface';
 import { UserRole } from '../auth/enums/user-role.enum';
+import { AdStatus } from './enums/ad-status.enum';
+import { AdRepository } from './ad.repository';
+import { AdPhotoRepository } from './ad-photo.repository';
+import { AdMessageRepository } from './ad-message.repository';
 import { Ad } from './entities/ad.entity';
 import { AdPhoto } from './entities/ad-photo.entity';
 import { AdMessage } from './entities/ad-message.entity';
-import { AdStatus } from './enums/ad-status.enum';
 import { CreateAdDto } from './dto/create-ad.dto';
 import { UpdateAdDto } from './dto/update-ad.dto';
 import { CreateAdPhotoDto } from './dto/create-ad-photo.dto';
+import { RequestPhotoUploadUrlDto } from './dto/request-photo-upload-url.dto';
+import { buildPhotoObjectKey } from './utils/photo-object-key.util';
 
 // Cap on active (DRAFT/REVIEW/VALIDATED) ads per seller.
 const MAX_ACTIVE_ADS_PER_SELLER = 5;
-const ACTIVE_STATUSES = [AdStatus.DRAFT, AdStatus.REVIEW, AdStatus.VALIDATED];
-
-const AD_RELATIONS = {
-  vehicle: { make: true, model: true, trim: true },
-  photos: true,
-} as const;
 
 @Injectable()
 export class AdService {
   constructor(
-    @InjectRepository(Ad)
-    private readonly adRepository: Repository<Ad>,
-    @InjectRepository(AdPhoto)
-    private readonly adPhotoRepository: Repository<AdPhoto>,
-    @InjectRepository(AdMessage)
-    private readonly adMessageRepository: Repository<AdMessage>,
+    private readonly adRepository: AdRepository,
+    private readonly adPhotoRepository: AdPhotoRepository,
+    private readonly adMessageRepository: AdMessageRepository,
     private readonly vehicleFactory: VehicleFactoryService,
     private readonly notificationService: NotificationService,
+    private readonly storageService: StorageService,
   ) {}
 
   async createAd(sellerId: number, dto: CreateAdDto): Promise<Ad> {
-    const activeCount = await this.adRepository.count({
-      where: { sellerId, status: In(ACTIVE_STATUSES) },
-    });
+    const activeCount = await this.adRepository.countActiveForSeller(sellerId);
     if (activeCount >= MAX_ACTIVE_ADS_PER_SELLER) {
       throw new ForbiddenException(
         `Active ad limit reached (max ${MAX_ACTIVE_ADS_PER_SELLER} per seller)`,
@@ -151,6 +145,7 @@ export class AdService {
     const photo = this.adPhotoRepository.create({
       ad,
       url: dto.url,
+      category: dto.category,
       caption: dto.caption,
       sortOrder: dto.sortOrder ?? 0,
       isPrimary: dto.isPrimary ?? false,
@@ -158,34 +153,40 @@ export class AdService {
     return this.adPhotoRepository.save(photo);
   }
 
+  // Ownership/edit-state guard mirrors addPhoto() -- this only mints a place to upload to,
+  // the actual DB row is still created via addPhoto() once the browser's GCS PUT succeeds.
+  async requestPhotoUploadUrl(
+    sellerId: number,
+    adId: number,
+    dto: RequestPhotoUploadUrlDto,
+  ): Promise<SignedUpload & { objectKey: string }> {
+    const ad = await this.findOwnedOrThrow(adId, sellerId);
+    if (!ad.canEdit()) {
+      throw new ForbiddenException('Ad cannot be edited in its current status');
+    }
+
+    const existingCount = await this.adPhotoRepository.countForAd(adId);
+    const objectKey = buildPhotoObjectKey(ad, existingCount + 1, dto.filename);
+    const signed = await this.storageService.generateUploadUrl(objectKey, dto.contentType);
+    return { ...signed, objectKey };
+  }
+
   listPublic(): Promise<Ad[]> {
-    return this.adRepository.find({
-      where: { status: AdStatus.VALIDATED },
-      relations: AD_RELATIONS,
-      order: { createdAt: 'DESC' },
-    });
+    return this.adRepository.findValidatedOrdered();
   }
 
   // Every status, not just VALIDATED -- unlike listPublic(), this is the seller's own view.
   findMine(sellerId: number): Promise<Ad[]> {
-    return this.adRepository.find({
-      where: { sellerId },
-      relations: AD_RELATIONS,
-      order: { createdAt: 'DESC' },
-    });
+    return this.adRepository.findBySeller(sellerId);
   }
 
   findPending(): Promise<Ad[]> {
-    return this.adRepository.find({
-      where: { status: AdStatus.REVIEW },
-      relations: AD_RELATIONS,
-      order: { createdAt: 'ASC' },
-    });
+    return this.adRepository.findPendingReview();
   }
 
   // 404, not 403, for a non-owner/admin so we don't leak that a draft ad exists.
   async findVisible(id: number, currentUser?: RequestUser): Promise<Ad> {
-    const ad = await this.adRepository.findOne({ where: { id }, relations: AD_RELATIONS });
+    const ad = await this.adRepository.findByIdWithRelations(id);
     if (!ad) {
       throw new NotFoundException('Ad not found');
     }
@@ -217,13 +218,10 @@ export class AdService {
   async listMessages(currentUser: RequestUser, adId: number): Promise<AdMessage[]> {
     const ad = await this.findByIdOrThrow(adId);
     if (!this.isOwnerOrAdmin(ad, currentUser)) {
-      throw new ForbiddenException('Not authorized to view this ad\'s messages');
+      throw new ForbiddenException("Not authorized to view this ad's messages");
     }
 
-    return this.adMessageRepository.find({
-      where: { ad: { id: adId } },
-      order: { createdAt: 'ASC' },
-    });
+    return this.adMessageRepository.findByAdOrdered(adId);
   }
 
   private isOwnerOrAdmin(ad: Ad, currentUser?: RequestUser): boolean {
@@ -231,7 +229,7 @@ export class AdService {
   }
 
   private async findByIdOrThrow(id: number): Promise<Ad> {
-    const ad = await this.adRepository.findOne({ where: { id }, relations: AD_RELATIONS });
+    const ad = await this.adRepository.findByIdWithRelations(id);
     if (!ad) {
       throw new NotFoundException('Ad not found');
     }

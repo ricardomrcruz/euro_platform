@@ -10,7 +10,10 @@ const MAX_SERIALIZATION_RETRIES = 3;
 const POSTGRES_SERIALIZATION_FAILURE = '40001';
 
 // SERIALIZABLE transactions can abort under contention (code 40001) -- the retry loop is
-// required for correctness, not optional.
+// required for correctness, not optional. Deliberately not routed through AuctionRepository/
+// a BidRepository: every query here must run against this transaction's own EntityManager
+// (manager.getRepository(...)), not the app-wide singleton repositories used elsewhere --
+// using those instead would silently escape the SERIALIZABLE transaction.
 @Injectable()
 export class BidService {
   constructor(

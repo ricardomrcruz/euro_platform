@@ -1,8 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { VehicleRepository } from './vehicle.repository';
 import { VehicleMake } from './entities/vehicle-make.entity';
-import { VehicleModel } from './entities/vehicle-model.entity';
 import { VehicleTrim } from './entities/vehicle-trim.entity';
 import { Vehicle } from './entities/vehicle.entity';
 import { decodeModelYear } from './vin-year.util';
@@ -33,45 +31,22 @@ export interface CreateVehicleInput {
 // don't fit a European collectible-car platform (see CLAUDE.md / the plan for the research).
 @Injectable()
 export class VehicleFactoryService {
-  constructor(
-    @InjectRepository(VehicleMake)
-    private readonly makeRepository: Repository<VehicleMake>,
-    @InjectRepository(VehicleModel)
-    private readonly modelRepository: Repository<VehicleModel>,
-    @InjectRepository(VehicleTrim)
-    private readonly trimRepository: Repository<VehicleTrim>,
-    @InjectRepository(Vehicle)
-    private readonly vehicleRepository: Repository<Vehicle>,
-  ) {}
+  constructor(private readonly vehicleRepository: VehicleRepository) {}
 
   listMakes(): Promise<VehicleMake[]> {
-    return this.makeRepository.find({ order: { name: 'ASC' } });
+    return this.vehicleRepository.listMakes();
   }
 
-  listModels(make: string): Promise<VehicleModel[]> {
-    return this.modelRepository.find({
-      where: { make: { name: make } },
-      relations: { make: true },
-      order: { name: 'ASC' },
-    });
+  listModels(make: string) {
+    return this.vehicleRepository.listModelsByMakeName(make);
   }
 
   listTrims(make: string, model: string, year?: number): Promise<VehicleTrim[]> {
-    return this.trimRepository.find({
-      where: {
-        model: { name: model, make: { name: make } },
-        ...(year ? { year } : {}),
-      },
-      relations: { model: { make: true } },
-      order: { year: 'ASC', name: 'ASC' },
-    });
+    return this.vehicleRepository.listTrimsByMakeModelYear(make, model, year);
   }
 
   resolveTrim(id: number): Promise<VehicleTrim | null> {
-    return this.trimRepository.findOne({
-      where: { id },
-      relations: { model: { make: true } },
-    });
+    return this.vehicleRepository.findTrimByIdWithMakeModel(id);
   }
 
   // Best-effort VIN recognition (design doc 6.2.1.1 "VIN reconnu" -- a separate scenario
@@ -82,10 +57,7 @@ export class VehicleFactoryService {
   // the caller still needs to pick model/trim from the catalog, same as any other listing.
   async resolveByVin(vin: string): Promise<VinLookupResult> {
     const wmi = vin.slice(0, 3).toUpperCase();
-    const make = await this.makeRepository
-      .createQueryBuilder('make')
-      .where(':wmi = ANY(make.wmiCodes)', { wmi })
-      .getOne();
+    const make = await this.vehicleRepository.findMakeByWmi(wmi);
 
     return {
       recognized: !!make,
@@ -98,27 +70,27 @@ export class VehicleFactoryService {
   // Called by AdService when creating an ad (design doc 6.2.1: the Factory service is what
   // actually creates the Vehicle row, not AdModule directly).
   async createVehicle(input: CreateVehicleInput): Promise<Vehicle> {
-    const make = await this.makeRepository.findOneBy({ id: input.makeId });
+    const make = await this.vehicleRepository.findMakeById(input.makeId);
     if (!make) {
       throw new NotFoundException('Vehicle make not found');
     }
 
-    const model = await this.modelRepository.findOneBy({ id: input.modelId });
+    const model = await this.vehicleRepository.findModelById(input.modelId);
     if (!model) {
       throw new NotFoundException('Vehicle model not found');
     }
 
     let trim: VehicleTrim | undefined;
     if (input.trimId) {
-      const found = await this.trimRepository.findOneBy({ id: input.trimId });
+      const found = await this.vehicleRepository.findTrimById(input.trimId);
       if (!found) {
         throw new NotFoundException('Vehicle trim not found');
       }
       trim = found;
     }
 
-    return this.vehicleRepository.save(
-      this.vehicleRepository.create({
+    return this.vehicleRepository.saveVehicle(
+      this.vehicleRepository.createVehicle({
         make,
         model,
         trim,
