@@ -9,7 +9,7 @@ import { InputText } from 'primeng/inputtext';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { MessageService } from 'primeng/api';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AdService, AdPhoto, VehicleCondition } from '../ad.service';
+import { AdService, AdPhoto, AdPhotoCategory, VehicleCondition } from '../ad.service';
 import {
   VehicleCatalogService,
   VehicleMake,
@@ -29,7 +29,57 @@ const CONDITION_OPTIONS: ConditionOption[] = [
   { value: 'POOR', labelKey: 'ad.create.conditionPoor' },
 ];
 
-type PhotoRow = FormGroup<{ url: import('@angular/forms').FormControl<string>; caption: import('@angular/forms').FormControl<string> }>;
+interface PhotoCategoryOption {
+  value: AdPhotoCategory;
+  labelKey: string;
+}
+
+const AD_PHOTO_CATEGORY_OPTIONS: PhotoCategoryOption[] = [
+  { value: 'EXTERIOR_FRONT', labelKey: 'ad.create.photoCategoryOptions.EXTERIOR_FRONT' },
+  { value: 'EXTERIOR_REAR', labelKey: 'ad.create.photoCategoryOptions.EXTERIOR_REAR' },
+  {
+    value: 'EXTERIOR_DRIVER_SIDE',
+    labelKey: 'ad.create.photoCategoryOptions.EXTERIOR_DRIVER_SIDE',
+  },
+  {
+    value: 'EXTERIOR_PASSENGER_SIDE',
+    labelKey: 'ad.create.photoCategoryOptions.EXTERIOR_PASSENGER_SIDE',
+  },
+  {
+    value: 'EXTERIOR_FRONT_THREE_QUARTER',
+    labelKey: 'ad.create.photoCategoryOptions.EXTERIOR_FRONT_THREE_QUARTER',
+  },
+  {
+    value: 'EXTERIOR_REAR_THREE_QUARTER',
+    labelKey: 'ad.create.photoCategoryOptions.EXTERIOR_REAR_THREE_QUARTER',
+  },
+  {
+    value: 'EXTERIOR_UNDERCARRIAGE',
+    labelKey: 'ad.create.photoCategoryOptions.EXTERIOR_UNDERCARRIAGE',
+  },
+  { value: 'WHEELS_TIRES', labelKey: 'ad.create.photoCategoryOptions.WHEELS_TIRES' },
+  { value: 'ENGINE_BAY', labelKey: 'ad.create.photoCategoryOptions.ENGINE_BAY' },
+  { value: 'INTERIOR_DASHBOARD', labelKey: 'ad.create.photoCategoryOptions.INTERIOR_DASHBOARD' },
+  {
+    value: 'INTERIOR_FRONT_SEATS',
+    labelKey: 'ad.create.photoCategoryOptions.INTERIOR_FRONT_SEATS',
+  },
+  { value: 'INTERIOR_REAR_SEATS', labelKey: 'ad.create.photoCategoryOptions.INTERIOR_REAR_SEATS' },
+  { value: 'ODOMETER', labelKey: 'ad.create.photoCategoryOptions.ODOMETER' },
+  { value: 'TRUNK', labelKey: 'ad.create.photoCategoryOptions.TRUNK' },
+  {
+    value: 'REGISTRATION_DOCUMENT',
+    labelKey: 'ad.create.photoCategoryOptions.REGISTRATION_DOCUMENT',
+  },
+  { value: 'OTHER', labelKey: 'ad.create.photoCategoryOptions.OTHER' },
+];
+
+type PhotoRow = FormGroup<{
+  caption: import('@angular/forms').FormControl<string>;
+  category: import('@angular/forms').FormControl<AdPhotoCategory | null>;
+}>;
+
+type PhotoUploadStatus = 'idle' | 'uploading' | 'error';
 
 @Component({
   selector: 'app-create-ad',
@@ -63,6 +113,7 @@ export class CreateAdComponent {
   readonly errorKey = signal<string | null>(null);
 
   readonly conditionOptions = CONDITION_OPTIONS;
+  readonly photoCategoryOptions = AD_PHOTO_CATEGORY_OPTIONS;
 
   readonly makes = signal<VehicleMake[]>([]);
   readonly models = signal<VehicleModel[]>([]);
@@ -98,9 +149,12 @@ export class CreateAdComponent {
     location: [''],
   });
 
-  // Photo rows are entirely optional -- no validator on url, blank rows are just skipped on
-  // save rather than blocking the form.
+  // Photo rows are entirely optional -- rows with no file picked are just skipped on save
+  // rather than blocking the form. photoFiles/photoUploadStatus are kept in lockstep with
+  // photoRows by index (native <input type="file"> can't be driven through a FormControl).
   readonly photoRows = this.fb.array<PhotoRow>([]);
+  readonly photoFiles = signal<(File | null)[]>([]);
+  readonly photoUploadStatus = signal<PhotoUploadStatus[]>([]);
 
   constructor() {
     this.form.controls.make.valueChanges.subscribe((make) => {
@@ -141,17 +195,30 @@ export class CreateAdComponent {
 
   private newPhotoRow(): PhotoRow {
     return this.fb.group({
-      url: this.fb.nonNullable.control(''),
       caption: this.fb.nonNullable.control(''),
+      category: this.fb.control<AdPhotoCategory | null>(null),
     });
   }
 
   addPhotoRow(): void {
     this.photoRows.push(this.newPhotoRow());
+    this.photoFiles.update((files) => [...files, null]);
+    this.photoUploadStatus.update((statuses) => [...statuses, 'idle']);
   }
 
   removePhotoRow(index: number): void {
     this.photoRows.removeAt(index);
+    this.photoFiles.update((files) => files.filter((_, i) => i !== index));
+    this.photoUploadStatus.update((statuses) => statuses.filter((_, i) => i !== index));
+  }
+
+  onFileSelected(event: Event, index: number): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.photoFiles.update((files) => files.map((f, i) => (i === index ? file : f)));
+    this.photoUploadStatus.update((statuses) =>
+      statuses.map((s, i) => (i === index ? 'idle' : s)),
+    );
   }
 
   // Sets every cascade level with emitEvent: false and fetches models/trims manually --
@@ -277,12 +344,32 @@ export class CreateAdComponent {
         ? await this.adService.update(existingId, payload)
         : await this.adService.create(payload);
 
-      const newPhotoRows = this.photoRows.controls.filter((row) => row.controls.url.value.trim());
-      for (const row of newPhotoRows) {
-        await this.adService.addPhoto(ad.id, {
-          url: row.controls.url.value.trim(),
-          caption: row.controls.caption.value.trim() || undefined,
-        });
+      for (let i = 0; i < this.photoRows.length; i++) {
+        const file = this.photoFiles()[i];
+        if (!file) continue;
+
+        const row = this.photoRows.at(i);
+        const category = row.controls.category.value ?? undefined;
+        try {
+          const { uploadUrl, publicUrl } = await this.adService.requestUploadUrl(ad.id, {
+            filename: file.name,
+            contentType: file.type,
+            category,
+          });
+          await this.adService.uploadFileToSignedUrl(uploadUrl, file);
+          await this.adService.addPhoto(ad.id, {
+            url: publicUrl,
+            category,
+            caption: row.controls.caption.value.trim() || undefined,
+            sortOrder: i,
+            isPrimary: i === 0,
+          });
+        } catch {
+          // One bad photo shouldn't block saving the rest of the ad -- flagged inline instead.
+          this.photoUploadStatus.update((statuses) =>
+            statuses.map((s, idx) => (idx === i ? 'error' : s)),
+          );
+        }
       }
 
       if (thenSubmit) {

@@ -5,6 +5,24 @@ import { firstValueFrom } from 'rxjs';
 export type AdStatus = 'DRAFT' | 'REVIEW' | 'VALIDATED' | 'REJECTED';
 export type VehicleCondition = 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR';
 
+export type AdPhotoCategory =
+  | 'EXTERIOR_FRONT'
+  | 'EXTERIOR_REAR'
+  | 'EXTERIOR_DRIVER_SIDE'
+  | 'EXTERIOR_PASSENGER_SIDE'
+  | 'EXTERIOR_FRONT_THREE_QUARTER'
+  | 'EXTERIOR_REAR_THREE_QUARTER'
+  | 'EXTERIOR_UNDERCARRIAGE'
+  | 'WHEELS_TIRES'
+  | 'ENGINE_BAY'
+  | 'INTERIOR_DASHBOARD'
+  | 'INTERIOR_FRONT_SEATS'
+  | 'INTERIOR_REAR_SEATS'
+  | 'ODOMETER'
+  | 'TRUNK'
+  | 'REGISTRATION_DOCUMENT'
+  | 'OTHER';
+
 export interface CreateAdPayload {
   title: string;
   description: string;
@@ -29,6 +47,7 @@ export interface CreateAdPayload {
 export interface AdPhoto {
   id: number;
   url: string;
+  category: AdPhotoCategory;
   caption?: string;
   sortOrder: number;
   isPrimary: boolean;
@@ -68,9 +87,22 @@ export interface Ad {
 
 export interface AddPhotoPayload {
   url: string;
+  category?: AdPhotoCategory;
   caption?: string;
   sortOrder?: number;
   isPrimary?: boolean;
+}
+
+export interface RequestUploadUrlPayload {
+  filename: string;
+  contentType: string;
+  category?: AdPhotoCategory;
+}
+
+export interface SignedUpload {
+  uploadUrl: string;
+  publicUrl: string;
+  objectKey: string;
 }
 
 export interface AdMessage {
@@ -104,6 +136,23 @@ export class AdService {
 
   addPhoto(id: number, payload: AddPhotoPayload): Promise<AdPhoto> {
     return firstValueFrom(this.http.post<AdPhoto>(`/api/ads/${id}/photos`, payload));
+  }
+
+  requestUploadUrl(id: number, payload: RequestUploadUrlPayload): Promise<SignedUpload> {
+    return firstValueFrom(
+      this.http.post<SignedUpload>(`/api/ads/${id}/photos/upload-url`, payload),
+    );
+  }
+
+  // uploadUrl is an absolute https://storage.googleapis.com/... URL -- auth.interceptor.ts's
+  // "/api/ only" guard already skips attaching our JWT to it, so no interceptor change needed.
+  async uploadFileToSignedUrl(uploadUrl: string, file: File): Promise<void> {
+    await firstValueFrom(
+      this.http.put(uploadUrl, file, {
+        headers: { 'Content-Type': file.type },
+        responseType: 'text',
+      }),
+    );
   }
 
   // GET /me/ads -- every status, seller's own ads only.

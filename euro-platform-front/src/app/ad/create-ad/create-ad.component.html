@@ -185,8 +185,29 @@
           @for (row of photoRows.controls; track row; let i = $index) {
             <div [formGroup]="row" class="flex flex-wrap items-end gap-2">
               <div class="flex-1">
-                <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.photoUrl' | translate }}</label>
-                <input type="text" pInputText [pSize]="'small'" formControlName="url" class="w-full" />
+                <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.photoFile' | translate }}</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  class="w-full text-sm text-white"
+                  (change)="onFileSelected($event, i)"
+                />
+              </div>
+              <div class="w-56">
+                <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.photoCategory' | translate }}</label>
+                <p-select
+                  formControlName="category"
+                  [options]="photoCategoryOptions"
+                  optionLabel="labelKey"
+                  optionValue="value"
+                  [placeholder]="'ad.create.photoCategory' | translate"
+                  [size]="'small'"
+                  class="w-full"
+                  styleClass="w-full"
+                >
+                  <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+                  <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+                </p-select>
               </div>
               <div class="flex-1">
                 <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.photoCaption' | translate }}</label>
@@ -200,6 +221,9 @@
                 severity="danger"
                 (onClick)="removePhotoRow(i)"
               />
+              @if (photoUploadStatus()[i] === 'error') {
+                <p class="w-full text-xs text-red-400">{{ 'ad.create.photoUploadError' | translate }}</p>
+              }
             </div>
           }
         </div>
