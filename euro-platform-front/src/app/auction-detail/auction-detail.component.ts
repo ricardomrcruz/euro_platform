@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -11,8 +11,9 @@ import { AuctionBidHistoryComponent } from './bid-history/auction-bid-history.co
 import { AuctionCommentsComponent } from './comments/auction-comments.component';
 import { AuctionCardComponent } from '../shared/auction-card/auction-card.component';
 import { CountdownComponent } from '../shared/countdown/countdown.component';
-import { getAuctionDetail } from './mock-detail-data';
-import { MOCK_AUCTIONS } from '../home/mock-data';
+import { AuctionDetailData } from './mock-detail-data';
+import { AuctionCardData } from '../home/mock-data';
+import { AuctionService, toAuctionCardData, toAuctionDetailData } from '../auction/auction.service';
 
 @Component({
   selector: 'app-auction-detail',
@@ -34,19 +35,44 @@ import { MOCK_AUCTIONS } from '../home/mock-data';
   templateUrl: './auction-detail.component.html',
 })
 export class AuctionDetailComponent {
-  // Bound automatically from the `:id` route segment via withComponentInputBinding().
+  private readonly auctionService = inject(AuctionService);
+
+  // Bound automatically from the `:id` route segment via withComponentInputBinding(). This is
+  // the real Auction's own id (GET /auctions/:id), matching how the homepage routerLinks here.
   id = input<string>('');
 
-  readonly detail = computed(() => getAuctionDetail(Number(this.id())));
-
-  readonly otherAuctions = computed(() => {
-    const currentId = Number(this.id());
-    return MOCK_AUCTIONS.filter((a) => a.id !== currentId).slice(0, 3);
-  });
+  readonly detail = signal<AuctionDetailData | undefined>(undefined);
+  readonly otherAuctions = signal<AuctionCardData[]>([]);
 
   // Bids are stored in the same feed as comments (kind: 'bid') -- the quick-stats bar
   // needs the comment-only count, matching how the reference site tallies them separately.
   readonly commentsOnlyCount = computed(
     () => this.detail()?.comments.filter((c) => c.kind === 'comment').length ?? 0,
   );
+
+  constructor() {
+    effect(() => {
+      const auctionId = Number(this.id());
+      this.loadAuction(auctionId);
+    });
+  }
+
+  private async loadAuction(auctionId: number): Promise<void> {
+    this.detail.set(undefined);
+    try {
+      const auction = await this.auctionService.getOne(auctionId);
+      this.detail.set(toAuctionDetailData(auction));
+    } catch {
+      this.detail.set(undefined);
+      return;
+    }
+
+    const live = await this.auctionService.listLive();
+    this.otherAuctions.set(
+      live
+        .filter((a) => a.id !== auctionId)
+        .slice(0, 3)
+        .map(toAuctionCardData),
+    );
+  }
 }

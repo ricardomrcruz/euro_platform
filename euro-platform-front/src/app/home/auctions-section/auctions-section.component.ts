@@ -1,9 +1,10 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Select } from 'primeng/select';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuctionCardComponent } from '../../shared/auction-card/auction-card.component';
-import { MOCK_AUCTIONS } from '../mock-data';
+import { AuctionService, toAuctionCardData } from '../../auction/auction.service';
+import { AuctionCardData } from '../mock-data';
 
 type SortKey = 'ending-soon' | 'newly-listed' | 'no-reserve' | 'lowest-mileage' | 'closest-to-me';
 
@@ -49,10 +50,18 @@ const BODY_STYLE_OPTION_KEYS = [
   imports: [CommonModule, Select, AuctionCardComponent, TranslatePipe],
   templateUrl: './auctions-section.component.html',
 })
-export class AuctionsSectionComponent {
+export class AuctionsSectionComponent implements OnInit {
   private readonly translate = inject(TranslateService);
+  private readonly auctionService = inject(AuctionService);
 
   readonly sortTabs = SORT_TABS;
+  readonly liveAuctions = signal<AuctionCardData[]>([]);
+
+  ngOnInit(): void {
+    this.auctionService.listLive().then((auctions) => {
+      this.liveAuctions.set(auctions.map(toAuctionCardData));
+    });
+  }
 
   // These dropdowns bind their [options] to plain display strings (not value/key pairs),
   // so the option lists themselves have to be re-translated as computed signals whenever
@@ -64,7 +73,7 @@ export class AuctionsSectionComponent {
   readonly activeSort = signal<SortKey>('ending-soon');
 
   readonly auctions = computed(() => {
-    const items = [...MOCK_AUCTIONS];
+    const items = [...this.liveAuctions()];
     switch (this.activeSort()) {
       case 'newly-listed':
         return items.sort((a, b) => b.listedAt.getTime() - a.listedAt.getTime());
