@@ -11,9 +11,9 @@ import { TranslatePipe } from '@ngx-translate/core';
 export class AuctionGalleryComponent {
   title = input.required<string>();
   mainPhotoUrl = input.required<string>();
-  // Exactly 7 real thumbnails, rendered plainly, matching the reference's 2-column x
-  // 4-row grid -- the 8th tile is built from the last one with a blur overlay, so it
-  // isn't part of this list.
+  // Any number of thumbnails (excludes the main photo) -- the grid auto-sizes its row count,
+  // and a final "see all" tile (built from the last thumbnail with a blur overlay, not part
+  // of this list) always lands right after them.
   thumbnailUrls = input.required<string[]>();
   totalPhotoCount = input.required<number>();
 

@@ -155,9 +155,14 @@ export class AdService {
     );
   }
 
-  // GET /me/ads -- every status, seller's own ads only.
+  // GET /account/ads -- every status, seller's own ads only.
   getMine(): Promise<Ad[]> {
-    return firstValueFrom(this.http.get<Ad[]>('/api/me/ads'));
+    return firstValueFrom(this.http.get<Ad[]>('/api/account/ads'));
+  }
+
+  // GET /ads -- public, VALIDATED ads across every seller.
+  list(): Promise<Ad[]> {
+    return firstValueFrom(this.http.get<Ad[]>('/api/ads'));
   }
 
   // GET /ads/pending -- ADMIN only, REVIEW-status ads.

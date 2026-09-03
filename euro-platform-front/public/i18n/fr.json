@@ -220,6 +220,8 @@
         "sellerPrice": "Le vendeur reçoit",
         "commission": "Commission EuroCars",
         "totalForBuyer": "Total pour l'acheteur",
+        "reserveCommissionEstimate": "Commission minimale estimée basée sur votre prix de réserve : {{amount}}. La commission EuroCars s'adapte à la dernière enchère une fois l'enchère terminée.",
+        "commissionRuleExplainer": "Commission EuroCars : {{rate}} % du prix de vente final, avec un minimum de {{min}} et un maximum de {{max}}.",
         "confirm": "Lancer",
         "cancel": "Annuler",
         "alreadyLaunchedError": "Une enchère existe déjà pour cette annonce.",
@@ -233,6 +235,11 @@
   },
   "admin": {
     "heading": "Back-office Admin",
+    "tabs": {
+      "pending": "En attente de validation",
+      "launchAuctions": "Lancer des enchères"
+    },
+    "launchAuctionsEmpty": "Aucune annonce validée en attente de lancement.",
     "pendingAdsHeading": "Annonces en attente de validation",
     "comingSoon": "Bientôt disponible.",
     "empty": "Aucune annonce en attente de validation.",
@@ -290,7 +297,7 @@
       "existingPhotos": "Déjà ajoutées",
       "activeAdLimitError": "Vous avez atteint la limite de 5 annonces actives.",
       "genericError": "Une erreur est survenue. Veuillez réessayer.",
-      "photoFile": "Fichier photo",
+      "addPhotos": "Ajouter des photos",
       "photoCategory": "Catégorie",
       "photoUploadError": "Cette photo n'a pas pu être envoyée. Veuillez réessayer.",
       "photoCategoryOptions": {

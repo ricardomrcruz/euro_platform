@@ -1,4 +1,4 @@
-<div class="mx-auto max-w-3xl px-3 py-8 sm:px-5">
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
   <h1 class="text-2xl font-bold text-white">
     {{ (editingAdId() ? 'ad.create.editHeading' : 'ad.create.heading') | translate }}
   </h1>
@@ -6,12 +6,12 @@
   @if (loadingExisting()) {
     <p class="mt-4 text-sm text-surface-300">...</p>
   } @else {
-    <form [formGroup]="form" class="mt-4 space-y-6">
-      <div class="bg-surface-700 p-6">
+    <form [formGroup]="form" class="mt-4 bg-surface-700 p-6 sm:p-8">
+      <section>
         <h2 class="text-lg font-bold text-white">{{ 'ad.create.vehicleSection' | translate }}</h2>
 
         <div class="mt-4 flex flex-wrap items-end gap-2">
-          <div class="flex-1">
+          <div class="max-w-sm flex-1">
             <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.vin' | translate }}</label>
             <input type="text" pInputText [pSize]="'small'" formControlName="vin" class="w-full" />
           </div>
@@ -35,6 +35,7 @@
               formControlName="make"
               [options]="makes()"
               optionLabel="name"
+              [editable]="true"
               [placeholder]="'ad.create.selectMake' | translate"
               [size]="'small'"
               class="w-full"
@@ -50,6 +51,7 @@
               formControlName="model"
               [options]="models()"
               optionLabel="name"
+              [editable]="true"
               [placeholder]="'ad.create.selectModel' | translate"
               [size]="'small'"
               class="w-full"
@@ -65,6 +67,7 @@
               formControlName="trim"
               [options]="trims()"
               optionLabel="name"
+              [editable]="true"
               [placeholder]="'ad.create.selectTrim' | translate"
               [size]="'small'"
               class="w-full"
@@ -73,7 +76,7 @@
           </div>
         </div>
 
-        <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <div>
             <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.year' | translate }}</label>
             <input type="number" pInputText [pSize]="'small'" formControlName="year" class="w-full" />
@@ -99,16 +102,26 @@
           </div>
           <div>
             <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.plateCountry' | translate }}</label>
-            <input type="text" pInputText [pSize]="'small'" formControlName="plateCountry" class="w-full" />
+            <p-select
+              formControlName="plateCountry"
+              [options]="plateCountryOptions"
+              [filter]="true"
+              [placeholder]="'ad.create.plateCountry' | translate"
+              [size]="'small'"
+              class="w-full"
+              styleClass="w-full"
+            />
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="bg-surface-700 p-6">
+      <hr class="my-6 border-surface-600" />
+
+      <section>
         <h2 class="text-lg font-bold text-white">{{ 'ad.create.detailsSection' | translate }}</h2>
 
         <div class="mt-4 space-y-3">
-          <div>
+          <div class="max-w-xl">
             <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.title' | translate }}</label>
             <input type="text" pInputText [pSize]="'small'" formControlName="title" class="w-full" />
             @if (form.controls.title.touched && form.controls.title.invalid) {
@@ -144,55 +157,74 @@
             }
           </div>
 
-          <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.highlights' | translate }}</label>
-            <textarea pInputTextarea formControlName="highlights" rows="3" class="w-full"></textarea>
+          <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.highlights' | translate }}</label>
+              <textarea pInputTextarea formControlName="highlights" rows="3" class="w-full"></textarea>
+            </div>
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.knownFlaws' | translate }}</label>
+              <textarea pInputTextarea formControlName="knownFlaws" rows="3" class="w-full"></textarea>
+            </div>
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.modifications' | translate }}</label>
+              <textarea pInputTextarea formControlName="modifications" rows="3" class="w-full"></textarea>
+            </div>
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.serviceHistory' | translate }}</label>
+              <textarea pInputTextarea formControlName="serviceHistory" rows="3" class="w-full"></textarea>
+            </div>
           </div>
-          <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.knownFlaws' | translate }}</label>
-            <textarea pInputTextarea formControlName="knownFlaws" rows="3" class="w-full"></textarea>
-          </div>
-          <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.modifications' | translate }}</label>
-            <textarea pInputTextarea formControlName="modifications" rows="3" class="w-full"></textarea>
-          </div>
-          <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.serviceHistory' | translate }}</label>
-            <textarea pInputTextarea formControlName="serviceHistory" rows="3" class="w-full"></textarea>
-          </div>
-          <div>
+          <div class="max-w-sm">
             <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.location' | translate }}</label>
             <input type="text" pInputText [pSize]="'small'" formControlName="location" class="w-full" />
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="bg-surface-700 p-6">
+      <hr class="my-6 border-surface-600" />
+
+      <section>
         <h2 class="text-lg font-bold text-white">{{ 'ad.create.photosSection' | translate }}</h2>
 
         @if (existingPhotos().length > 0) {
           <div class="mt-3">
             <div class="text-sm text-surface-300">{{ 'ad.create.existingPhotos' | translate }}</div>
-            <ul class="mt-1 space-y-1 text-sm text-white">
+            <div class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
               @for (photo of existingPhotos(); track photo.id) {
-                <li>{{ photo.url }}</li>
+                <div class="aspect-[4/3] overflow-hidden bg-surface-800">
+                  <p-image
+                    [src]="photo.url"
+                    [alt]="photo.caption || ''"
+                    [preview]="true"
+                    styleClass="block h-full w-full"
+                    imageClass="h-full w-full object-cover"
+                  />
+                </div>
               }
-            </ul>
+            </div>
           </div>
         }
 
+        <div class="mt-4 max-w-sm">
+          <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.addPhotos' | translate }}</label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            class="w-full text-sm text-white"
+            (change)="onFilesSelected($event)"
+          />
+        </div>
+
         <div class="mt-4 space-y-3">
           @for (row of photoRows.controls; track row; let i = $index) {
-            <div [formGroup]="row" class="flex flex-wrap items-end gap-2">
-              <div class="flex-1">
-                <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.photoFile' | translate }}</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  class="w-full text-sm text-white"
-                  (change)="onFileSelected($event, i)"
-                />
-              </div>
+            <div [formGroup]="row" class="flex flex-wrap items-end gap-3">
+              @if (photoPreviewUrls()[i]; as preview) {
+                <div class="h-20 w-20 flex-none overflow-hidden bg-surface-800">
+                  <img [src]="preview" alt="" class="h-full w-full object-cover" />
+                </div>
+              }
               <div class="w-56">
                 <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.photoCategory' | translate }}</label>
                 <p-select
@@ -209,7 +241,7 @@
                   <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
                 </p-select>
               </div>
-              <div class="flex-1">
+              <div class="max-w-sm flex-1">
                 <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.photoCaption' | translate }}</label>
                 <input type="text" pInputText [pSize]="'small'" formControlName="caption" class="w-full" />
               </div>
@@ -227,22 +259,13 @@
             </div>
           }
         </div>
-
-        <p-button
-          type="button"
-          [label]="'ad.create.addPhoto' | translate"
-          [size]="'small'"
-          [outlined]="true"
-          styleClass="mt-3"
-          (onClick)="addPhotoRow()"
-        />
-      </div>
+      </section>
 
       @if (errorKey()) {
-        <p class="text-sm text-red-400">{{ errorKey()! | translate }}</p>
+        <p class="mt-6 text-sm text-red-400">{{ errorKey()! | translate }}</p>
       }
 
-      <div class="flex flex-wrap gap-2">
+      <div class="mt-6 flex flex-wrap gap-2">
         <p-button
           type="button"
           [label]="'ad.create.saveDraft' | translate"

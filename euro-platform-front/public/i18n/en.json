@@ -220,6 +220,8 @@
         "sellerPrice": "Seller receives",
         "commission": "EuroCars commission",
         "totalForBuyer": "Total for buyer",
+        "reserveCommissionEstimate": "Estimated minimum commission based on your reserve price: {{amount}}. EuroCars' commission adapts to the final winning bid once the auction closes.",
+        "commissionRuleExplainer": "EuroCars commission: {{rate}}% of the final sale price, with a {{min}} minimum and {{max}} maximum.",
         "confirm": "Launch",
         "cancel": "Cancel",
         "alreadyLaunchedError": "An auction already exists for this ad.",
@@ -233,6 +235,11 @@
   },
   "admin": {
     "heading": "Admin Backoffice",
+    "tabs": {
+      "pending": "Pending Review",
+      "launchAuctions": "Launch Auctions"
+    },
+    "launchAuctionsEmpty": "No validated ads waiting to be launched.",
     "pendingAdsHeading": "Ads Pending Review",
     "comingSoon": "Coming soon.",
     "empty": "No ads waiting for review.",
@@ -290,7 +297,7 @@
       "existingPhotos": "Already added",
       "activeAdLimitError": "You've reached the limit of 5 active ads.",
       "genericError": "Something went wrong. Please try again.",
-      "photoFile": "Photo file",
+      "addPhotos": "Add photos",
       "photoCategory": "Category",
       "photoUploadError": "This photo failed to upload. Please try again.",
       "photoCategoryOptions": {

@@ -49,6 +49,18 @@ export class VehicleFactoryService {
     return this.vehicleRepository.findTrimByIdWithMakeModel(id);
   }
 
+  findOrCreateMake(name: string): Promise<VehicleMake> {
+    return this.vehicleRepository.findOrCreateMakeByName(name);
+  }
+
+  findOrCreateModel(makeId: number, name: string) {
+    return this.vehicleRepository.findOrCreateModelByName(makeId, name);
+  }
+
+  findOrCreateTrim(modelId: number, name: string, year: number): Promise<VehicleTrim> {
+    return this.vehicleRepository.findOrCreateTrimByName(modelId, name, year);
+  }
+
   // Best-effort VIN recognition (design doc 6.2.1.1 "VIN reconnu" -- a separate scenario
   // from 6.2.1.2 "limite atteinte", which is the active-ad cap enforced in AdService, not a
   // VIN fallback). Only the WMI (first 3 chars -> manufacturer) and the model-year code are

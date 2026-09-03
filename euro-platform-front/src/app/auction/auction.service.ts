@@ -127,8 +127,12 @@ export function toFeaturedCar(auction: Auction): FeaturedCar {
 // here rather than invented, matching mock-detail-data.ts's own '—' fallback convention.
 export function toAuctionDetailData(auction: Auction): AuctionDetailData {
   const { ad } = auction;
+  const mainUrl = primaryPhotoUrl(ad.photos, ad.title);
   const photos = [...ad.photos].sort((a, b) => a.sortOrder - b.sortOrder);
-  const thumbnailUrls = photos.length > 0 ? photos.map((p) => p.url) : [placeholder(ad.title)];
+  // Exclude whatever's shown as the large hero photo so it isn't repeated in the thumbnail
+  // strip -- falls back to repeating it only when there are no other photos at all.
+  const otherPhotos = photos.filter((p) => p.url !== mainUrl);
+  const thumbnailUrls = otherPhotos.length > 0 ? otherPhotos.map((p) => p.url) : [mainUrl];
 
   const detailSections: DetailSection[] = [
     { headingKey: 'auctionDetail.sections.description', paragraphs: [ad.description] },
@@ -158,7 +162,7 @@ export function toAuctionDetailData(auction: Auction): AuctionDetailData {
     subtitle: ad.highlights ?? '',
     // No boolean "no reserve" flag exists on Auction -- always defaults to 'reserve'.
     reserveStatus: 'reserve',
-    mainPhotoUrl: primaryPhotoUrl(ad.photos, ad.title),
+    mainPhotoUrl: mainUrl,
     thumbnailUrls,
     totalPhotoCount: photos.length,
     currentBid: auction.currentHighestBid ?? auction.reservePrice,

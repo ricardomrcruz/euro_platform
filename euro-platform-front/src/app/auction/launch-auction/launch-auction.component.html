@@ -1,122 +1,144 @@
-<div class="mx-auto max-w-3xl px-3 py-8 sm:px-5">
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
   <h1 class="text-2xl font-bold text-white">{{ 'profile.myAds.launch.heading' | translate }}</h1>
 
   @if (loading()) {
     <p class="mt-4 text-sm text-surface-300">...</p>
   } @else {
     @if (ad(); as adValue) {
-      <div class="mt-4 bg-surface-700 p-6">
-        <h2 class="text-lg font-bold text-white">{{ 'profile.myAds.launch.summaryHeading' | translate }}</h2>
-        <p class="mt-2 text-sm text-surface-300">{{ 'ad.create.title' | translate }}: <span class="text-white">{{ adValue.title }}</span></p>
-        <p class="mt-1 text-sm text-surface-300">
-          {{ adValue.vehicle.year }} {{ adValue.vehicle.make.name }} {{ adValue.vehicle.model.name }}
-          @if (adValue.vehicle.trim) { ({{ adValue.vehicle.trim.name }}) }
-        </p>
-        <p class="mt-3 whitespace-pre-line text-sm text-surface-200">{{ adValue.description }}</p>
+      <div class="mt-4 bg-surface-700 p-6 sm:p-8">
+        <section>
+          <h2 class="text-lg font-bold text-white">{{ 'profile.myAds.launch.summaryHeading' | translate }}</h2>
+          <p class="mt-2 text-sm text-surface-300">{{ 'ad.create.title' | translate }}: <span class="text-white">{{ adValue.title }}</span></p>
+          <p class="mt-1 text-sm text-surface-300">
+            {{ adValue.vehicle.year }} {{ adValue.vehicle.make.name }} {{ adValue.vehicle.model.name }}
+            @if (adValue.vehicle.trim) { ({{ adValue.vehicle.trim.name }}) }
+          </p>
+          <p class="mt-3 whitespace-pre-line text-sm text-surface-200">{{ adValue.description }}</p>
 
-        @if (adValue.photos.length > 0) {
-          <div class="mt-3">
-            <div class="text-sm text-surface-300">{{ 'ad.create.photosSection' | translate }}</div>
-            <ul class="mt-1 space-y-1 text-sm text-white">
-              @for (photo of adValue.photos; track photo.id) {
-                <li>{{ photo.url }}</li>
-              }
-            </ul>
-          </div>
-        }
-
-        <p-button
-          [label]="'profile.myAds.edit' | translate"
-          [size]="'small'"
-          [outlined]="true"
-          styleClass="mt-4"
-          [routerLink]="['/sell', adValue.id]"
-        />
-      </div>
-
-      <div class="mt-6 bg-surface-700 p-6">
-        <h2 class="text-lg font-bold text-white">{{ 'profile.myAds.launch.paramsHeading' | translate }}</h2>
-
-        <form [formGroup]="form" (ngSubmit)="launch()" class="mt-4 space-y-3">
-          <div>
-            <label class="mb-1 block text-sm text-surface-300">
-              {{ 'profile.myAds.launch.endDate' | translate }}
-            </label>
-            <p-datepicker
-              formControlName="endDate"
-              [showTime]="true"
-              [hourFormat]="'24'"
-              [minDate]="minDate"
-              [showIcon]="true"
-              dateFormat="dd/mm/yy"
-              styleClass="w-full"
-            />
-            @if (form.controls.endDate.touched && form.controls.endDate.invalid) {
-              <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
-            }
-          </div>
-
-          <div>
-            <label class="mb-1 block text-sm text-surface-300">
-              {{ 'profile.myAds.launch.reservePrice' | translate }}
-            </label>
-            <input type="number" pInputText [pSize]="'small'" formControlName="reservePrice" class="w-full" />
-            <p class="mt-1 text-xs text-surface-400">{{ 'profile.myAds.launch.reservePriceHelp' | translate }}</p>
-            @if (form.controls.reservePrice.touched && form.controls.reservePrice.invalid) {
-              <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
-            }
-          </div>
-
-          <div>
-            <label class="mb-1 block text-sm text-surface-300">
-              {{ 'profile.myAds.launch.buyNowPrice' | translate }}
-            </label>
-            <input type="number" pInputText [pSize]="'small'" formControlName="buyNowPrice" class="w-full" />
-          </div>
-
-          @if (commissionPreview(); as commission) {
-            <div class="bg-surface-800 p-3 text-sm">
-              <div class="flex justify-between">
-                <span class="text-surface-300">{{ 'profile.myAds.launch.sellerPrice' | translate }}</span>
-                <span class="font-medium text-white">
-                  {{ form.controls.buyNowPrice.value | currency: 'EUR' : 'symbol' : '1.0-0' }}
-                </span>
-              </div>
-              <div class="mt-1 flex justify-between">
-                <span class="text-surface-300">{{ 'profile.myAds.launch.commission' | translate }}</span>
-                <span class="font-medium text-white">
-                  {{ commission | currency: 'EUR' : 'symbol' : '1.0-0' }}
-                </span>
-              </div>
-              <div class="mt-1 flex justify-between border-t border-surface-600 pt-1">
-                <span class="font-medium text-white">{{ 'profile.myAds.launch.totalForBuyer' | translate }}</span>
-                <span class="font-bold text-white">
-                  {{ totalForBuyerPreview() | currency: 'EUR' : 'symbol' : '1.0-0' }}
-                </span>
+          @if (adValue.photos.length > 0) {
+            <div class="mt-4">
+              <div class="text-sm text-surface-300">{{ 'ad.create.photosSection' | translate }}</div>
+              <div class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
+                @for (photo of adValue.photos; track photo.id) {
+                  <div class="aspect-[4/3] overflow-hidden bg-surface-800">
+                    <p-image
+                      [src]="photo.url"
+                      [alt]="photo.caption || ''"
+                      [preview]="true"
+                      styleClass="block h-full w-full"
+                      imageClass="h-full w-full object-cover"
+                    />
+                  </div>
+                }
               </div>
             </div>
           }
 
-          @if (errorKey()) {
-            <p class="text-sm text-red-400">{{ errorKey()! | translate }}</p>
-          }
+          <p-button
+            [label]="'profile.myAds.edit' | translate"
+            [size]="'small'"
+            [outlined]="true"
+            styleClass="mt-4"
+            [routerLink]="['/sell', adValue.id]"
+          />
+        </section>
 
-          <div class="flex gap-2">
-            <p-button
-              type="submit"
-              [label]="'profile.myAds.launch.confirm' | translate"
-              [size]="'small'"
-              [loading]="launching()"
-            />
-            <p-button
-              type="button"
-              [label]="'profile.myAds.launch.cancel' | translate"
-              [size]="'small'"
-              [outlined]="true"
-              routerLink="/profile"
-            />
-          </div>
-        </form>
+        <hr class="my-6 border-surface-600" />
+
+        <section>
+          <h2 class="text-lg font-bold text-white">{{ 'profile.myAds.launch.paramsHeading' | translate }}</h2>
+
+          <form [formGroup]="form" (ngSubmit)="launch()" class="mt-4 max-w-xl space-y-3">
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">
+                {{ 'profile.myAds.launch.endDate' | translate }}
+              </label>
+              <p-datepicker
+                formControlName="endDate"
+                [showTime]="true"
+                [hourFormat]="'24'"
+                [minDate]="minDate"
+                [showIcon]="true"
+                dateFormat="dd/mm/yy"
+                styleClass="w-full"
+              />
+              @if (form.controls.endDate.touched && form.controls.endDate.invalid) {
+                <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
+              }
+            </div>
+
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">
+                {{ 'profile.myAds.launch.reservePrice' | translate }}
+              </label>
+              <input type="number" pInputText [pSize]="'small'" formControlName="reservePrice" class="w-full" />
+              <p class="mt-1 text-xs text-surface-400">{{ 'profile.myAds.launch.reservePriceHelp' | translate }}</p>
+              @if (form.controls.reservePrice.touched && form.controls.reservePrice.invalid) {
+                <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
+              }
+            </div>
+
+            <div>
+              <label class="mb-1 block text-sm text-surface-300">
+                {{ 'profile.myAds.launch.buyNowPrice' | translate }}
+              </label>
+              <input type="number" pInputText [pSize]="'small'" formControlName="buyNowPrice" class="w-full" />
+            </div>
+
+            @if (commissionPreview(); as commission) {
+              <div class="bg-surface-800 p-3 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-surface-300">{{ 'profile.myAds.launch.sellerPrice' | translate }}</span>
+                  <span class="font-medium text-white">
+                    {{ form.controls.buyNowPrice.value | currency: 'EUR' : 'symbol' : '1.0-0' }}
+                  </span>
+                </div>
+                <div class="mt-1 flex justify-between">
+                  <span class="text-surface-300">{{ 'profile.myAds.launch.commission' | translate }}</span>
+                  <span class="font-medium text-white">
+                    {{ commission | currency: 'EUR' : 'symbol' : '1.0-0' }}
+                  </span>
+                </div>
+                <div class="mt-1 flex justify-between border-t border-surface-600 pt-1">
+                  <span class="font-medium text-white">{{ 'profile.myAds.launch.totalForBuyer' | translate }}</span>
+                  <span class="font-bold text-white">
+                    {{ totalForBuyerPreview() | currency: 'EUR' : 'symbol' : '1.0-0' }}
+                  </span>
+                </div>
+              </div>
+            }
+
+            @if (reserveCommissionPreview(); as reserveCommission) {
+              <div class="bg-surface-800 p-3 text-sm text-sky-400">
+                {{ 'profile.myAds.launch.reserveCommissionEstimate' | translate: { amount: (reserveCommission | currency: 'EUR' : 'symbol' : '1.0-0') } }}
+              </div>
+            }
+
+            <p class="text-xs text-surface-400">
+              {{ 'profile.myAds.launch.commissionRuleExplainer' | translate: { rate: commissionRatePercent, min: (minCommission | currency: 'EUR' : 'symbol' : '1.0-0'), max: (maxCommission | currency: 'EUR' : 'symbol' : '1.0-0') } }}
+            </p>
+
+            @if (errorKey()) {
+              <p class="text-sm text-red-400">{{ errorKey()! | translate }}</p>
+            }
+
+            <div class="flex gap-2">
+              <p-button
+                type="submit"
+                [label]="'profile.myAds.launch.confirm' | translate"
+                [size]="'small'"
+                [loading]="launching()"
+              />
+              <p-button
+                type="button"
+                [label]="'profile.myAds.launch.cancel' | translate"
+                [size]="'small'"
+                [outlined]="true"
+                routerLink="/profile"
+              />
+            </div>
+          </form>
+        </section>
       </div>
     }
   }

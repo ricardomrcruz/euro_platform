@@ -3,7 +3,7 @@
     <img [src]="mainPhotoUrl()" [alt]="title()" class="h-full w-full object-cover" />
   </div>
 
-  <div class="col-span-2 grid grid-cols-2 grid-rows-4 gap-2">
+  <div class="col-span-2 grid grid-cols-2 gap-2">
     @for (photo of thumbnailUrls(); track photo) {
       <div class="aspect-[3/2] overflow-hidden bg-surface-200">
         <img [src]="photo" alt="" class="h-full w-full object-cover" />

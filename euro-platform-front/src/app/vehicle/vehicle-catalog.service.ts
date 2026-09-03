@@ -65,4 +65,22 @@ export class VehicleCatalogService {
       }),
     );
   }
+
+  // Find-or-create -- used when a seller types a make/model/trim name that isn't in the
+  // catalog's dropdown options, resolved once at ad-submit time (not on every keystroke).
+  findOrCreateMake(name: string): Promise<VehicleMake> {
+    return firstValueFrom(this.http.post<VehicleMake>('/api/vehicles/makes', { name }));
+  }
+
+  findOrCreateModel(makeId: number, name: string): Promise<VehicleModel> {
+    return firstValueFrom(
+      this.http.post<VehicleModel>('/api/vehicles/models', { makeId, name }),
+    );
+  }
+
+  findOrCreateTrim(modelId: number, name: string, year: number): Promise<VehicleTrim> {
+    return firstValueFrom(
+      this.http.post<VehicleTrim>('/api/vehicles/trims', { modelId, name, year }),
+    );
+  }
 }

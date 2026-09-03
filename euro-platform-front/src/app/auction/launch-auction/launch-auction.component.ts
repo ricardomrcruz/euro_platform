@@ -6,11 +6,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePicker } from 'primeng/datepicker';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
+import { Image } from 'primeng/image';
 import { MessageService } from 'primeng/api';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdService, Ad } from '../../ad/ad.service';
 import { AuctionService } from '../auction.service';
-import { calculateCommission } from '../commission.util';
+import { calculateCommission, COMMISSION_RATE, MIN_COMMISSION, MAX_COMMISSION } from '../commission.util';
 
 @Component({
   selector: 'app-launch-auction',
@@ -22,6 +23,7 @@ import { calculateCommission } from '../commission.util';
     DatePicker,
     ButtonModule,
     InputText,
+    Image,
     TranslatePipe,
   ],
   templateUrl: './launch-auction.component.html',
@@ -49,9 +51,19 @@ export class LaunchAuctionComponent {
     buyNowPrice: this.fb.control<number | null>(null, Validators.min(1)),
   });
 
-  // Buy Now Price is the only field with a concrete, guaranteed sale amount -- the reserve
-  // is just a bidding floor, not itself a price the buyer would actually pay.
+  // Plain-language commission-rule constants for the always-visible explanation text --
+  // sourced from commission.util.ts so the displayed numbers can never drift from the actual
+  // calculation logic.
+  readonly commissionRatePercent = COMMISSION_RATE * 100;
+  readonly minCommission = MIN_COMMISSION;
+  readonly maxCommission = MAX_COMMISSION;
+
+  // Buy Now Price has a concrete, guaranteed sale amount -- shown as a firm total-for-buyer.
+  // Reserve Price is just a bidding floor, so its preview is shown separately as an estimate
+  // (the real commission is only known once the auction closes on the winning bid).
   private readonly buyNowPriceValue = signal<number | null>(null);
+  private readonly reservePriceValue = signal<number | null>(null);
+
   readonly commissionPreview = computed(() => {
     const price = this.buyNowPriceValue();
     return price && price > 0 ? calculateCommission(price) : null;
@@ -60,6 +72,10 @@ export class LaunchAuctionComponent {
     const price = this.buyNowPriceValue();
     const commission = this.commissionPreview();
     return price && commission ? price + commission : null;
+  });
+  readonly reserveCommissionPreview = computed(() => {
+    const price = this.reservePriceValue();
+    return price && price > 0 ? calculateCommission(price) : null;
   });
 
   constructor() {
@@ -71,6 +87,9 @@ export class LaunchAuctionComponent {
 
     this.form.controls.buyNowPrice.valueChanges.subscribe((value) => {
       this.buyNowPriceValue.set(value);
+    });
+    this.form.controls.reservePrice.valueChanges.subscribe((value) => {
+      this.reservePriceValue.set(value);
     });
   }
 

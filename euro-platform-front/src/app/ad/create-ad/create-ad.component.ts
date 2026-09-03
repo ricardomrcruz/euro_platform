@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -7,6 +7,7 @@ import { Select } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { InputTextarea } from 'primeng/inputtextarea';
+import { Image } from 'primeng/image';
 import { MessageService } from 'primeng/api';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdService, AdPhoto, AdPhotoCategory, VehicleCondition } from '../ad.service';
@@ -16,6 +17,7 @@ import {
   VehicleModel,
   VehicleTrim,
 } from '../../vehicle/vehicle-catalog.service';
+import { COUNTRIES } from '../../shared/countries';
 
 interface ConditionOption {
   value: VehicleCondition;
@@ -81,6 +83,19 @@ type PhotoRow = FormGroup<{
 
 type PhotoUploadStatus = 'idle' | 'uploading' | 'error';
 
+// Editable p-selects emit a plain string when the typed text doesn't match any catalog
+// option -- these fields hold either the real catalog object (selected from the list) or a
+// custom-typed name, resolved to a real id via find-or-create right before submit.
+type MakeValue = VehicleMake | string | null;
+type ModelValue = VehicleModel | string | null;
+type TrimValue = VehicleTrim | string | null;
+
+function catalogName(value: { name: string } | string | null | undefined): string | undefined {
+  if (!value) return undefined;
+  if (typeof value === 'string') return value.trim() || undefined;
+  return value.name;
+}
+
 @Component({
   selector: 'app-create-ad',
   standalone: true,
@@ -91,11 +106,12 @@ type PhotoUploadStatus = 'idle' | 'uploading' | 'error';
     ButtonModule,
     InputText,
     InputTextarea,
+    Image,
     TranslatePipe,
   ],
   templateUrl: './create-ad.component.html',
 })
-export class CreateAdComponent {
+export class CreateAdComponent implements OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly adService = inject(AdService);
   private readonly catalog = inject(VehicleCatalogService);
@@ -114,6 +130,7 @@ export class CreateAdComponent {
 
   readonly conditionOptions = CONDITION_OPTIONS;
   readonly photoCategoryOptions = AD_PHOTO_CATEGORY_OPTIONS;
+  readonly plateCountryOptions = COUNTRIES;
 
   readonly makes = signal<VehicleMake[]>([]);
   readonly models = signal<VehicleModel[]>([]);
@@ -127,12 +144,9 @@ export class CreateAdComponent {
   // so keeping the whole object around avoids a second lookup at submit time.
   readonly form = this.fb.group({
     vin: [''],
-    make: this.fb.control<VehicleMake | null>(null, Validators.required),
-    model: this.fb.control<VehicleModel | null>(
-      { value: null, disabled: true },
-      Validators.required,
-    ),
-    trim: this.fb.control<VehicleTrim | null>({ value: null, disabled: true }),
+    make: this.fb.control<MakeValue>(null, Validators.required),
+    model: this.fb.control<ModelValue>({ value: null, disabled: true }, Validators.required),
+    trim: this.fb.control<TrimValue>({ value: null, disabled: true }),
     year: this.fb.control<number | null>(null, [Validators.required, Validators.min(1886)]),
     exteriorColor: [''],
     interiorColor: [''],
@@ -150,20 +164,23 @@ export class CreateAdComponent {
   });
 
   // Photo rows are entirely optional -- rows with no file picked are just skipped on save
-  // rather than blocking the form. photoFiles/photoUploadStatus are kept in lockstep with
-  // photoRows by index (native <input type="file"> can't be driven through a FormControl).
+  // rather than blocking the form. photoFiles/photoUploadStatus/photoPreviewUrls are kept in
+  // lockstep with photoRows by index (native <input type="file"> can't be driven through a
+  // FormControl). Rows are created in batches by onFilesSelected(), one per picked file.
   readonly photoRows = this.fb.array<PhotoRow>([]);
   readonly photoFiles = signal<(File | null)[]>([]);
   readonly photoUploadStatus = signal<PhotoUploadStatus[]>([]);
+  readonly photoPreviewUrls = signal<(string | null)[]>([]);
 
   constructor() {
     this.form.controls.make.valueChanges.subscribe((make) => {
       this.form.controls.model.setValue(null);
       this.form.controls.trim.setValue(null);
       this.trims.set([]);
-      if (make) {
+      const makeName = catalogName(make);
+      if (makeName) {
         this.form.controls.model.enable();
-        this.catalog.listModels(make.name).then((models) => this.models.set(models));
+        this.catalog.listModels(makeName).then((models) => this.models.set(models));
       } else {
         this.form.controls.model.disable();
         this.models.set([]);
@@ -172,10 +189,11 @@ export class CreateAdComponent {
 
     this.form.controls.model.valueChanges.subscribe((model) => {
       this.form.controls.trim.setValue(null);
-      const make = this.form.controls.make.value;
-      if (model && make) {
+      const makeName = catalogName(this.form.controls.make.value);
+      const modelName = catalogName(model);
+      if (modelName && makeName) {
         this.form.controls.trim.enable();
-        this.catalog.listTrims(make.name, model.name).then((trims) => this.trims.set(trims));
+        this.catalog.listTrims(makeName, modelName).then((trims) => this.trims.set(trims));
       } else {
         this.form.controls.trim.disable();
         this.trims.set([]);
@@ -187,10 +205,14 @@ export class CreateAdComponent {
       const idParam = this.route.snapshot.paramMap.get('id');
       if (idParam) {
         await this.loadForEdit(Number(idParam));
-      } else {
-        this.addPhotoRow();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    for (const url of this.photoPreviewUrls()) {
+      if (url) URL.revokeObjectURL(url);
+    }
   }
 
   private newPhotoRow(): PhotoRow {
@@ -204,21 +226,33 @@ export class CreateAdComponent {
     this.photoRows.push(this.newPhotoRow());
     this.photoFiles.update((files) => [...files, null]);
     this.photoUploadStatus.update((statuses) => [...statuses, 'idle']);
+    this.photoPreviewUrls.update((urls) => [...urls, null]);
   }
 
   removePhotoRow(index: number): void {
+    const url = this.photoPreviewUrls()[index];
+    if (url) URL.revokeObjectURL(url);
     this.photoRows.removeAt(index);
     this.photoFiles.update((files) => files.filter((_, i) => i !== index));
     this.photoUploadStatus.update((statuses) => statuses.filter((_, i) => i !== index));
+    this.photoPreviewUrls.update((urls) => urls.filter((_, i) => i !== index));
   }
 
-  onFileSelected(event: Event, index: number): void {
+  // Picking multiple files at once appends one row per file (existing rows are untouched, so
+  // the file picker can be reopened later to add more without losing what's already there).
+  onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const file = input.files?.[0] ?? null;
-    this.photoFiles.update((files) => files.map((f, i) => (i === index ? file : f)));
-    this.photoUploadStatus.update((statuses) =>
-      statuses.map((s, i) => (i === index ? 'idle' : s)),
-    );
+    const files = input.files;
+    if (files) {
+      for (const file of Array.from(files)) {
+        this.addPhotoRow();
+        const index = this.photoRows.length - 1;
+        const previewUrl = URL.createObjectURL(file);
+        this.photoFiles.update((arr) => arr.map((f, i) => (i === index ? file : f)));
+        this.photoPreviewUrls.update((arr) => arr.map((u, i) => (i === index ? previewUrl : u)));
+      }
+    }
+    input.value = '';
   }
 
   // Sets every cascade level with emitEvent: false and fetches models/trims manually --
@@ -269,8 +303,6 @@ export class CreateAdComponent {
         serviceHistory: ad.serviceHistory ?? '',
         location: ad.location ?? '',
       });
-
-      this.addPhotoRow();
     } finally {
       this.loadingExisting.set(false);
     }
@@ -297,6 +329,29 @@ export class CreateAdComponent {
     }
   }
 
+  // Resolves a picked catalog object as-is, or find-or-creates a custom-typed name into a
+  // real catalog row -- called once at submit time, never on every keystroke.
+  private async resolveMake(value: MakeValue): Promise<VehicleMake> {
+    if (value && typeof value === 'object') return value;
+    return this.catalog.findOrCreateMake(catalogName(value)!);
+  }
+
+  private async resolveModel(makeId: number, value: ModelValue): Promise<VehicleModel> {
+    if (value && typeof value === 'object') return value;
+    return this.catalog.findOrCreateModel(makeId, catalogName(value)!);
+  }
+
+  private async resolveTrim(
+    modelId: number,
+    value: TrimValue,
+    year: number,
+  ): Promise<VehicleTrim | undefined> {
+    if (!value) return undefined;
+    if (typeof value === 'object') return value;
+    const name = catalogName(value);
+    return name ? this.catalog.findOrCreateTrim(modelId, name, year) : undefined;
+  }
+
   async saveDraft(): Promise<void> {
     await this.persistAndMaybeSubmit(false, this.savingDraft);
   }
@@ -315,30 +370,35 @@ export class CreateAdComponent {
     }
 
     const v = this.form.getRawValue();
-    const payload = {
-      title: v.title!,
-      description: v.description!,
-      condition: v.condition!,
-      highlights: v.highlights || undefined,
-      knownFlaws: v.knownFlaws || undefined,
-      modifications: v.modifications || undefined,
-      serviceHistory: v.serviceHistory || undefined,
-      location: v.location || undefined,
-      makeId: v.make!.id,
-      modelId: v.model!.id,
-      trimId: v.trim?.id,
-      vin: v.vin || undefined,
-      year: v.year!,
-      exteriorColor: v.exteriorColor || undefined,
-      interiorColor: v.interiorColor || undefined,
-      mileage: v.mileage ?? undefined,
-      numberOfOwners: v.numberOfOwners ?? undefined,
-      plateCountry: v.plateCountry || undefined,
-    };
 
     loadingSignal.set(true);
     this.errorKey.set(null);
     try {
+      const make = await this.resolveMake(v.make);
+      const model = await this.resolveModel(make.id, v.model);
+      const trim = await this.resolveTrim(model.id, v.trim, v.year!);
+
+      const payload = {
+        title: v.title!,
+        description: v.description!,
+        condition: v.condition!,
+        highlights: v.highlights || undefined,
+        knownFlaws: v.knownFlaws || undefined,
+        modifications: v.modifications || undefined,
+        serviceHistory: v.serviceHistory || undefined,
+        location: v.location || undefined,
+        makeId: make.id,
+        modelId: model.id,
+        trimId: trim?.id,
+        vin: v.vin || undefined,
+        year: v.year!,
+        exteriorColor: v.exteriorColor || undefined,
+        interiorColor: v.interiorColor || undefined,
+        mileage: v.mileage ?? undefined,
+        numberOfOwners: v.numberOfOwners ?? undefined,
+        plateCountry: v.plateCountry || undefined,
+      };
+
       const existingId = this.editingAdId();
       const ad = existingId
         ? await this.adService.update(existingId, payload)

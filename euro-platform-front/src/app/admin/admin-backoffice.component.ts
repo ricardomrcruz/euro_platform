@@ -1,12 +1,18 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { TagModule } from 'primeng/tag';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AdService, Ad, AdMessage, AdStatus } from '../ad/ad.service';
+import { AuctionService, Auction } from '../auction/auction.service';
+import { CountdownComponent } from '../shared/countdown/countdown.component';
+
+type AdminTab = 'pending' | 'launchAuctions';
 
 const STATUS_SEVERITY: Record<AdStatus, 'secondary' | 'warn' | 'success' | 'danger'> = {
   DRAFT: 'secondary',
@@ -18,11 +24,30 @@ const STATUS_SEVERITY: Record<AdStatus, 'secondary' | 'warn' | 'success' | 'dang
 @Component({
   selector: 'app-admin-backoffice',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, InputText, InputTextarea, TagModule, TranslatePipe],
+  imports: [
+    CommonModule,
+    RouterLink,
+    FormsModule,
+    Tabs,
+    TabList,
+    Tab,
+    TabPanels,
+    TabPanel,
+    ButtonModule,
+    InputText,
+    InputTextarea,
+    TagModule,
+    TranslatePipe,
+    CountdownComponent,
+  ],
   templateUrl: './admin-backoffice.component.html',
+  styles: [':host ::ng-deep .p-tablist-tab-list { background: transparent !important; }'],
 })
 export class AdminBackofficeComponent {
   private readonly adService = inject(AdService);
+  private readonly auctionService = inject(AuctionService);
+
+  readonly activeTab = signal<AdminTab>('pending');
 
   readonly pendingAds = signal<Ad[]>([]);
   readonly loading = signal(true);
@@ -41,11 +66,39 @@ export class AdminBackofficeComponent {
   readonly replyDraft = signal('');
   readonly sendingReply = signal(false);
 
+  // Validated ads system-wide (any seller), cross-referenced against live auctions -- same
+  // pattern as profile.component.ts's liveAuctionByAdId -- so admins can launch an auction
+  // for any validated ad, not just their own.
+  readonly validatedAds = signal<Ad[]>([]);
+  readonly loadingValidated = signal(true);
+  readonly liveAuctionByAdId = signal<Partial<Record<number, Auction>>>({});
+
   constructor() {
     this.adService
       .getPending()
       .then((ads) => this.pendingAds.set(ads))
       .finally(() => this.loading.set(false));
+
+    this.adService.list().then((ads) => {
+      this.validatedAds.set(ads.filter((ad) => ad.status === 'VALIDATED'));
+      this.loadingValidated.set(false);
+    });
+
+    this.auctionService.listLive().then((auctions) => {
+      const byId: Partial<Record<number, Auction>> = {};
+      for (const auction of auctions) {
+        byId[auction.ad.id] = auction;
+      }
+      this.liveAuctionByAdId.set(byId);
+    });
+  }
+
+  setActiveTab(value: string | number): void {
+    this.activeTab.set(value as AdminTab);
+  }
+
+  endDateOf(auction: Auction): Date {
+    return new Date(auction.endDate);
   }
 
   statusSeverity(status: AdStatus) {
@@ -61,6 +114,7 @@ export class AdminBackofficeComponent {
     try {
       await this.adService.validate(ad.id);
       this.removeFromPending(ad.id);
+      this.validatedAds.update((ads) => [...ads, { ...ad, status: 'VALIDATED' }]);
     } finally {
       this.validatingId.set(null);
     }
