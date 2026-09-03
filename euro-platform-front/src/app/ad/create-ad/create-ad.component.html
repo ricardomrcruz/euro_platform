@@ -6,6 +6,12 @@
   @if (loadingExisting()) {
     <p class="mt-4 text-sm text-surface-300">...</p>
   } @else {
+    @if (isContentEditMode()) {
+      <p class="mt-4 bg-sky-950 p-3 text-sm text-sky-400">
+        {{ 'ad.create.contentEditNotice' | translate }}
+      </p>
+    }
+
     <form [formGroup]="form" class="mt-4 bg-surface-700 p-6 sm:p-8">
       <section>
         <h2 class="text-lg font-bold text-white">{{ 'ad.create.vehicleSection' | translate }}</h2>
@@ -266,21 +272,31 @@
       }
 
       <div class="mt-6 flex flex-wrap gap-2">
-        <p-button
-          type="button"
-          [label]="'ad.create.saveDraft' | translate"
-          [size]="'small'"
-          [outlined]="true"
-          [loading]="savingDraft()"
-          (onClick)="saveDraft()"
-        />
-        <p-button
-          type="button"
-          [label]="'ad.create.submitForReview' | translate"
-          [size]="'small'"
-          [loading]="savingAndSubmitting()"
-          (onClick)="saveAndSubmit()"
-        />
+        @if (isContentEditMode()) {
+          <p-button
+            type="button"
+            [label]="'ad.create.saveChanges' | translate"
+            [size]="'small'"
+            [loading]="savingContent()"
+            (onClick)="saveContentChanges()"
+          />
+        } @else {
+          <p-button
+            type="button"
+            [label]="'ad.create.saveDraft' | translate"
+            [size]="'small'"
+            [outlined]="true"
+            [loading]="savingDraft()"
+            (onClick)="saveDraft()"
+          />
+          <p-button
+            type="button"
+            [label]="'ad.create.submitForReview' | translate"
+            [size]="'small'"
+            [loading]="savingAndSubmitting()"
+            (onClick)="saveAndSubmit()"
+          />
+        }
       </div>
     </form>
   }

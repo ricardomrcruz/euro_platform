@@ -9,6 +9,7 @@ import {
   CreateAdPayload,
   RequestUploadUrlPayload,
   SignedUpload,
+  UpdateAdContentPayload,
 } from './interfaces/ad.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -22,6 +23,12 @@ export class AdService {
   // Only valid while ad.canEdit() on the backend (DRAFT or REJECTED) -- 403s otherwise.
   update(id: number, payload: CreateAdPayload): Promise<Ad> {
     return firstValueFrom(this.http.patch<Ad>(`/api/ads/${id}`, payload));
+  }
+
+  // Content-only edit for a VALIDATED ad -- 403s outside that status. Always sends the ad
+  // back to REVIEW as part of the same save.
+  updateContent(id: number, payload: UpdateAdContentPayload): Promise<Ad> {
+    return firstValueFrom(this.http.patch<Ad>(`/api/ads/${id}/content`, payload));
   }
 
   getOne(id: number): Promise<Ad> {

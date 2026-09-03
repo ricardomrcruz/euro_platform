@@ -65,6 +65,22 @@ export class Ad {
     return this.status === AdStatus.DRAFT || this.status === AdStatus.REJECTED;
   }
 
+  // A VALIDATED ad's fundamentals (vehicle, title, condition, location) are locked forever --
+  // only content fields (description/highlights/knownFlaws/modifications/serviceHistory) and
+  // photos may still change, and doing so always sends the ad back for re-review via
+  // resubmitForReview(). Allowed regardless of whether a live auction already exists for this
+  // ad -- deliberately not gated on auction state.
+  canEditContent(): boolean {
+    return this.status === AdStatus.VALIDATED;
+  }
+
+  resubmitForReview(): void {
+    if (this.status !== AdStatus.VALIDATED) {
+      throw new BadRequestException(`Cannot resubmit an ad in status ${this.status}`);
+    }
+    this.status = AdStatus.REVIEW;
+  }
+
   submit(): void {
     if (this.status !== AdStatus.DRAFT && this.status !== AdStatus.REJECTED) {
       throw new BadRequestException(`Cannot submit an ad in status ${this.status}`);

@@ -319,14 +319,17 @@
         "OTHER": "Autre"
       },
       "photoCaption": "Légende (optionnel)",
-      "addPhoto": "Ajouter la photo",
       "removePhoto": "Retirer",
       "saveDraft": "Enregistrer le brouillon",
       "submitForReview": "Soumettre à la revue",
       "toastDraftSummary": "Brouillon enregistré",
       "toastDraftDetail": "Votre annonce a été enregistrée comme brouillon.",
       "toastSubmittedSummary": "Annonce soumise",
-      "toastSubmittedDetail": "🎉 Votre annonce a été soumise à la revue !"
+      "toastSubmittedDetail": "🎉 Votre annonce a été soumise à la revue !",
+      "contentEditNotice": "Cette annonce est déjà validée -- les détails du véhicule, le titre, l'état et la localisation sont verrouillés. Vous pouvez encore modifier la description, les points forts, les défauts connus, les modifications, l'historique d'entretien et les photos, mais l'enregistrement renverra l'annonce en revue par un administrateur.",
+      "saveChanges": "Enregistrer les modifications",
+      "toastResubmittedSummary": "Modifications soumises",
+      "toastResubmittedDetail": "Vos modifications ont été renvoyées pour revue par un administrateur."
     }
   }
 }

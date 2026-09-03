@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs
 import { AdService } from './ad.service';
 import { CreateAdDto } from './dto/create-ad.dto';
 import { UpdateAdDto } from './dto/update-ad.dto';
+import { UpdateAdContentDto } from './dto/update-ad-content.dto';
 import { RejectAdDto } from './dto/reject-ad.dto';
 import { CreateAdPhotoDto } from './dto/create-ad-photo.dto';
 import { RequestPhotoUploadUrlDto } from './dto/request-photo-upload-url.dto';
@@ -28,6 +29,16 @@ export class AdController {
     @Body() dto: UpdateAdDto,
   ) {
     return this.adService.updateAd(user.id, id, dto);
+  }
+
+  // Content-only edit for a VALIDATED ad -- see Ad.canEditContent()/resubmitForReview().
+  @Patch(':id/content')
+  updateContent(
+    @CurrentUser() user: RequestUser,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateAdContentDto,
+  ) {
+    return this.adService.updateContent(user.id, id, dto);
   }
 
   @Post(':id/submit')

@@ -319,14 +319,17 @@
         "OTHER": "Other"
       },
       "photoCaption": "Caption (optional)",
-      "addPhoto": "Add Photo",
       "removePhoto": "Remove",
       "saveDraft": "Save Draft",
       "submitForReview": "Submit for Review",
       "toastDraftSummary": "Draft saved",
       "toastDraftDetail": "Your ad has been saved as a draft.",
       "toastSubmittedSummary": "Ad submitted",
-      "toastSubmittedDetail": "🎉 Your ad has been submitted for review!"
+      "toastSubmittedDetail": "🎉 Your ad has been submitted for review!",
+      "contentEditNotice": "This ad is already validated -- the vehicle details, title, condition, and location are locked. You can still update the description, highlights, known flaws, modifications, service history, and photos, but saving will send it back for admin review.",
+      "saveChanges": "Save Changes",
+      "toastResubmittedSummary": "Changes submitted",
+      "toastResubmittedDetail": "Your changes have been sent back for admin review."
     }
   }
 }

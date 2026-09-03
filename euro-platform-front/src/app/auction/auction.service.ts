@@ -5,6 +5,10 @@ import { AuctionCardData, FeaturedCar, placeholder } from '../home/mock-data';
 import { AuctionDetailData, DetailSection } from '../auction-detail/interfaces/auction-detail.interface';
 import { Auction, AuctionPhoto, LaunchAuctionPayload } from './interfaces/auction.interface';
 
+// Matches AuctionGalleryComponent's fixed 2-col x 4-row thumbnail grid (7 photo cells + 1
+// "see all" cell).
+const GALLERY_THUMBNAIL_COUNT = 7;
+
 @Injectable({ providedIn: 'root' })
 export class AuctionService {
   private readonly http = inject(HttpClient);
@@ -79,7 +83,14 @@ export function toAuctionDetailData(auction: Auction): AuctionDetailData {
   // Exclude whatever's shown as the large hero photo so it isn't repeated in the thumbnail
   // strip -- falls back to repeating it only when there are no other photos at all.
   const otherPhotos = photos.filter((p) => p.url !== mainUrl);
-  const thumbnailUrls = otherPhotos.length > 0 ? otherPhotos.map((p) => p.url) : [mainUrl];
+  const otherUrls = otherPhotos.length > 0 ? otherPhotos.map((p) => p.url) : [mainUrl];
+  // The gallery's 2-col x 4-row grid needs exactly GALLERY_THUMBNAIL_COUNT small squares to
+  // stay fully packed (the 8th cell is the "see all" tile) -- cycle through what's actually
+  // available to fill it out when an ad has fewer real photos than that.
+  const thumbnailUrls = Array.from(
+    { length: GALLERY_THUMBNAIL_COUNT },
+    (_, i) => otherUrls[i % otherUrls.length],
+  );
 
   const detailSections: DetailSection[] = [
     { headingKey: 'auctionDetail.sections.description', paragraphs: [ad.description] },

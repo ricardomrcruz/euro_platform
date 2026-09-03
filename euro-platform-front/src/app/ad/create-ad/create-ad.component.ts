@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -11,7 +11,12 @@ import { Image } from 'primeng/image';
 import { MessageService } from 'primeng/api';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdService } from '../ad.service';
-import type { AdPhoto, AdPhotoCategory, VehicleCondition } from '../interfaces/ad.interface';
+import type {
+  AdPhoto,
+  AdPhotoCategory,
+  AdStatus,
+  VehicleCondition,
+} from '../interfaces/ad.interface';
 import { VehicleCatalogService } from '../../vehicle/vehicle-catalog.service';
 import type {
   VehicleMake,
@@ -107,11 +112,18 @@ export class CreateAdComponent implements OnDestroy {
   private readonly translate = inject(TranslateService);
 
   readonly editingAdId = signal<number | null>(null);
+  readonly editingAdStatus = signal<AdStatus | null>(null);
   readonly loadingExisting = signal(false);
   readonly existingPhotos = signal<AdPhoto[]>([]);
 
+  // A VALIDATED ad can only have its content (description/highlights/knownFlaws/
+  // modifications/serviceHistory) and photos edited -- title/location/condition/vehicle
+  // fundamentals are locked forever. Editing content always resubmits for review.
+  readonly isContentEditMode = computed(() => this.editingAdStatus() === 'VALIDATED');
+
   readonly savingDraft = signal(false);
   readonly savingAndSubmitting = signal(false);
+  readonly savingContent = signal(false);
   readonly errorKey = signal<string | null>(null);
 
   readonly conditionOptions = CONDITION_OPTIONS;
@@ -250,6 +262,7 @@ export class CreateAdComponent implements OnDestroy {
     try {
       const ad = await this.adService.getOne(id);
       this.existingPhotos.set(ad.photos);
+      this.editingAdStatus.set(ad.status);
 
       const make = this.makes().find((m) => m.id === ad.vehicle.make.id) ?? null;
       this.form.controls.make.setValue(make, { emitEvent: false });
@@ -289,6 +302,22 @@ export class CreateAdComponent implements OnDestroy {
         serviceHistory: ad.serviceHistory ?? '',
         location: ad.location ?? '',
       });
+
+      if (this.isContentEditMode()) {
+        this.form.controls.vin.disable();
+        this.form.controls.make.disable();
+        this.form.controls.model.disable();
+        this.form.controls.trim.disable();
+        this.form.controls.year.disable();
+        this.form.controls.exteriorColor.disable();
+        this.form.controls.interiorColor.disable();
+        this.form.controls.mileage.disable();
+        this.form.controls.numberOfOwners.disable();
+        this.form.controls.plateCountry.disable();
+        this.form.controls.title.disable();
+        this.form.controls.condition.disable();
+        this.form.controls.location.disable();
+      }
     } finally {
       this.loadingExisting.set(false);
     }
@@ -346,6 +375,74 @@ export class CreateAdComponent implements OnDestroy {
     await this.persistAndMaybeSubmit(true, this.savingAndSubmitting);
   }
 
+  // Uploads every photo row that has a picked file: request a signed URL, PUT the file
+  // straight to GCS, then register it. Shared by both the create/full-edit flow and the
+  // VALIDATED-ad content-edit flow -- one bad photo doesn't block saving the rest.
+  private async uploadPendingPhotos(adId: number): Promise<void> {
+    for (let i = 0; i < this.photoRows.length; i++) {
+      const file = this.photoFiles()[i];
+      if (!file) continue;
+
+      const row = this.photoRows.at(i);
+      const category = row.controls.category.value ?? undefined;
+      try {
+        const { uploadUrl, publicUrl } = await this.adService.requestUploadUrl(adId, {
+          filename: file.name,
+          contentType: file.type,
+          category,
+        });
+        await this.adService.uploadFileToSignedUrl(uploadUrl, file);
+        await this.adService.addPhoto(adId, {
+          url: publicUrl,
+          category,
+          caption: row.controls.caption.value.trim() || undefined,
+          sortOrder: i,
+          isPrimary: i === 0,
+        });
+      } catch {
+        this.photoUploadStatus.update((statuses) =>
+          statuses.map((s, idx) => (idx === i ? 'error' : s)),
+        );
+      }
+    }
+  }
+
+  // For a VALIDATED ad: only content fields + photos can change, and saving always
+  // resubmits the ad for review -- no separate draft/submit split like the create flow.
+  async saveContentChanges(): Promise<void> {
+    const id = this.editingAdId();
+    if (!id || this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const v = this.form.getRawValue();
+    this.savingContent.set(true);
+    this.errorKey.set(null);
+    try {
+      await this.uploadPendingPhotos(id);
+      await this.adService.updateContent(id, {
+        description: v.description!,
+        highlights: v.highlights || undefined,
+        knownFlaws: v.knownFlaws || undefined,
+        modifications: v.modifications || undefined,
+        serviceHistory: v.serviceHistory || undefined,
+      });
+
+      this.messageService.add({
+        severity: 'success',
+        summary: this.translate.instant('ad.create.toastResubmittedSummary'),
+        detail: this.translate.instant('ad.create.toastResubmittedDetail'),
+        life: 5000,
+      });
+      this.router.navigateByUrl('/profile');
+    } catch {
+      this.errorKey.set('ad.create.genericError');
+    } finally {
+      this.savingContent.set(false);
+    }
+  }
+
   private async persistAndMaybeSubmit(
     thenSubmit: boolean,
     loadingSignal: ReturnType<typeof signal<boolean>>,
@@ -390,33 +487,7 @@ export class CreateAdComponent implements OnDestroy {
         ? await this.adService.update(existingId, payload)
         : await this.adService.create(payload);
 
-      for (let i = 0; i < this.photoRows.length; i++) {
-        const file = this.photoFiles()[i];
-        if (!file) continue;
-
-        const row = this.photoRows.at(i);
-        const category = row.controls.category.value ?? undefined;
-        try {
-          const { uploadUrl, publicUrl } = await this.adService.requestUploadUrl(ad.id, {
-            filename: file.name,
-            contentType: file.type,
-            category,
-          });
-          await this.adService.uploadFileToSignedUrl(uploadUrl, file);
-          await this.adService.addPhoto(ad.id, {
-            url: publicUrl,
-            category,
-            caption: row.controls.caption.value.trim() || undefined,
-            sortOrder: i,
-            isPrimary: i === 0,
-          });
-        } catch {
-          // One bad photo shouldn't block saving the rest of the ad -- flagged inline instead.
-          this.photoUploadStatus.update((statuses) =>
-            statuses.map((s, idx) => (idx === i ? 'error' : s)),
-          );
-        }
-      }
+      await this.uploadPendingPhotos(ad.id);
 
       if (thenSubmit) {
         await this.adService.submit(ad.id);

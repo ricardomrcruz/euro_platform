@@ -13,6 +13,7 @@ import { AdPhoto } from './entities/ad-photo.entity';
 import { AdMessage } from './entities/ad-message.entity';
 import { CreateAdDto } from './dto/create-ad.dto';
 import { UpdateAdDto } from './dto/update-ad.dto';
+import { UpdateAdContentDto } from './dto/update-ad-content.dto';
 import { CreateAdPhotoDto } from './dto/create-ad-photo.dto';
 import { RequestPhotoUploadUrlDto } from './dto/request-photo-upload-url.dto';
 import { buildPhotoObjectKey } from './utils/photo-object-key.util';
@@ -104,6 +105,25 @@ export class AdService {
     return this.adRepository.save(ad);
   }
 
+  // The re-review counterpart to updateAd() -- only for a VALIDATED ad (ad.canEditContent()),
+  // only touches content fields (never title/location/condition/vehicle), and always sends
+  // the ad back to REVIEW as part of the same save, regardless of any live auction on it.
+  async updateContent(sellerId: number, adId: number, dto: UpdateAdContentDto): Promise<Ad> {
+    const ad = await this.findOwnedOrThrow(adId, sellerId);
+    if (!ad.canEditContent()) {
+      throw new ForbiddenException('Ad content cannot be edited in its current status');
+    }
+
+    ad.description = dto.description;
+    ad.highlights = dto.highlights;
+    ad.knownFlaws = dto.knownFlaws;
+    ad.modifications = dto.modifications;
+    ad.serviceHistory = dto.serviceHistory;
+    ad.resubmitForReview();
+
+    return this.adRepository.save(ad);
+  }
+
   async submitAd(sellerId: number, adId: number): Promise<Ad> {
     const ad = await this.findOwnedOrThrow(adId, sellerId);
     ad.submit();
@@ -138,7 +158,7 @@ export class AdService {
 
   async addPhoto(sellerId: number, adId: number, dto: CreateAdPhotoDto): Promise<AdPhoto> {
     const ad = await this.findOwnedOrThrow(adId, sellerId);
-    if (!ad.canEdit()) {
+    if (!ad.canEdit() && !ad.canEditContent()) {
       throw new ForbiddenException('Ad cannot be edited in its current status');
     }
 
@@ -161,7 +181,7 @@ export class AdService {
     dto: RequestPhotoUploadUrlDto,
   ): Promise<SignedUpload & { objectKey: string }> {
     const ad = await this.findOwnedOrThrow(adId, sellerId);
-    if (!ad.canEdit()) {
+    if (!ad.canEdit() && !ad.canEditContent()) {
       throw new ForbiddenException('Ad cannot be edited in its current status');
     }
 

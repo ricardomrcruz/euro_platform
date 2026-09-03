@@ -81,6 +81,16 @@ export interface Ad {
   photos: AdPhoto[];
 }
 
+// For a VALIDATED ad only -- title/location/condition/vehicle fields are permanent
+// fundamentals and can't be changed through this payload.
+export interface UpdateAdContentPayload {
+  description: string;
+  highlights?: string;
+  knownFlaws?: string;
+  modifications?: string;
+  serviceHistory?: string;
+}
+
 export interface AddPhotoPayload {
   url: string;
   category?: AdPhotoCategory;
