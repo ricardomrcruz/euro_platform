@@ -1,7 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
-import type { CommentItem } from '../mock-detail-data';
+import type { CommentItem } from '../interfaces/auction-detail.interface';
 
 @Component({
   selector: 'app-auction-bid-history',

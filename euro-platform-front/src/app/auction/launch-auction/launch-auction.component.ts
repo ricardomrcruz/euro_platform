@@ -9,7 +9,8 @@ import { InputText } from 'primeng/inputtext';
 import { Image } from 'primeng/image';
 import { MessageService } from 'primeng/api';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AdService, Ad } from '../../ad/ad.service';
+import { AdService } from '../../ad/ad.service';
+import { Ad } from '../../ad/interfaces/ad.interface';
 import { AuctionService } from '../auction.service';
 import { calculateCommission, COMMISSION_RATE, MIN_COMMISSION, MAX_COMMISSION } from '../commission.util';
 

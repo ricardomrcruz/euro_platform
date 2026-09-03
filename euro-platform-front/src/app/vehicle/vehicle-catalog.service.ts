@@ -1,39 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-
-export interface VehicleMake {
-  id: number;
-  name: string;
-  country?: string;
-  logoUrl?: string;
-}
-
-export interface VehicleModel {
-  id: number;
-  name: string;
-  bodyType?: string;
-  yearStart?: number;
-  yearEnd?: number;
-}
-
-export interface VehicleTrim {
-  id: number;
-  name: string;
-  engine?: string;
-  horsepower?: number;
-  transmission?: string;
-  drivetrain?: string;
-  fuelType?: string;
-  year?: number;
-}
-
-export interface VinLookupResult {
-  recognized: boolean;
-  wmi: string;
-  make: VehicleMake | null;
-  modelYear?: number;
-}
+import {
+  VehicleMake,
+  VehicleModel,
+  VehicleTrim,
+  VinLookupResult,
+} from './interfaces/vehicle-catalog.interface';
 
 // The catalog browsing endpoints filter by make/model NAME (not id) -- confirmed from
 // VehicleFactoryService.listModels/listTrims. Callers must keep both the id (for

@@ -8,8 +8,10 @@ import { InputText } from 'primeng/inputtext';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { TagModule } from 'primeng/tag';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AdService, Ad, AdMessage, AdStatus } from '../ad/ad.service';
-import { AuctionService, Auction } from '../auction/auction.service';
+import { AdService } from '../ad/ad.service';
+import { Ad, AdMessage, AdStatus } from '../ad/interfaces/ad.interface';
+import { AuctionService } from '../auction/auction.service';
+import { Auction } from '../auction/interfaces/auction.interface';
 import { CountdownComponent } from '../shared/countdown/countdown.component';
 
 type AdminTab = 'pending' | 'launchAuctions';

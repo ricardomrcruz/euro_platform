@@ -4,7 +4,7 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CountdownComponent } from '../../shared/countdown/countdown.component';
-import type { AuctionDetailData } from '../mock-detail-data';
+import type { AuctionDetailData } from '../interfaces/auction-detail.interface';
 
 @Component({
   selector: 'app-auction-bid-panel',

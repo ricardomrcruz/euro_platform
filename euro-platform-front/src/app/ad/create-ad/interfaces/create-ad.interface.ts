@@ -1,0 +1,31 @@
+import { FormControl, FormGroup } from '@angular/forms';
+import { AdPhotoCategory, VehicleCondition } from '../../interfaces/ad.interface';
+import {
+  VehicleMake,
+  VehicleModel,
+  VehicleTrim,
+} from '../../../vehicle/interfaces/vehicle-catalog.interface';
+
+export interface ConditionOption {
+  value: VehicleCondition;
+  labelKey: string;
+}
+
+export interface PhotoCategoryOption {
+  value: AdPhotoCategory;
+  labelKey: string;
+}
+
+export type PhotoRow = FormGroup<{
+  caption: FormControl<string>;
+  category: FormControl<AdPhotoCategory | null>;
+}>;
+
+export type PhotoUploadStatus = 'idle' | 'uploading' | 'error';
+
+// Editable p-selects emit a plain string when the typed text doesn't match any catalog
+// option -- these fields hold either the real catalog object (selected from the list) or a
+// custom-typed name, resolved to a real id via find-or-create right before submit.
+export type MakeValue = VehicleMake | string | null;
+export type ModelValue = VehicleModel | string | null;
+export type TrimValue = VehicleTrim | string | null;

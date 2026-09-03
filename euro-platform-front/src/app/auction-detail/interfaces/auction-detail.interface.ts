@@ -1,7 +1,3 @@
-// Shared shapes for the auction-detail view. Real data comes from AuctionService
-// (see toAuctionDetailData in ../auction/auction.service.ts) -- no mock detail records are
-// seeded from this file anymore.
-
 export interface DetailSection {
   headingKey: string;
   paragraphs?: string[];
@@ -62,4 +58,20 @@ export interface AuctionDetailData {
   detailSections: DetailSection[];
   videos: VideoItem[];
   comments: CommentItem[];
+}
+
+// Sub-component-local view types -- grouped here too rather than scattered across
+// auction-specs.component.ts/auction-comments.component.ts, since this page already has
+// several related interfaces worth keeping in one place.
+export interface SpecRow {
+  labelKey: string;
+  value?: string;
+  valueKey?: string;
+}
+
+export type SortKey = 'newest' | 'most-upvoted' | 'seller-comments' | 'bid-history';
+
+export interface SortTab {
+  key: SortKey;
+  labelKey: string;
 }

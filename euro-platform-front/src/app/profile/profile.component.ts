@@ -6,8 +6,10 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../auth/auth.service';
-import { AdService, Ad, AdStatus } from '../ad/ad.service';
-import { AuctionService, Auction } from '../auction/auction.service';
+import { AdService } from '../ad/ad.service';
+import { Ad, AdStatus } from '../ad/interfaces/ad.interface';
+import { AuctionService } from '../auction/auction.service';
+import { Auction } from '../auction/interfaces/auction.interface';
 import { CountdownComponent } from '../shared/countdown/countdown.component';
 
 type ProfileTab = 'myAds' | 'myBids' | 'watchlist';

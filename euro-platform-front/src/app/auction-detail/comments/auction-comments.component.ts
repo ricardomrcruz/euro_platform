@@ -3,14 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { TranslatePipe } from '@ngx-translate/core';
-import type { CommentItem } from '../mock-detail-data';
-
-type SortKey = 'newest' | 'most-upvoted' | 'seller-comments' | 'bid-history';
-
-interface SortTab {
-  key: SortKey;
-  labelKey: string;
-}
+import type { CommentItem, SortKey, SortTab } from '../interfaces/auction-detail.interface';
 
 const SORT_TABS: SortTab[] = [
   { key: 'newest', labelKey: 'auctionDetail.comments.sortNewest' },

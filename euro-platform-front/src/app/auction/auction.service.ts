@@ -2,61 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { AuctionCardData, FeaturedCar, placeholder } from '../home/mock-data';
-import { AuctionDetailData, DetailSection } from '../auction-detail/mock-detail-data';
-
-export type AuctionState = 'LIVE' | 'SOLD' | 'EXPIRED' | 'CANCELLED';
-
-export interface LaunchAuctionPayload {
-  endDate: string;
-  reservePrice: number;
-  buyNowPrice?: number;
-}
-
-export interface AuctionPhoto {
-  id: number;
-  url: string;
-  category: string;
-  caption?: string;
-  sortOrder: number;
-  isPrimary: boolean;
-}
-
-export interface AuctionVehicleSummary {
-  id: number;
-  vin?: string;
-  year: number;
-  exteriorColor?: string;
-  interiorColor?: string;
-  mileage?: number;
-  make: { id: number; name: string };
-  model: { id: number; name: string };
-  trim?: { id: number; name: string };
-}
-
-export interface AuctionAdSummary {
-  id: number;
-  title: string;
-  description: string;
-  highlights?: string;
-  knownFlaws?: string;
-  modifications?: string;
-  serviceHistory?: string;
-  location?: string;
-  sellerId: number;
-  vehicle: AuctionVehicleSummary;
-  photos: AuctionPhoto[];
-}
-
-export interface Auction {
-  id: number;
-  startDate: string;
-  endDate: string;
-  reservePrice: number;
-  buyNowPrice?: number;
-  currentHighestBid?: number;
-  state: AuctionState;
-  ad: AuctionAdSummary;
-}
+import { AuctionDetailData, DetailSection } from '../auction-detail/interfaces/auction-detail.interface';
+import { Auction, AuctionPhoto, LaunchAuctionPayload } from './interfaces/auction.interface';
 
 @Injectable({ providedIn: 'root' })
 export class AuctionService {

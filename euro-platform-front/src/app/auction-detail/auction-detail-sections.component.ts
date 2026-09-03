@@ -1,7 +1,7 @@
 import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
-import type { DetailSection } from './mock-detail-data';
+import type { DetailSection } from './interfaces/auction-detail.interface';
 
 @Component({
   selector: 'app-auction-detail-sections',

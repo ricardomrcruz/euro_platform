@@ -3,26 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { getToken, setToken, clearToken } from './token-storage';
 import { decodeJwtPayload, JwtPayload } from './jwt';
-
-export interface RegisterPayload {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-}
-
-export interface RegisteredUser {
-  id: number;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-}
-
-export interface LoginPayload {
-  email: string;
-  password: string;
-}
+import { LoginPayload, RegisterPayload, RegisteredUser } from './interfaces/auth.interface';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {

@@ -2,7 +2,7 @@ import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Select } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
@@ -10,19 +10,24 @@ import { InputTextarea } from 'primeng/inputtextarea';
 import { Image } from 'primeng/image';
 import { MessageService } from 'primeng/api';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AdService, AdPhoto, AdPhotoCategory, VehicleCondition } from '../ad.service';
-import {
-  VehicleCatalogService,
+import { AdService } from '../ad.service';
+import type { AdPhoto, AdPhotoCategory, VehicleCondition } from '../interfaces/ad.interface';
+import { VehicleCatalogService } from '../../vehicle/vehicle-catalog.service';
+import type {
   VehicleMake,
   VehicleModel,
   VehicleTrim,
-} from '../../vehicle/vehicle-catalog.service';
+} from '../../vehicle/interfaces/vehicle-catalog.interface';
 import { COUNTRIES } from '../../shared/countries';
-
-interface ConditionOption {
-  value: VehicleCondition;
-  labelKey: string;
-}
+import type {
+  ConditionOption,
+  PhotoCategoryOption,
+  PhotoRow,
+  PhotoUploadStatus,
+  MakeValue,
+  ModelValue,
+  TrimValue,
+} from './interfaces/create-ad.interface';
 
 const CONDITION_OPTIONS: ConditionOption[] = [
   { value: 'EXCELLENT', labelKey: 'ad.create.conditionExcellent' },
@@ -30,11 +35,6 @@ const CONDITION_OPTIONS: ConditionOption[] = [
   { value: 'FAIR', labelKey: 'ad.create.conditionFair' },
   { value: 'POOR', labelKey: 'ad.create.conditionPoor' },
 ];
-
-interface PhotoCategoryOption {
-  value: AdPhotoCategory;
-  labelKey: string;
-}
 
 const AD_PHOTO_CATEGORY_OPTIONS: PhotoCategoryOption[] = [
   { value: 'EXTERIOR_FRONT', labelKey: 'ad.create.photoCategoryOptions.EXTERIOR_FRONT' },
@@ -75,20 +75,6 @@ const AD_PHOTO_CATEGORY_OPTIONS: PhotoCategoryOption[] = [
   },
   { value: 'OTHER', labelKey: 'ad.create.photoCategoryOptions.OTHER' },
 ];
-
-type PhotoRow = FormGroup<{
-  caption: import('@angular/forms').FormControl<string>;
-  category: import('@angular/forms').FormControl<AdPhotoCategory | null>;
-}>;
-
-type PhotoUploadStatus = 'idle' | 'uploading' | 'error';
-
-// Editable p-selects emit a plain string when the typed text doesn't match any catalog
-// option -- these fields hold either the real catalog object (selected from the list) or a
-// custom-typed name, resolved to a real id via find-or-create right before submit.
-type MakeValue = VehicleMake | string | null;
-type ModelValue = VehicleModel | string | null;
-type TrimValue = VehicleTrim | string | null;
 
 function catalogName(value: { name: string } | string | null | undefined): string | undefined {
   if (!value) return undefined;

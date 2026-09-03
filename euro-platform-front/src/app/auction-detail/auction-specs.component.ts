@@ -1,13 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
-import type { AuctionSpecs } from './mock-detail-data';
-
-interface SpecRow {
-  labelKey: string;
-  value?: string;
-  valueKey?: string;
-}
+import type { AuctionSpecs, SpecRow } from './interfaces/auction-detail.interface';
 
 @Component({
   selector: 'app-auction-specs',

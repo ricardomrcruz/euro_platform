@@ -11,7 +11,7 @@ import { AuctionBidHistoryComponent } from './bid-history/auction-bid-history.co
 import { AuctionCommentsComponent } from './comments/auction-comments.component';
 import { AuctionCardComponent } from '../shared/auction-card/auction-card.component';
 import { CountdownComponent } from '../shared/countdown/countdown.component';
-import { AuctionDetailData } from './mock-detail-data';
+import { AuctionDetailData } from './interfaces/auction-detail.interface';
 import { AuctionCardData } from '../home/mock-data';
 import { AuctionService, toAuctionCardData, toAuctionDetailData } from '../auction/auction.service';
 
