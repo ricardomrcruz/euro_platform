@@ -50,6 +50,31 @@ export class AuthClientService {
     }
   }
 
+  // "First L." style display names, resolved in one batch call to avoid an N+1 lookup when
+  // showing a list of ads/bids. Never fails the caller -- a euro-auth hiccup falls back to a
+  // plain "User #<id>" per missing id rather than breaking an auction/bid listing.
+  async getPublicNames(userIds: number[]): Promise<Record<number, string>> {
+    const uniqueIds = [...new Set(userIds)];
+    if (uniqueIds.length === 0) return {};
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<Record<number, string>>(`${this.config.serviceUrl}/users/public-names`, {
+          params: { ids: uniqueIds.join(',') },
+        }),
+      );
+      const resolved = response.data;
+      const result: Record<number, string> = {};
+      for (const id of uniqueIds) {
+        result[id] = resolved[id] ?? `User #${id}`;
+      }
+      return result;
+    } catch (error) {
+      this.logger.debug(`Public name lookup failed: ${(error as Error).message}`);
+      return Object.fromEntries(uniqueIds.map((id) => [id, `User #${id}`]));
+    }
+  }
+
   register(dto: RegisterDto): Promise<RegisteredUser> {
     return this.forward<RegisteredUser>('register', dto);
   }

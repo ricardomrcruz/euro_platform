@@ -15,8 +15,11 @@
   },
   "countdown": {
     "ended": "Terminée",
-    "day": "Jour",
-    "days": "Jours"
+    "weekAbbr": "sem",
+    "dayAbbr": "j",
+    "hourAbbr": "h",
+    "minuteAbbr": "min",
+    "secondAbbr": "s"
   },
   "auctions": {
     "heading": "Enchères",
@@ -92,6 +95,10 @@
   },
   "auctionDetail": {
     "notFound": "Enchère introuvable.",
+    "liveBid": {
+      "summary": "Nouvelle enchère",
+      "detail": "{{name}} a enchéri {{amount}} à {{time}}"
+    },
     "bidPanel": {
       "seller": "Vendeur",
       "ending": "Fin",
@@ -102,7 +109,16 @@
       "watch": "Suivre",
       "reserve": "Avec réserve",
       "noReserve": "Sans réserve",
-      "currentBid": "Enchère actuelle"
+      "currentBid": "Enchère actuelle",
+      "logInToBid": "Connectez-vous pour enchérir",
+      "ownAuction": "Vous ne pouvez pas enchérir sur votre propre enchère.",
+      "notLive": "Cette enchère n'accepte plus d'enchères.",
+      "minBidHint": "Enchère minimale : {{min}}",
+      "minBidError": "Votre enchère doit être d'au moins {{min}}.",
+      "bidPlacedSummary": "Enchère placée !",
+      "boughtSummary": "Achat effectué !",
+      "genericError": "Une erreur est survenue. Veuillez réessayer.",
+      "buyNow": "Achat immédiat pour {{price}}"
     },
     "specs": {
       "heading": "Détails du véhicule",

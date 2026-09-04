@@ -1,8 +1,34 @@
 import { Component, computed, inject, input, OnDestroy, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 
-// Matches the reference site's own convention: more than a day left shows day-granularity,
-// under a day shows a ticking HH:MM:SS.
+const SECONDS_PER_MINUTE = 60;
+const SECONDS_PER_HOUR = 60 * SECONDS_PER_MINUTE;
+const SECONDS_PER_DAY = 24 * SECONDS_PER_HOUR;
+const SECONDS_PER_WEEK = 7 * SECONDS_PER_DAY;
+
+// Always ticks live, second by second. Weeks/days/hours only appear once relevant (no leading
+// zero units); minutes/seconds always show, matching the "real time" countdown the reference
+// site uses.
+function formatDuration(totalSeconds: number, t: (key: string) => string): string {
+  let remaining = totalSeconds;
+  const weeks = Math.floor(remaining / SECONDS_PER_WEEK);
+  remaining %= SECONDS_PER_WEEK;
+  const days = Math.floor(remaining / SECONDS_PER_DAY);
+  remaining %= SECONDS_PER_DAY;
+  const hours = Math.floor(remaining / SECONDS_PER_HOUR);
+  remaining %= SECONDS_PER_HOUR;
+  const minutes = Math.floor(remaining / SECONDS_PER_MINUTE);
+  const seconds = remaining % SECONDS_PER_MINUTE;
+
+  const parts: string[] = [];
+  if (weeks > 0) parts.push(`${weeks}${t('countdown.weekAbbr')}`);
+  if (weeks > 0 || days > 0) parts.push(`${days}${t('countdown.dayAbbr')}`);
+  if (weeks > 0 || days > 0 || hours > 0) parts.push(`${hours}${t('countdown.hourAbbr')}`);
+  parts.push(`${minutes}${t('countdown.minuteAbbr')}`);
+  parts.push(`${seconds}${t('countdown.secondAbbr')}`);
+  return parts.join(' ');
+}
+
 @Component({
   selector: 'app-countdown',
   standalone: true,
@@ -24,17 +50,7 @@ export class CountdownComponent implements OnDestroy {
     if (remainingMs <= 0) return this.translate.instant('countdown.ended');
 
     const totalSeconds = Math.floor(remainingMs / 1000);
-    const days = Math.floor(totalSeconds / 86400);
-    if (days >= 1) {
-      const unit = this.translate.instant(days === 1 ? 'countdown.day' : 'countdown.days');
-      return `${days} ${unit}`;
-    }
-
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+    return formatDuration(totalSeconds, (key) => this.translate.instant(key));
   });
 
   ngOnDestroy(): void {

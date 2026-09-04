@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { AuctionCardData, FeaturedCar, placeholder } from '../home/mock-data';
 import { AuctionDetailData, DetailSection } from '../auction-detail/interfaces/auction-detail.interface';
-import { Auction, AuctionPhoto, LaunchAuctionPayload } from './interfaces/auction.interface';
+import { Auction, AuctionPhoto, Bid, LaunchAuctionPayload } from './interfaces/auction.interface';
 
 // Matches AuctionGalleryComponent's fixed 2-col x 4-row thumbnail grid (7 photo cells + 1
 // "see all" cell).
@@ -27,6 +27,20 @@ export class AuctionService {
 
   getOne(id: number): Promise<Auction> {
     return firstValueFrom(this.http.get<Auction>(`/api/auctions/${id}`));
+  }
+
+  placeBid(auctionId: number, amount: number): Promise<Bid> {
+    return firstValueFrom(this.http.post<Bid>(`/api/auctions/${auctionId}/bids`, { amount }));
+  }
+
+  buyNow(auctionId: number): Promise<Bid> {
+    return firstValueFrom(this.http.post<Bid>(`/api/auctions/${auctionId}/buy-now`, {}));
+  }
+
+  // Newest first -- also doubles as the real bid count (bids().length) since bidsCount was
+  // previously always hardcoded to 0.
+  listBids(auctionId: number): Promise<Bid[]> {
+    return firstValueFrom(this.http.get<Bid[]>(`/api/auctions/${auctionId}/bids`));
   }
 }
 
@@ -76,7 +90,7 @@ export function toFeaturedCar(auction: Auction): FeaturedCar {
 // equivalent at all (videos, comments, view/watch counts, bidder/seller display name,
 // engine/drivetrain/transmission/bodyStyle/titleStatus) -- these are emptied/placeholdered
 // here rather than invented, matching mock-detail-data.ts's own '—' fallback convention.
-export function toAuctionDetailData(auction: Auction): AuctionDetailData {
+export function toAuctionDetailData(auction: Auction, bids: Bid[] = []): AuctionDetailData {
   const { ad } = auction;
   const mainUrl = primaryPhotoUrl(ad.photos, ad.title);
   const photos = [...ad.photos].sort((a, b) => a.sortOrder - b.sortOrder);
@@ -124,13 +138,16 @@ export function toAuctionDetailData(auction: Auction): AuctionDetailData {
     thumbnailUrls,
     totalPhotoCount: photos.length,
     currentBid: auction.currentHighestBid ?? auction.reservePrice,
-    // No bids-listing endpoint exists yet to derive a real top-bidder name.
-    bidderName: '—',
-    // Documented gap: Ad.sellerId is opaque, no cross-service lookup into euro-auth exists.
-    sellerName: `Seller #${ad.sellerId}`,
+    buyNowPrice: auction.buyNowPrice,
+    sellerId: ad.sellerId,
+    state: auction.state,
+    // bids is newest-first and each bid must exceed the previous (server-enforced), so the
+    // newest is also the current highest bidder.
+    bidderName: bids[0]?.bidderName ?? '—',
+    sellerName: ad.sellerName ?? `Seller #${ad.sellerId}`,
     sellerType: 'private',
     endDate: new Date(auction.endDate),
-    bidsCount: 0,
+    bidsCount: bids.length,
     viewsCount: 0,
     watchingCount: 0,
     specs: {
@@ -150,5 +167,6 @@ export function toAuctionDetailData(auction: Auction): AuctionDetailData {
     detailSections,
     videos: [],
     comments: [],
+    bids,
   };
 }

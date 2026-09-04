@@ -51,13 +51,13 @@
         <app-auction-specs [specs]="d.specs" [sellerType]="d.sellerType" />
         <app-auction-detail-sections [sections]="d.detailSections" />
         <app-auction-videos [videos]="d.videos" />
-        <app-auction-bid-history [comments]="d.comments" />
+        <app-auction-bid-history [bids]="d.bids" />
         <app-auction-comments [comments]="d.comments" />
       </div>
 
-      <div class="lg:col-span-1">
+      <div class="self-start lg:col-span-1">
         <div class="sticky top-6 space-y-6">
-          <app-auction-bid-panel [detail]="d" />
+          <app-auction-bid-panel [detail]="d" (bidPlaced)="refreshAuction()" />
 
           @if (otherAuctions().length > 0) {
             <div class="bg-surface-700 p-4">

@@ -5,9 +5,9 @@
     <div class="mt-3 divide-y divide-surface-600 text-sm">
       @for (bid of bids(); track bid.id) {
         <div class="flex items-center justify-between py-2">
-          <span class="font-medium text-white">{{ bid.author }}</span>
-          <span class="font-semibold text-white">{{ bid.bidAmount | currency: 'EUR' : 'symbol' : '1.0-0' }}</span>
-          <span class="text-xs text-surface-300">{{ bid.timeAgo }}</span>
+          <span class="font-medium text-white">{{ bid.bidderName }}</span>
+          <span class="font-semibold text-white">{{ bid.amount | currency: 'EUR' : 'symbol' : '1.0-0' }}</span>
+          <span class="text-xs text-surface-300">{{ bid.timestamp | date: 'short' }}</span>
         </div>
       }
     </div>

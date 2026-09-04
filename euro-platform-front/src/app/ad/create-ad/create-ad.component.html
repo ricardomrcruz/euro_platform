@@ -1,19 +1,19 @@
-<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-  <h1 class="text-2xl font-bold text-white">
-    {{ (editingAdId() ? 'ad.create.editHeading' : 'ad.create.heading') | translate }}
-  </h1>
-
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
   @if (loadingExisting()) {
-    <p class="mt-4 text-sm text-surface-300">...</p>
+    <p class="bg-surface-700 p-6 text-sm text-surface-300 sm:p-8">...</p>
   } @else {
-    @if (isContentEditMode()) {
-      <p class="mt-4 bg-sky-950 p-3 text-sm text-sky-400">
-        {{ 'ad.create.contentEditNotice' | translate }}
-      </p>
-    }
+    <form [formGroup]="form" class="bg-surface-700 p-6 sm:p-8">
+      <h1 class="text-2xl font-bold text-white">
+        {{ (editingAdId() ? 'ad.create.editHeading' : 'ad.create.heading') | translate }}
+      </h1>
 
-    <form [formGroup]="form" class="mt-4 bg-surface-700 p-6 sm:p-8">
-      <section>
+      @if (isContentEditMode()) {
+        <p class="mt-4 bg-sky-950 p-3 text-sm text-sky-400">
+          {{ 'ad.create.contentEditNotice' | translate }}
+        </p>
+      }
+
+      <section class="mt-6">
         <h2 class="text-lg font-bold text-white">{{ 'ad.create.vehicleSection' | translate }}</h2>
 
         <div class="mt-4 flex flex-wrap items-end gap-2">

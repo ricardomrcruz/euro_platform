@@ -54,4 +54,10 @@ export class AuctionController {
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.auctionService.findOne(id);
   }
+
+  @Public()
+  @Get('auctions/:id/bids')
+  listBids(@Param('id', ParseIntPipe) id: number) {
+    return this.bidService.listBids(id);
+  }
 }

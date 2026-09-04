@@ -19,6 +19,10 @@ export class Bid {
   @Column({ name: 'bidder_id' })
   bidderId!: number;
 
+  // Transient, not persisted -- populated on read via AuthClientService.getPublicNames()
+  // (BidService.listBids), same pattern as Ad.sellerName.
+  bidderName?: string;
+
   @ManyToOne(() => Auction, (auction) => auction.bids)
   auction!: Auction;
 }

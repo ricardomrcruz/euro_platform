@@ -1,7 +1,9 @@
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, computed, effect, inject, input, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
-import { TranslatePipe } from '@ngx-translate/core';
+import { MessageService } from 'primeng/api';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuctionGalleryComponent } from './gallery/auction-gallery.component';
 import { AuctionBidPanelComponent } from './bid-panel/auction-bid-panel.component';
 import { AuctionSpecsComponent } from './auction-specs.component';
@@ -14,6 +16,7 @@ import { CountdownComponent } from '../shared/countdown/countdown.component';
 import { AuctionDetailData } from './interfaces/auction-detail.interface';
 import { AuctionCardData } from '../home/mock-data';
 import { AuctionService, toAuctionCardData, toAuctionDetailData } from '../auction/auction.service';
+import { AuctionSocketService } from '../auction/auction-socket.service';
 
 @Component({
   selector: 'app-auction-detail',
@@ -32,10 +35,16 @@ import { AuctionService, toAuctionCardData, toAuctionDetailData } from '../aucti
     AuctionCardComponent,
     CountdownComponent,
   ],
+  providers: [DatePipe, CurrencyPipe],
   templateUrl: './auction-detail.component.html',
 })
-export class AuctionDetailComponent {
+export class AuctionDetailComponent implements OnDestroy {
   private readonly auctionService = inject(AuctionService);
+  private readonly auctionSocket = inject(AuctionSocketService);
+  private readonly messageService = inject(MessageService);
+  private readonly translate = inject(TranslateService);
+  private readonly datePipe = inject(DatePipe);
+  private readonly currencyPipe = inject(CurrencyPipe);
 
   // Bound automatically from the `:id` route segment via withComponentInputBinding(). This is
   // the real Auction's own id (GET /auctions/:id), matching how the homepage routerLinks here.
@@ -50,18 +59,69 @@ export class AuctionDetailComponent {
     () => this.detail()?.comments.filter((c) => c.kind === 'comment').length ?? 0,
   );
 
+  private joinedAuctionId: number | null = null;
+
   constructor() {
     effect(() => {
       const auctionId = Number(this.id());
+      if (this.joinedAuctionId !== null && this.joinedAuctionId !== auctionId) {
+        this.auctionSocket.leaveAuction(this.joinedAuctionId);
+      }
+      this.auctionSocket.joinAuction(auctionId);
+      this.joinedAuctionId = auctionId;
+
+      this.detail.set(undefined);
       this.loadAuction(auctionId);
     });
+
+    this.auctionSocket
+      .onBidPlaced()
+      .pipe(takeUntilDestroyed())
+      .subscribe((event) => {
+        if (event.auctionId !== Number(this.id())) return;
+
+        this.messageService.add({
+          severity: 'info',
+          summary: this.translate.instant('auctionDetail.liveBid.summary'),
+          detail: this.translate.instant('auctionDetail.liveBid.detail', {
+            name: event.bidderName,
+            amount: this.currencyPipe.transform(event.amount, 'EUR', 'symbol', '1.0-0'),
+            time: this.datePipe.transform(event.timestamp, 'short'),
+          }),
+          life: 6000,
+        });
+        this.refreshAuction();
+      });
+
+    this.auctionSocket
+      .onAuctionClosed()
+      .pipe(takeUntilDestroyed())
+      .subscribe((event) => {
+        if (event.auctionId !== Number(this.id())) return;
+        this.refreshAuction();
+      });
+  }
+
+  ngOnDestroy(): void {
+    if (this.joinedAuctionId !== null) {
+      this.auctionSocket.leaveAuction(this.joinedAuctionId);
+    }
+  }
+
+  // Re-fetches without clearing detail() first -- used after the bidder's own successful
+  // bid/buy-now, and after any live WebSocket event, so the panel updates in place instead of
+  // flashing to "not found".
+  refreshAuction(): void {
+    this.loadAuction(Number(this.id()));
   }
 
   private async loadAuction(auctionId: number): Promise<void> {
-    this.detail.set(undefined);
     try {
-      const auction = await this.auctionService.getOne(auctionId);
-      this.detail.set(toAuctionDetailData(auction));
+      const [auction, bids] = await Promise.all([
+        this.auctionService.getOne(auctionId),
+        this.auctionService.listBids(auctionId),
+      ]);
+      this.detail.set(toAuctionDetailData(auction, bids));
     } catch {
       this.detail.set(undefined);
       return;

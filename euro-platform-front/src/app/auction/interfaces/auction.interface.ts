@@ -37,6 +37,10 @@ export interface AuctionAdSummary {
   serviceHistory?: string;
   location?: string;
   sellerId: number;
+  // "First L." style, resolved server-side via a batched euro-auth lookup -- undefined only
+  // if that lookup somehow returned nothing for this seller (shouldn't happen in practice,
+  // the backend always falls back to "User #<id>").
+  sellerName?: string;
   vehicle: AuctionVehicleSummary;
   photos: AuctionPhoto[];
 }
@@ -50,4 +54,13 @@ export interface Auction {
   currentHighestBid?: number;
   state: AuctionState;
   ad: AuctionAdSummary;
+}
+
+export interface Bid {
+  id: number;
+  amount: number;
+  commission: number;
+  timestamp: string;
+  bidderId: number;
+  bidderName?: string;
 }

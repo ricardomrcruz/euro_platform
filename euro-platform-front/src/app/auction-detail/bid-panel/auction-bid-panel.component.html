@@ -40,9 +40,63 @@
       </div>
     </dl>
 
-    <div class="mt-4 flex gap-2">
-      <p-button [label]="'auctionDetail.bidPanel.placeBid' | translate" [size]="'small'" class="flex-1" styleClass="w-full" />
-      <p-button [label]="'auctionDetail.bidPanel.watch' | translate" [size]="'small'" [outlined]="true" class="flex-1" styleClass="w-full" />
+    <div class="mt-4">
+      @if (!isLoggedIn()) {
+        <p-button
+          [label]="'auctionDetail.bidPanel.logInToBid' | translate"
+          [size]="'small'"
+          styleClass="w-full"
+          (onClick)="openLogin()"
+        />
+      } @else if (isSeller()) {
+        <p class="text-sm text-surface-300">{{ 'auctionDetail.bidPanel.ownAuction' | translate }}</p>
+      } @else if (!isLive()) {
+        <p class="text-sm text-surface-300">{{ 'auctionDetail.bidPanel.notLive' | translate }}</p>
+      } @else {
+        <div class="flex gap-2">
+          <input
+            type="number"
+            pInputText
+            [pSize]="'small'"
+            [ngModel]="bidAmount()"
+            (ngModelChange)="bidAmount.set($event)"
+            [placeholder]="minNextBid().toString()"
+            [min]="minNextBid()"
+            class="w-full"
+          />
+          <p-button
+            [label]="'auctionDetail.bidPanel.placeBid' | translate"
+            [size]="'small'"
+            [loading]="placingBid()"
+            (onClick)="placeBid()"
+          />
+        </div>
+        <p class="mt-1 text-xs text-surface-400">
+          {{ 'auctionDetail.bidPanel.minBidHint' | translate: { min: (minNextBid() | currency: 'EUR' : 'symbol' : '1.0-0') } }}
+        </p>
+
+        @if (d.buyNowPrice) {
+          <p-button
+            [label]="'auctionDetail.bidPanel.buyNow' | translate: { price: (d.buyNowPrice | currency: 'EUR' : 'symbol' : '1.0-0') }"
+            [size]="'small'"
+            [outlined]="true"
+            [loading]="buyingNow()"
+            styleClass="mt-2 w-full"
+            (onClick)="buyNow()"
+          />
+        }
+
+        @if (errorMessage()) {
+          <p class="mt-2 text-sm text-red-400">{{ errorMessage() }}</p>
+        }
+      }
+
+      <p-button
+        [label]="'auctionDetail.bidPanel.watch' | translate"
+        [size]="'small'"
+        [outlined]="true"
+        styleClass="mt-2 w-full"
+      />
     </div>
   </div>
 }

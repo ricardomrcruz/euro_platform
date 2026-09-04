@@ -1,3 +1,5 @@
+import type { AuctionState, Bid } from '../../auction/interfaces/auction.interface';
+
 export interface DetailSection {
   headingKey: string;
   paragraphs?: string[];
@@ -47,6 +49,9 @@ export interface AuctionDetailData {
   thumbnailUrls: string[];
   totalPhotoCount: number;
   currentBid: number;
+  buyNowPrice?: number;
+  sellerId: number;
+  state: AuctionState;
   bidderName: string;
   sellerName: string;
   sellerType: 'dealer' | 'private';
@@ -58,6 +63,7 @@ export interface AuctionDetailData {
   detailSections: DetailSection[];
   videos: VideoItem[];
   comments: CommentItem[];
+  bids: Bid[];
 }
 
 // Sub-component-local view types -- grouped here too rather than scattered across

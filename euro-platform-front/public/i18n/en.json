@@ -15,8 +15,11 @@
   },
   "countdown": {
     "ended": "Ended",
-    "day": "Day",
-    "days": "Days"
+    "weekAbbr": "w",
+    "dayAbbr": "d",
+    "hourAbbr": "h",
+    "minuteAbbr": "m",
+    "secondAbbr": "s"
   },
   "auctions": {
     "heading": "Auctions",
@@ -92,6 +95,10 @@
   },
   "auctionDetail": {
     "notFound": "Auction not found.",
+    "liveBid": {
+      "summary": "New bid",
+      "detail": "{{name}} bid {{amount}} at {{time}}"
+    },
     "bidPanel": {
       "seller": "Seller",
       "ending": "Ending",
@@ -102,7 +109,16 @@
       "watch": "Watch",
       "reserve": "Reserve",
       "noReserve": "No Reserve",
-      "currentBid": "Current Bid"
+      "currentBid": "Current Bid",
+      "logInToBid": "Log in to bid",
+      "ownAuction": "You can't bid on your own auction.",
+      "notLive": "This auction is no longer accepting bids.",
+      "minBidHint": "Minimum bid: {{min}}",
+      "minBidError": "Your bid must be at least {{min}}.",
+      "bidPlacedSummary": "Bid placed!",
+      "boughtSummary": "Purchased!",
+      "genericError": "Something went wrong. Please try again.",
+      "buyNow": "Buy Now for {{price}}"
     },
     "specs": {
       "heading": "Vehicle Details",

@@ -55,6 +55,10 @@ export class Ad {
   @Column({ name: 'seller_id' })
   sellerId!: number;
 
+  // Transient, not persisted -- populated on read by whichever service resolved it via
+  // AuthClientService.getPublicNames() (currently AuctionService, for the auction-detail page).
+  sellerName?: string;
+
   @ManyToOne(() => Vehicle)
   vehicle!: Vehicle;
 

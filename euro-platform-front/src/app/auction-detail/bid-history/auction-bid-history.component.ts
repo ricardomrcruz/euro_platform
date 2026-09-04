@@ -1,7 +1,7 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
-import type { CommentItem } from '../interfaces/auction-detail.interface';
+import type { Bid } from '../../auction/interfaces/auction.interface';
 
 @Component({
   selector: 'app-auction-bid-history',
@@ -10,9 +10,7 @@ import type { CommentItem } from '../interfaces/auction-detail.interface';
   templateUrl: './auction-bid-history.component.html',
 })
 export class AuctionBidHistoryComponent {
-  // Reuses the same comment feed data (bids are just comments with kind: 'bid') rather
-  // than a separate dataset, since the two would otherwise drift out of sync.
-  comments = input.required<CommentItem[]>();
-
-  readonly bids = computed(() => this.comments().filter((c) => c.kind === 'bid'));
+  // Real bids, newest first (see AuctionService.listBids) -- no longer derived from the mock
+  // comment feed.
+  bids = input.required<Bid[]>();
 }

@@ -1,12 +1,12 @@
-<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-  <h1 class="text-2xl font-bold text-white">{{ 'profile.myAds.launch.heading' | translate }}</h1>
-
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
   @if (loading()) {
-    <p class="mt-4 text-sm text-surface-300">...</p>
+    <p class="bg-surface-700 p-6 text-sm text-surface-300 sm:p-8">...</p>
   } @else {
     @if (ad(); as adValue) {
-      <div class="mt-4 bg-surface-700 p-6 sm:p-8">
-        <section>
+      <div class="bg-surface-700 p-6 sm:p-8">
+        <h1 class="text-2xl font-bold text-white">{{ 'profile.myAds.launch.heading' | translate }}</h1>
+
+        <section class="mt-6">
           <h2 class="text-lg font-bold text-white">{{ 'profile.myAds.launch.summaryHeading' | translate }}</h2>
           <p class="mt-2 text-sm text-surface-300">{{ 'ad.create.title' | translate }}: <span class="text-white">{{ adValue.title }}</span></p>
           <p class="mt-1 text-sm text-surface-300">
@@ -85,38 +85,40 @@
               <input type="number" pInputText [pSize]="'small'" formControlName="buyNowPrice" class="w-full" />
             </div>
 
-            @if (commissionPreview(); as commission) {
-              <div class="bg-surface-800 p-3 text-sm">
-                <div class="flex justify-between">
-                  <span class="text-surface-300">{{ 'profile.myAds.launch.sellerPrice' | translate }}</span>
-                  <span class="font-medium text-white">
-                    {{ form.controls.buyNowPrice.value | currency: 'EUR' : 'symbol' : '1.0-0' }}
-                  </span>
+            <div class="space-y-2 bg-surface-800 p-3 text-sm">
+              @if (commissionPreview(); as commission) {
+                <div>
+                  <div class="flex justify-between">
+                    <span class="text-surface-300">{{ 'profile.myAds.launch.sellerPrice' | translate }}</span>
+                    <span class="font-medium text-white">
+                      {{ form.controls.buyNowPrice.value | currency: 'EUR' : 'symbol' : '1.0-0' }}
+                    </span>
+                  </div>
+                  <div class="mt-1 flex justify-between">
+                    <span class="text-surface-300">{{ 'profile.myAds.launch.commission' | translate }}</span>
+                    <span class="font-medium text-white">
+                      {{ commission | currency: 'EUR' : 'symbol' : '1.0-0' }}
+                    </span>
+                  </div>
+                  <div class="mt-1 flex justify-between border-t border-surface-600 pt-1">
+                    <span class="font-medium text-white">{{ 'profile.myAds.launch.totalForBuyer' | translate }}</span>
+                    <span class="font-bold text-white">
+                      {{ totalForBuyerPreview() | currency: 'EUR' : 'symbol' : '1.0-0' }}
+                    </span>
+                  </div>
                 </div>
-                <div class="mt-1 flex justify-between">
-                  <span class="text-surface-300">{{ 'profile.myAds.launch.commission' | translate }}</span>
-                  <span class="font-medium text-white">
-                    {{ commission | currency: 'EUR' : 'symbol' : '1.0-0' }}
-                  </span>
-                </div>
-                <div class="mt-1 flex justify-between border-t border-surface-600 pt-1">
-                  <span class="font-medium text-white">{{ 'profile.myAds.launch.totalForBuyer' | translate }}</span>
-                  <span class="font-bold text-white">
-                    {{ totalForBuyerPreview() | currency: 'EUR' : 'symbol' : '1.0-0' }}
-                  </span>
-                </div>
-              </div>
-            }
+              }
 
-            @if (reserveCommissionPreview(); as reserveCommission) {
-              <div class="bg-surface-800 p-3 text-sm text-sky-400">
-                {{ 'profile.myAds.launch.reserveCommissionEstimate' | translate: { amount: (reserveCommission | currency: 'EUR' : 'symbol' : '1.0-0') } }}
-              </div>
-            }
+              @if (reserveCommissionPreview(); as reserveCommission) {
+                <p class="text-sky-400">
+                  {{ 'profile.myAds.launch.reserveCommissionEstimate' | translate: { amount: (reserveCommission | currency: 'EUR' : 'symbol' : '1.0-0') } }}
+                </p>
+              }
 
-            <p class="text-xs text-surface-400">
-              {{ 'profile.myAds.launch.commissionRuleExplainer' | translate: { rate: commissionRatePercent, min: (minCommission | currency: 'EUR' : 'symbol' : '1.0-0'), max: (maxCommission | currency: 'EUR' : 'symbol' : '1.0-0') } }}
-            </p>
+              <p class="text-xs text-surface-400">
+                {{ 'profile.myAds.launch.commissionRuleExplainer' | translate: { rate: commissionRatePercent, min: (minCommission | currency: 'EUR' : 'symbol' : '1.0-0'), max: (maxCommission | currency: 'EUR' : 'symbol' : '1.0-0') } }}
+              </p>
+            </div>
 
             @if (errorKey()) {
               <p class="text-sm text-red-400">{{ errorKey()! | translate }}</p>

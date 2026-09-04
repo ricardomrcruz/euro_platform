@@ -3,6 +3,9 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
 import { CommissionService } from './commission.service';
 import { NotificationService } from '../notification/notification.service';
+import { AuthClientService } from '../auth/auth-client.service';
+import { BidRepository } from './bid.repository';
+import { AuctionGateway } from './auction.gateway';
 import { Auction } from './entities/auction.entity';
 import { Bid } from './entities/bid.entity';
 
@@ -21,7 +24,34 @@ export class BidService {
     private readonly dataSource: DataSource,
     private readonly commissionService: CommissionService,
     private readonly notificationService: NotificationService,
+    private readonly bidRepository: BidRepository,
+    private readonly authClient: AuthClientService,
+    private readonly auctionGateway: AuctionGateway,
   ) {}
+
+  private async emitBidPlaced(auctionId: number, bid: Bid): Promise<void> {
+    const [names, bidsCount] = await Promise.all([
+      this.authClient.getPublicNames([bid.bidderId]),
+      this.bidRepository.count({ where: { auction: { id: auctionId } } }),
+    ]);
+    this.auctionGateway.emitBidPlaced(auctionId, {
+      auctionId,
+      amount: bid.amount,
+      bidderName: names[bid.bidderId] ?? `User #${bid.bidderId}`,
+      timestamp: bid.timestamp.toISOString(),
+      currentHighestBid: bid.amount,
+      bidsCount,
+    });
+  }
+
+  async listBids(auctionId: number): Promise<Bid[]> {
+    const bids = await this.bidRepository.findByAuctionOrdered(auctionId);
+    const names = await this.authClient.getPublicNames(bids.map((bid) => bid.bidderId));
+    for (const bid of bids) {
+      bid.bidderName = names[bid.bidderId];
+    }
+    return bids;
+  }
 
   async placeBid(bidderId: number, auctionId: number, amount: number): Promise<Bid> {
     let previousBidderId: number | undefined;
@@ -59,6 +89,7 @@ export class BidService {
     if (previousBidderId && previousBidderId !== bidderId) {
       this.notificationService.notifyOutbid(previousBidderId, auctionId, amount);
     }
+    await this.emitBidPlaced(auctionId, bid);
 
     return bid;
   }
@@ -96,6 +127,8 @@ export class BidService {
     });
 
     this.notificationService.notifyAuctionClosed(result.sellerId, auctionId, result.state);
+    await this.emitBidPlaced(auctionId, result.bid);
+    this.auctionGateway.emitAuctionClosed(auctionId, { auctionId, state: result.state });
     return result.bid;
   }
 

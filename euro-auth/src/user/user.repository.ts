@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { DataSource, Repository } from "typeorm";
+import { DataSource, In, Repository } from "typeorm";
 import { User } from "./entities/user.entity";
 
 @Injectable()
@@ -14,5 +14,9 @@ export class UserRepository extends Repository<User>{
 
     findById(id: number): Promise<User | null> {
         return this.findOneBy({ id });
+    }
+
+    findByIds(ids: number[]): Promise<User[]> {
+        return this.findBy({ id: In(ids) });
     }
 }

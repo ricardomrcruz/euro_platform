@@ -9,8 +9,10 @@ import { AdRepository } from '../ad/ad.repository';
 import { AdStatus } from '../ad/enums/ad-status.enum';
 import { UserRole } from '../auth/enums/user-role.enum';
 import type { RequestUser } from '../auth/interfaces/authenticated-request.interface';
+import { AuthClientService } from '../auth/auth-client.service';
 import { NotificationService } from '../notification/notification.service';
 import { AuctionRepository } from './auction.repository';
+import { AuctionGateway } from './auction.gateway';
 import { Auction } from './entities/auction.entity';
 import { LaunchAuctionDto } from './dto/launch-auction.dto';
 
@@ -21,6 +23,8 @@ export class AuctionService {
     private readonly auctionRepository: AuctionRepository,
     private readonly adRepository: AdRepository,
     private readonly notificationService: NotificationService,
+    private readonly authClient: AuthClientService,
+    private readonly auctionGateway: AuctionGateway,
   ) {}
 
   async launch(currentUser: RequestUser, adId: number, dto: LaunchAuctionDto): Promise<Auction> {
@@ -65,6 +69,7 @@ export class AuctionService {
 
     const saved = await this.auctionRepository.save(auction);
     this.notificationService.notifyAuctionClosed(auction.ad.sellerId, saved.id, saved.state);
+    this.auctionGateway.emitAuctionClosed(saved.id, { auctionId: saved.id, state: saved.state });
     return saved;
   }
 
@@ -76,15 +81,20 @@ export class AuctionService {
       auction.finalize();
       const saved = await this.auctionRepository.save(auction);
       this.notificationService.notifyAuctionClosed(auction.ad.sellerId, saved.id, saved.state);
+      this.auctionGateway.emitAuctionClosed(saved.id, { auctionId: saved.id, state: saved.state });
     }
   }
 
-  listLive(): Promise<Auction[]> {
-    return this.auctionRepository.findLive();
+  async listLive(): Promise<Auction[]> {
+    const auctions = await this.auctionRepository.findLive();
+    await this.resolveSellerNames(auctions);
+    return auctions;
   }
 
-  findOne(id: number): Promise<Auction> {
-    return this.findByIdOrThrow(id);
+  async findOne(id: number): Promise<Auction> {
+    const auction = await this.findByIdOrThrow(id);
+    await this.resolveSellerNames([auction]);
+    return auction;
   }
 
   private async findByIdOrThrow(id: number): Promise<Auction> {
@@ -93,5 +103,14 @@ export class AuctionService {
       throw new NotFoundException('Auction not found');
     }
     return auction;
+  }
+
+  // Batched so a homepage-sized list of auctions costs one euro-auth call, not one per ad.
+  private async resolveSellerNames(auctions: Auction[]): Promise<void> {
+    const sellerIds = auctions.map((auction) => auction.ad.sellerId);
+    const names = await this.authClient.getPublicNames(sellerIds);
+    for (const auction of auctions) {
+      auction.ad.sellerName = names[auction.ad.sellerId];
+    }
   }
 }

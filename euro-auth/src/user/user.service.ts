@@ -37,6 +37,17 @@ export class UserService {
         return this.userRepository.findById(id);
     }
 
+    // "First L." style -- called server-to-server by euro-platform-api to show a bidder/
+    // seller's identity without exposing a full name or email publicly.
+    async getPublicNames(ids: number[]): Promise<Record<number, string>> {
+        const users = await this.userRepository.findByIds(ids);
+        const result: Record<number, string> = {};
+        for (const user of users) {
+            result[user.id] = `${user.firstName} ${user.lastName.charAt(0)}.`;
+        }
+        return result;
+    }
+
     private toResponseDto(user: User): UserResponseDto{
         return{
             id: user.id,
