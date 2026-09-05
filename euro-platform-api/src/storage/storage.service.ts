@@ -39,4 +39,15 @@ export class StorageService {
       publicUrl: `https://storage.googleapis.com/${this.config.bucketName}/${objectKey}`,
     };
   }
+
+  async deleteObject(objectKey: string): Promise<void> {
+    await this.storage.bucket(this.config.bucketName).file(objectKey).delete({ ignoreNotFound: true });
+  }
+
+  // Reverses the URL shape generated in generateUploadUrl() above -- null if the URL isn't
+  // actually one of ours (e.g. hand-pasted from elsewhere before this flow existed).
+  getObjectKeyFromPublicUrl(url: string): string | null {
+    const prefix = `https://storage.googleapis.com/${this.config.bucketName}/`;
+    return url.startsWith(prefix) ? url.slice(prefix.length) : null;
+  }
 }

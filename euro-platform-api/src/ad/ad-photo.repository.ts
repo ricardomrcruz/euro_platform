@@ -11,4 +11,8 @@ export class AdPhotoRepository extends Repository<AdPhoto> {
   countForAd(adId: number): Promise<number> {
     return this.count({ where: { ad: { id: adId } } });
   }
+
+  findByIdForAd(photoId: number, adId: number): Promise<AdPhoto | null> {
+    return this.findOne({ where: { id: photoId, ad: { id: adId } } });
+  }
 }

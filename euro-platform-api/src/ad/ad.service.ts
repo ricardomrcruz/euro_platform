@@ -191,6 +191,33 @@ export class AdService {
     return { ...signed, objectKey };
   }
 
+  // Same guard as addPhoto()/requestPhotoUploadUrl() -- editable while DRAFT/REJECTED (full
+  // edit) or VALIDATED (content edit). Best-effort GCS cleanup: a storage hiccup never blocks
+  // removing the DB row, it just leaves an orphaned object behind.
+  async deletePhoto(sellerId: number, adId: number, photoId: number): Promise<void> {
+    const ad = await this.findOwnedOrThrow(adId, sellerId);
+    if (!ad.canEdit() && !ad.canEditContent()) {
+      throw new ForbiddenException('Ad cannot be edited in its current status');
+    }
+
+    const photo = await this.adPhotoRepository.findByIdForAd(photoId, adId);
+    if (!photo) {
+      throw new NotFoundException('Photo not found');
+    }
+
+    await this.adPhotoRepository.remove(photo);
+
+    const objectKey = this.storageService.getObjectKeyFromPublicUrl(photo.url);
+    if (objectKey) {
+      try {
+        await this.storageService.deleteObject(objectKey);
+      } catch {
+        // Orphaned GCS object is acceptable; the DB row (the source of truth for what's
+        // actually shown on the ad) is already gone.
+      }
+    }
+  }
+
   listPublic(): Promise<Ad[]> {
     return this.adRepository.findValidatedOrdered();
   }

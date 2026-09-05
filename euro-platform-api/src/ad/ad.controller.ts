@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { AdService } from './ad.service';
 import { CreateAdDto } from './dto/create-ad.dto';
 import { UpdateAdDto } from './dto/update-ad.dto';
@@ -78,6 +78,15 @@ export class AdController {
     @Body() dto: RequestPhotoUploadUrlDto,
   ) {
     return this.adService.requestPhotoUploadUrl(user.id, id, dto);
+  }
+
+  @Delete(':id/photos/:photoId')
+  deletePhoto(
+    @CurrentUser() user: RequestUser,
+    @Param('id', ParseIntPipe) id: number,
+    @Param('photoId', ParseIntPipe) photoId: number,
+  ) {
+    return this.adService.deletePhoto(user.id, id, photoId);
   }
 
   @Public()
