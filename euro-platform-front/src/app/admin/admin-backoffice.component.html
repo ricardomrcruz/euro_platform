@@ -1,5 +1,5 @@
-<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-  <div class="bg-surface-700 p-6 sm:p-8">
+<div class="mx-auto h-full max-w-7xl px-4 sm:px-6 lg:px-8">
+  <div class="h-full bg-surface-700 p-6 sm:p-8">
     <h1 class="text-2xl font-bold text-white">{{ 'admin.heading' | translate }}</h1>
 
     <p-tabs [value]="activeTab()" (valueChange)="setActiveTab($event)" class="mt-6 block">
@@ -19,7 +19,9 @@
           } @else {
             <ul class="mt-4 divide-y divide-surface-600">
               @for (ad of pendingAds(); track ad.id) {
-                <li class="py-4">
+                <li class="flex gap-3 py-4">
+                  <img [src]="photoUrl(ad)" [alt]="ad.title" class="h-16 w-16 flex-none object-cover" />
+                  <div class="min-w-0 flex-1">
                   <div class="flex items-center justify-between gap-2">
                     <span class="font-medium text-white">{{ ad.title }}</span>
                     <p-tag [value]="('ad.status.' + ad.status) | translate" [severity]="statusSeverity(ad.status)" />
@@ -119,6 +121,7 @@
                       </div>
                     </div>
                   }
+                  </div>
                 </li>
               }
             </ul>
@@ -136,12 +139,15 @@
             <ul class="mt-4 divide-y divide-surface-600">
               @for (ad of validatedAds(); track ad.id) {
                 <li class="flex items-center justify-between gap-2 py-4">
-                  <div>
-                    <span class="font-medium text-white">{{ ad.title }}</span>
-                    <p class="mt-1 text-sm text-surface-300">
-                      {{ ad.vehicle.year }} {{ ad.vehicle.make.name }} {{ ad.vehicle.model.name }}
-                      — seller #{{ ad.sellerId }}
-                    </p>
+                  <div class="flex min-w-0 items-center gap-3">
+                    <img [src]="photoUrl(ad)" [alt]="ad.title" class="h-16 w-16 flex-none object-cover" />
+                    <div class="min-w-0">
+                      <span class="font-medium text-white">{{ ad.title }}</span>
+                      <p class="mt-1 text-sm text-surface-300">
+                        {{ ad.vehicle.year }} {{ ad.vehicle.make.name }} {{ ad.vehicle.model.name }}
+                        — seller #{{ ad.sellerId }}
+                      </p>
+                    </div>
                   </div>
 
                   @if (liveAuctionByAdId()[ad.id]; as auction) {

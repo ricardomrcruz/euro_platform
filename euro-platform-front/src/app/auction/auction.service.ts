@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { AuctionCardData, FeaturedCar, placeholder } from '../home/mock-data';
 import { AuctionDetailData, DetailSection } from '../auction-detail/interfaces/auction-detail.interface';
-import { Auction, AuctionPhoto, Bid, LaunchAuctionPayload } from './interfaces/auction.interface';
+import { Auction, Bid, LaunchAuctionPayload } from './interfaces/auction.interface';
+import { primaryPhotoUrl } from '../shared/photo.util';
 
 // Matches AuctionGalleryComponent's fixed 2-col x 4-row thumbnail grid (7 photo cells + 1
 // "see all" cell).
@@ -42,11 +43,6 @@ export class AuctionService {
   listBids(auctionId: number): Promise<Bid[]> {
     return firstValueFrom(this.http.get<Bid[]>(`/api/auctions/${auctionId}/bids`));
   }
-}
-
-function primaryPhotoUrl(photos: AuctionPhoto[], fallbackLabel: string): string {
-  const primary = photos.find((p) => p.isPrimary) ?? photos[0];
-  return primary?.url ?? placeholder(fallbackLabel);
 }
 
 // Real Auction -> the homepage grid's card shape. Several mock-only fields have no backend

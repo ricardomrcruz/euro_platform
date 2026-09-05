@@ -11,6 +11,7 @@ import { Ad, AdStatus } from '../ad/interfaces/ad.interface';
 import { AuctionService } from '../auction/auction.service';
 import { Auction } from '../auction/interfaces/auction.interface';
 import { CountdownComponent } from '../shared/countdown/countdown.component';
+import { primaryPhotoUrl } from '../shared/photo.util';
 
 type ProfileTab = 'myAds' | 'myBids' | 'watchlist';
 
@@ -97,5 +98,9 @@ export class ProfileComponent {
 
   endDateOf(auction: Auction): Date {
     return new Date(auction.endDate);
+  }
+
+  photoUrl(ad: Ad): string {
+    return primaryPhotoUrl(ad.photos, ad.title);
   }
 }

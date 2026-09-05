@@ -1,8 +1,8 @@
-<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+<div class="mx-auto h-full max-w-7xl px-4 sm:px-6 lg:px-8">
   @if (loadingExisting()) {
-    <p class="bg-surface-700 p-6 text-sm text-surface-300 sm:p-8">...</p>
+    <p class="h-full bg-surface-700 p-6 text-sm text-surface-300 sm:p-8">...</p>
   } @else {
-    <form [formGroup]="form" class="bg-surface-700 p-6 sm:p-8">
+    <form [formGroup]="form" class="h-full bg-surface-700 p-6 sm:p-8">
       <h1 class="text-2xl font-bold text-white">
         {{ (editingAdId() ? 'ad.create.editHeading' : 'ad.create.heading') | translate }}
       </h1>
@@ -198,13 +198,22 @@
             <div class="text-sm text-surface-300">{{ 'ad.create.existingPhotos' | translate }}</div>
             <div class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
               @for (photo of existingPhotos(); track photo.id) {
-                <div class="aspect-[4/3] overflow-hidden bg-surface-800">
+                <div class="relative aspect-[4/3] overflow-hidden bg-surface-800">
                   <p-image
                     [src]="photo.url"
                     [alt]="photo.caption || ''"
                     [preview]="true"
                     styleClass="block h-full w-full"
                     imageClass="h-full w-full object-cover"
+                  />
+                  <p-button
+                    type="button"
+                    icon="pi pi-trash"
+                    [size]="'small'"
+                    severity="danger"
+                    [loading]="deletingPhotoId() === photo.id"
+                    styleClass="!absolute !right-1 !top-1 !h-7 !w-7 !p-0"
+                    (onClick)="removeExistingPhoto(photo)"
                   />
                 </div>
               }

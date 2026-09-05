@@ -115,6 +115,7 @@ export class CreateAdComponent implements OnDestroy {
   readonly editingAdStatus = signal<AdStatus | null>(null);
   readonly loadingExisting = signal(false);
   readonly existingPhotos = signal<AdPhoto[]>([]);
+  readonly deletingPhotoId = signal<number | null>(null);
 
   // A VALIDATED ad can only have its content (description/highlights/knownFlaws/
   // modifications/serviceHistory) and photos edited -- title/location/condition/vehicle
@@ -251,6 +252,21 @@ export class CreateAdComponent implements OnDestroy {
       }
     }
     input.value = '';
+  }
+
+  async removeExistingPhoto(photo: AdPhoto): Promise<void> {
+    const adId = this.editingAdId();
+    if (!adId) return;
+
+    this.deletingPhotoId.set(photo.id);
+    try {
+      await this.adService.deletePhoto(adId, photo.id);
+      this.existingPhotos.update((photos) => photos.filter((p) => p.id !== photo.id));
+    } catch {
+      this.errorKey.set('ad.create.genericError');
+    } finally {
+      this.deletingPhotoId.set(null);
+    }
   }
 
   // Sets every cascade level with emitEvent: false and fetches models/trims manually --

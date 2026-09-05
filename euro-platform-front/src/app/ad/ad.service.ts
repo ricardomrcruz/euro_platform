@@ -49,6 +49,12 @@ export class AdService {
     );
   }
 
+  // Same edit-state rule as addPhoto()/requestUploadUrl() -- works while DRAFT/REJECTED
+  // (full edit) or VALIDATED (content edit), 403s otherwise.
+  deletePhoto(adId: number, photoId: number): Promise<void> {
+    return firstValueFrom(this.http.delete<void>(`/api/ads/${adId}/photos/${photoId}`));
+  }
+
   // uploadUrl is an absolute https://storage.googleapis.com/... URL -- auth.interceptor.ts's
   // "/api/ only" guard already skips attaching our JWT to it, so no interceptor change needed.
   async uploadFileToSignedUrl(uploadUrl: string, file: File): Promise<void> {

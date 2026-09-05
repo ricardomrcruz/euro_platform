@@ -13,6 +13,7 @@ import { Ad, AdMessage, AdStatus } from '../ad/interfaces/ad.interface';
 import { AuctionService } from '../auction/auction.service';
 import { Auction } from '../auction/interfaces/auction.interface';
 import { CountdownComponent } from '../shared/countdown/countdown.component';
+import { primaryPhotoUrl } from '../shared/photo.util';
 
 type AdminTab = 'pending' | 'launchAuctions';
 
@@ -105,6 +106,10 @@ export class AdminBackofficeComponent {
 
   statusSeverity(status: AdStatus) {
     return STATUS_SEVERITY[status];
+  }
+
+  photoUrl(ad: Ad): string {
+    return primaryPhotoUrl(ad.photos, ad.title);
   }
 
   private removeFromPending(adId: number): void {

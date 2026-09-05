@@ -29,7 +29,6 @@ body {
 /* Angular custom elements default to display: inline, which silently breaks margin,
    position: sticky, and other block-level layout for our own components -- app-countdown
    is deliberately excluded since it's meant to flow inline with surrounding text/icons. */
-app-root,
 app-navbar,
 app-footer,
 app-home,
@@ -45,5 +44,25 @@ app-auction-videos,
 app-auction-bid-history,
 app-auction-comments {
   display: block;
+}
+
+/* Flex column shell so <main> (given flex-1 in app.component.html) can grow to fill exactly
+   the space between the navbar and footer, instead of the body's background showing through
+   below a short page's content. */
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* These "single boxed panel" pages need their own host to be a growing flex item too, so the
+   h-full chain inside each template's outer wrapper -> panel div actually has something
+   real to stretch against. */
+app-create-ad,
+app-launch-auction,
+app-admin-backoffice,
+app-profile {
+  display: block;
+  flex: 1;
 }
 
