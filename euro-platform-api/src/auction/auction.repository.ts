@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, LessThanOrEqual, Repository } from 'typeorm';
+import { DataSource, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Auction } from './entities/auction.entity';
 import { AuctionState } from './enums/auction-state.enum';
+
+const FINISHED_STATES = [AuctionState.SOLD, AuctionState.EXPIRED] as const;
 
 // Mirrors AD_RELATIONS in ad.repository.ts so auction responses carry the same vehicle/photo
 // data the ad endpoints already return -- needed by the frontend homepage/detail pages.
@@ -36,5 +38,22 @@ export class AuctionRepository extends Repository<Auction> {
 
   findExistingForAd(adId: number): Promise<Auction | null> {
     return this.findOne({ where: { ad: { id: adId } } });
+  }
+
+  // Most-recently-ended first -- callers append this after findLive() results.
+  findFinishedSince(cutoff: Date): Promise<Auction[]> {
+    return this.find({
+      where: FINISHED_STATES.map((state) => ({ state, endDate: MoreThanOrEqual(cutoff) })),
+      relations: AUCTION_RELATIONS,
+      order: { endDate: 'DESC' },
+    });
+  }
+
+  findAllFinished(): Promise<Auction[]> {
+    return this.find({
+      where: FINISHED_STATES.map((state) => ({ state })),
+      relations: AUCTION_RELATIONS,
+      order: { endDate: 'DESC' },
+    });
   }
 }

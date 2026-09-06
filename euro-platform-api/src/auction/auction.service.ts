@@ -16,6 +16,8 @@ import { AuctionGateway } from './auction.gateway';
 import { Auction } from './entities/auction.entity';
 import { LaunchAuctionDto } from './dto/launch-auction.dto';
 
+const FEED_FINISHED_WINDOW_DAYS = 14;
+
 // Lifecycle only; bidding and buy-now live in BidService.
 @Injectable()
 export class AuctionService {
@@ -89,6 +91,31 @@ export class AuctionService {
     const auctions = await this.auctionRepository.findLive();
     await this.resolveSellerNames(auctions);
     return auctions;
+  }
+
+  // Live auctions, then anything that finished within the last two weeks -- what the
+  // homepage shows. Older finished auctions still exist, just not here (see listHistory()).
+  async listFeed(): Promise<Auction[]> {
+    const cutoff = new Date(Date.now() - FEED_FINISHED_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+    const [live, recentlyFinished] = await Promise.all([
+      this.auctionRepository.findLive(),
+      this.auctionRepository.findFinishedSince(cutoff),
+    ]);
+    const combined = [...live, ...recentlyFinished];
+    await this.resolveSellerNames(combined);
+    return combined;
+  }
+
+  // Every auction ever, live ones first (by soonest-ending), then every finished one
+  // (most-recently-ended first).
+  async listHistory(): Promise<Auction[]> {
+    const [live, finished] = await Promise.all([
+      this.auctionRepository.findLive(),
+      this.auctionRepository.findAllFinished(),
+    ]);
+    const combined = [...live, ...finished];
+    await this.resolveSellerNames(combined);
+    return combined;
   }
 
   async findOne(id: number): Promise<Auction> {

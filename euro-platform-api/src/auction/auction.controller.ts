@@ -49,6 +49,20 @@ export class AuctionController {
     return this.auctionService.listLive();
   }
 
+  // Declared above 'auctions/:id' deliberately -- NestJS matches routes in declaration order,
+  // so ':id' would otherwise swallow "feed"/"history" as a literal id value.
+  @Public()
+  @Get('auctions/feed')
+  listFeed() {
+    return this.auctionService.listFeed();
+  }
+
+  @Public()
+  @Get('auctions/history')
+  listHistory() {
+    return this.auctionService.listHistory();
+  }
+
   @Public()
   @Get('auctions/:id')
   findOne(@Param('id', ParseIntPipe) id: number) {
