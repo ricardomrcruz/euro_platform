@@ -1,5 +1,8 @@
 @if (cars()[index()]; as car) {
-  <div class="grid grid-cols-1 gap-2 lg:grid-cols-5">
+  <div
+    class="grid grid-cols-1 gap-2 lg:grid-cols-5 transition-opacity duration-200 ease-in-out"
+    [class.opacity-0]="fading()"
+  >
     <div
       class="relative col-span-3 aspect-[16/10] cursor-pointer overflow-hidden bg-surface-200"
       [routerLink]="['/auctions', car.id]"
