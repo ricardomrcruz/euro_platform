@@ -14,7 +14,7 @@ import { AuctionCommentsComponent } from './comments/auction-comments.component'
 import { AuctionCardComponent } from '../shared/auction-card/auction-card.component';
 import { CountdownComponent } from '../shared/countdown/countdown.component';
 import { AuctionDetailData } from './interfaces/auction-detail.interface';
-import { AuctionCardData } from '../home/mock-data';
+import { AuctionCardData } from '../home/auction-view-models';
 import { AuctionService, toAuctionCardData, toAuctionDetailData } from '../auction/auction.service';
 import { AuctionSocketService } from '../auction/auction-socket.service';
 

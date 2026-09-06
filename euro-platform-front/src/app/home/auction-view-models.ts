@@ -1,7 +1,6 @@
 // Shared shapes for the homepage/auction-detail views, plus a placeholder-image helper used
-// as a fallback when a real ad has no photos yet. Real data comes from AuctionService
-// (see toAuctionCardData/toFeaturedCar/toAuctionDetailData in ../auction/auction.service.ts) --
-// no mock listings are seeded from this file anymore.
+// as a fallback when a real ad has no photos yet. Populated from AuctionService (see
+// toAuctionCardData/toFeaturedCar/toAuctionDetailData in ../auction/auction.service.ts).
 import type { AuctionState } from '../auction/interfaces/auction.interface';
 
 export interface AuctionCardData {

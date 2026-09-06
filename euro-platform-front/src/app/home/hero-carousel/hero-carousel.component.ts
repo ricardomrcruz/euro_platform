@@ -5,7 +5,7 @@ import { TagModule } from 'primeng/tag';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CountdownComponent } from '../../shared/countdown/countdown.component';
 import { AuctionService, toFeaturedCar } from '../../auction/auction.service';
-import { FeaturedCar } from '../mock-data';
+import { FeaturedCar } from '../auction-view-models';
 
 const ROTATE_INTERVAL_MS = 20_000;
 const MAX_FEATURED = 4;

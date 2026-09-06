@@ -1,10 +1,10 @@
 @if (cars()[index()]; as car) {
   <div
-    class="grid grid-cols-1 gap-2 lg:grid-cols-5 transition-opacity duration-200 ease-in-out"
+    class="grid grid-cols-1 gap-2 transition-opacity duration-200 ease-in-out lg:aspect-[8/3] lg:grid-cols-5"
     [class.opacity-0]="fading()"
   >
     <div
-      class="relative col-span-3 aspect-[16/10] cursor-pointer overflow-hidden bg-surface-200"
+      class="relative col-span-3 aspect-[16/10] cursor-pointer overflow-hidden bg-surface-200 lg:aspect-auto lg:h-full"
       [routerLink]="['/auctions', car.id]"
     >
       <img [src]="car.mainPhotoUrl" [alt]="car.title" class="h-full w-full object-cover" />
@@ -24,9 +24,9 @@
       </div>
     </div>
 
-    <div class="col-span-2 grid grid-cols-2 grid-rows-2 gap-2">
+    <div class="col-span-2 grid grid-cols-2 grid-rows-2 gap-2 lg:h-full">
       @for (photo of car.detailPhotoUrls; track photo) {
-        <div class="overflow-hidden bg-surface-200">
+        <div class="aspect-[4/3] overflow-hidden bg-surface-200 lg:aspect-auto lg:h-full">
           <img [src]="photo" alt="" class="h-full w-full object-cover" />
         </div>
       }

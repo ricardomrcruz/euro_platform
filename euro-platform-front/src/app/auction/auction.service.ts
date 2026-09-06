@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { AuctionCardData, FeaturedCar, placeholder } from '../home/mock-data';
+import { AuctionCardData, FeaturedCar, placeholder } from '../home/auction-view-models';
 import { AuctionDetailData, DetailSection } from '../auction-detail/interfaces/auction-detail.interface';
 import { Auction, Bid, LaunchAuctionPayload } from './interfaces/auction.interface';
 import { primaryPhotoUrl } from '../shared/photo.util';

@@ -4,7 +4,7 @@ import { Select } from 'primeng/select';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuctionCardComponent } from '../../shared/auction-card/auction-card.component';
 import { AuctionService, toAuctionCardData } from '../../auction/auction.service';
-import { AuctionCardData } from '../mock-data';
+import { AuctionCardData } from '../auction-view-models';
 
 type SortKey = 'ending-soon' | 'newly-listed' | 'no-reserve' | 'lowest-mileage' | 'closest-to-me';
 
