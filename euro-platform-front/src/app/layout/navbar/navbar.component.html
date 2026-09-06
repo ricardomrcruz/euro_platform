@@ -62,7 +62,7 @@
         <a routerLink="/register" class="hidden text-sm font-medium text-surface-300 hover:text-white sm:block">
           {{ 'nav.register' | translate }}
         </a>
-        <p-button [label]="'nav.signIn' | translate" [size]="'small'" (onClick)="openLoginDialog()" />
+        <p-button [label]="'nav.signIn' | translate" [size]="'small'" [raised]="true" (onClick)="openLoginDialog()" />
       }
     </div>
   </div>

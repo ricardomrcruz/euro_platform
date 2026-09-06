@@ -6,6 +6,7 @@
       <p-button
         [label]="'auth.register.signInButton' | translate"
         [size]="'small'"
+        [raised]="true"
         styleClass="mt-4"
         (onClick)="openLoginDialog()"
       />
@@ -60,6 +61,7 @@
         type="submit"
         [label]="'auth.register.submit' | translate"
         [size]="'small'"
+        [raised]="true"
         [loading]="submitting()"
         styleClass="mt-4 w-full"
       />

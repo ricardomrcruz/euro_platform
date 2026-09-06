@@ -82,6 +82,7 @@
                       <p-button
                         [label]="'profile.myAds.submitForReview' | translate"
                         [size]="'small'"
+                        [raised]="true"
                         [loading]="submittingAdId() === ad.id"
                         (onClick)="submitForReview(ad)"
                       />
@@ -100,6 +101,7 @@
                     <p-button
                       [label]="'profile.myAds.launch.action' | translate"
                       [size]="'small'"
+                      [raised]="true"
                       styleClass="mt-2"
                       [routerLink]="['/sell', ad.id, 'auction']"
                     />

@@ -45,6 +45,7 @@
         <p-button
           [label]="'auctionDetail.bidPanel.logInToBid' | translate"
           [size]="'small'"
+          [raised]="true"
           styleClass="w-full"
           (onClick)="openLogin()"
         />
@@ -67,6 +68,7 @@
           <p-button
             [label]="'auctionDetail.bidPanel.placeBid' | translate"
             [size]="'small'"
+            [raised]="true"
             [loading]="placingBid()"
             (onClick)="placeBid()"
           />

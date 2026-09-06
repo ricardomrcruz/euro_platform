@@ -35,6 +35,7 @@
                     <p-button
                       [label]="'admin.validate' | translate"
                       [size]="'small'"
+                      [raised]="true"
                       [loading]="validatingId() === ad.id"
                       (onClick)="validate(ad)"
                     />
@@ -71,6 +72,7 @@
                         <p-button
                           [label]="'admin.confirmReject' | translate"
                           [size]="'small'"
+                          [raised]="true"
                           severity="danger"
                           [loading]="rejectingId() === ad.id"
                           (onClick)="confirmReject(ad)"
@@ -162,6 +164,7 @@
                     <p-button
                       [label]="'profile.myAds.launch.action' | translate"
                       [size]="'small'"
+                      [raised]="true"
                       [routerLink]="['/sell', ad.id, 'auction']"
                     />
                   }
