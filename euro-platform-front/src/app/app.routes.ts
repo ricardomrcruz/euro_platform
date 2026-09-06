@@ -7,7 +7,7 @@ import { ProfileComponent } from './profile/profile.component';
 import { AdminBackofficeComponent } from './admin/admin-backoffice.component';
 import { CreateAdComponent } from './ad/create-ad/create-ad.component';
 import { LaunchAuctionComponent } from './auction/launch-auction/launch-auction.component';
-import { authGuard, adminGuard } from './auth/auth.guard';
+import { authGuard, adminGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },

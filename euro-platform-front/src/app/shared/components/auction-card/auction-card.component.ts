@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { TagModule } from 'primeng/tag';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CountdownComponent } from '../countdown/countdown.component';
-import type { AuctionCardData } from '../../home/auction-view-models';
+import type { AuctionCardData } from '../../models/auction.model';
 
 @Component({
   selector: 'app-auction-card',

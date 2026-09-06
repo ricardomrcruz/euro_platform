@@ -5,7 +5,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-register',

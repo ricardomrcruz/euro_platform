@@ -2,9 +2,10 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Select } from 'primeng/select';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AuctionCardComponent } from '../../shared/auction-card/auction-card.component';
-import { AuctionService, toAuctionCardData } from '../../auction/auction.service';
-import { AuctionCardData } from '../auction-view-models';
+import { AuctionCardComponent } from '../../shared/components/auction-card/auction-card.component';
+import { AuctionService } from '../../auction/auction.service';
+import { toAuctionCardData } from '../../auction/auction.mappers';
+import { AuctionCardData } from '../../shared/models/auction.model';
 
 type SortKey = 'ending-soon' | 'newly-listed' | 'no-reserve' | 'lowest-mileage' | 'closest-to-me';
 

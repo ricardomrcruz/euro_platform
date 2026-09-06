@@ -12,17 +12,11 @@ import { AdService } from '../ad/ad.service';
 import { Ad, AdMessage, AdStatus } from '../ad/interfaces/ad.interface';
 import { AuctionService } from '../auction/auction.service';
 import { Auction } from '../auction/interfaces/auction.interface';
-import { CountdownComponent } from '../shared/countdown/countdown.component';
-import { primaryPhotoUrl } from '../shared/photo.util';
+import { CountdownComponent } from '../shared/components/countdown/countdown.component';
+import { primaryPhotoUrl } from '../shared/utils/photo.util';
+import { STATUS_SEVERITY } from '../shared/utils/ad-status.util';
 
 type AdminTab = 'pending' | 'launchAuctions';
-
-const STATUS_SEVERITY: Record<AdStatus, 'secondary' | 'warn' | 'success' | 'danger'> = {
-  DRAFT: 'secondary',
-  REVIEW: 'warn',
-  VALIDATED: 'success',
-  REJECTED: 'danger',
-};
 
 @Component({
   selector: 'app-admin-backoffice',

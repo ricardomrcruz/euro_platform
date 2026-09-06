@@ -5,24 +5,16 @@ import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../core/auth/auth.service';
 import { AdService } from '../ad/ad.service';
 import { Ad, AdStatus } from '../ad/interfaces/ad.interface';
 import { AuctionService } from '../auction/auction.service';
 import { Auction } from '../auction/interfaces/auction.interface';
-import { CountdownComponent } from '../shared/countdown/countdown.component';
-import { primaryPhotoUrl } from '../shared/photo.util';
+import { CountdownComponent } from '../shared/components/countdown/countdown.component';
+import { primaryPhotoUrl } from '../shared/utils/photo.util';
+import { STATUS_SEVERITY } from '../shared/utils/ad-status.util';
 
 type ProfileTab = 'myAds' | 'myBids' | 'watchlist';
-
-// p-tag severity per ad status -- matches the color language already used for reserve/
-// no-reserve tags elsewhere (auction-card, auction-bid-panel).
-const STATUS_SEVERITY: Record<AdStatus, 'secondary' | 'warn' | 'success' | 'danger'> = {
-  DRAFT: 'secondary',
-  REVIEW: 'warn',
-  VALIDATED: 'success',
-  REJECTED: 'danger',
-};
 
 @Component({
   selector: 'app-profile',

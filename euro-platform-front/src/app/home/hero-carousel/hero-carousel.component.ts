@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TagModule } from 'primeng/tag';
 import { TranslatePipe } from '@ngx-translate/core';
-import { CountdownComponent } from '../../shared/countdown/countdown.component';
-import { AuctionService, toFeaturedCar } from '../../auction/auction.service';
-import { FeaturedCar } from '../auction-view-models';
+import { CountdownComponent } from '../../shared/components/countdown/countdown.component';
+import { AuctionService } from '../../auction/auction.service';
+import { toFeaturedCar } from '../../auction/auction.mappers';
+import { FeaturedCar } from '../../shared/models/auction.model';
 
 const ROTATE_INTERVAL_MS = 20_000;
 const MAX_FEATURED = 4;

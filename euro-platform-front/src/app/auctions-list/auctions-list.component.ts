@@ -1,8 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AuctionCardComponent } from '../shared/auction-card/auction-card.component';
-import { AuctionService, toAuctionCardData } from '../auction/auction.service';
-import { AuctionCardData } from '../home/auction-view-models';
+import { AuctionCardComponent } from '../shared/components/auction-card/auction-card.component';
+import { AuctionService } from '../auction/auction.service';
+import { toAuctionCardData } from '../auction/auction.mappers';
+import { AuctionCardData } from '../shared/models/auction.model';
 
 @Component({
   selector: 'app-auctions-list',

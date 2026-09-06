@@ -7,8 +7,8 @@ import { TagModule } from 'primeng/tag';
 import { InputText } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { CountdownComponent } from '../../shared/countdown/countdown.component';
-import { AuthService } from '../../auth/auth.service';
+import { CountdownComponent } from '../../shared/components/countdown/countdown.component';
+import { AuthService } from '../../core/auth/auth.service';
 import { AuctionService } from '../../auction/auction.service';
 import type { AuctionDetailData } from '../interfaces/auction-detail.interface';
 

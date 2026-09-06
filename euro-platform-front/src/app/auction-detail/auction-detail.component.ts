@@ -11,11 +11,12 @@ import { AuctionDetailSectionsComponent } from './auction-detail-sections.compon
 import { AuctionVideosComponent } from './auction-videos.component';
 import { AuctionBidHistoryComponent } from './bid-history/auction-bid-history.component';
 import { AuctionCommentsComponent } from './comments/auction-comments.component';
-import { AuctionCardComponent } from '../shared/auction-card/auction-card.component';
-import { CountdownComponent } from '../shared/countdown/countdown.component';
+import { AuctionCardComponent } from '../shared/components/auction-card/auction-card.component';
+import { CountdownComponent } from '../shared/components/countdown/countdown.component';
 import { AuctionDetailData } from './interfaces/auction-detail.interface';
-import { AuctionCardData } from '../home/auction-view-models';
-import { AuctionService, toAuctionCardData, toAuctionDetailData } from '../auction/auction.service';
+import { AuctionCardData } from '../shared/models/auction.model';
+import { AuctionService } from '../auction/auction.service';
+import { toAuctionCardData, toAuctionDetailData } from '../auction/auction.mappers';
 import { AuctionSocketService } from '../auction/auction-socket.service';
 
 @Component({

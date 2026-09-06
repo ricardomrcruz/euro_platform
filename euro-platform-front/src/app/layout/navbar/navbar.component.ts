@@ -5,8 +5,8 @@ import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { InputText } from 'primeng/inputtext';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
-import { AppLang, SUPPORTED_LANGS, setStoredLang } from '../../i18n/lang-storage';
-import { AuthService } from '../../auth/auth.service';
+import { AppLang, SUPPORTED_LANGS, setStoredLang } from '../../core/i18n/lang-storage';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-navbar',

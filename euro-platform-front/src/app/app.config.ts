@@ -9,8 +9,8 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { routes } from './app.routes';
 import { EuroCarsPreset } from '../theme/eurocars-preset';
-import { getStoredLang, DEFAULT_LANG } from './i18n/lang-storage';
-import { authInterceptor } from './auth/auth.interceptor';
+import { getStoredLang, DEFAULT_LANG } from './core/i18n/lang-storage';
+import { authInterceptor } from './core/auth/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [

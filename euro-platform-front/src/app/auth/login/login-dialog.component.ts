@@ -6,7 +6,7 @@ import { Dialog } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../../core/auth/auth.service';
 
 // Mounted once in the app shell -- opened from anywhere (navbar, the register page's
 // post-success prompt) via AuthService.openLoginDialog().

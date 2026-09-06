@@ -23,7 +23,7 @@ import type {
   VehicleModel,
   VehicleTrim,
 } from '../../vehicle/interfaces/vehicle-catalog.interface';
-import { COUNTRIES } from '../../shared/countries';
+import { COUNTRIES } from '../../shared/utils/countries';
 import type {
   ConditionOption,
   PhotoCategoryOption,

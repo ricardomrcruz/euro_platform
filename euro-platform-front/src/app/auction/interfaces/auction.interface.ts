@@ -64,3 +64,17 @@ export interface Bid {
   bidderId: number;
   bidderName?: string;
 }
+
+export interface BidPlacedEvent {
+  auctionId: number;
+  amount: number;
+  bidderName: string;
+  timestamp: string;
+  currentHighestBid: number;
+  bidsCount: number;
+}
+
+export interface AuctionClosedEvent {
+  auctionId: number;
+  state: AuctionState;
+}

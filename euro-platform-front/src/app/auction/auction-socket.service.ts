@@ -1,21 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
-import type { AuctionState } from './interfaces/auction.interface';
-
-export interface BidPlacedEvent {
-  auctionId: number;
-  amount: number;
-  bidderName: string;
-  timestamp: string;
-  currentHighestBid: number;
-  bidsCount: number;
-}
-
-export interface AuctionClosedEvent {
-  auctionId: number;
-  state: AuctionState;
-}
+import type { BidPlacedEvent, AuctionClosedEvent } from './interfaces/auction.interface';
 
 // Kept separate from the HTTP-only AuctionService -- this is purely a server -> client push
 // channel for live updates, never used to mutate anything (bids/buy-now stay authenticated

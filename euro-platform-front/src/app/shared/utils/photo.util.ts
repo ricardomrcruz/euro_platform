@@ -1,4 +1,4 @@
-import { placeholder } from '../home/auction-view-models';
+import { placeholder } from './photo-placeholder.util';
 
 export interface PhotoLike {
   url: string;
