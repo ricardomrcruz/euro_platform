@@ -8,12 +8,19 @@
       <i class="pi pi-clock text-[0.7rem]"></i>
       <app-countdown [endDate]="data().endDate" />
       <span class="opacity-60">|</span>
-      <span>{{ 'card.bid' | translate }} {{ data().currentBid | currency: 'EUR' : 'symbol' : '1.0-0' }}</span>
+      <span>
+        {{ (data().state === 'LIVE' ? 'card.bid' : 'card.finalBid') | translate }}
+        {{ data().currentBid | currency: 'EUR' : 'symbol' : '1.0-0' }}
+      </span>
     </div>
   </div>
 
   <div class="mt-3">
-    @if (data().badge === 'NO RESERVE') {
+    @if (data().state === 'SOLD') {
+      <p-tag [value]="'card.sold' | translate" severity="success" styleClass="!text-xs mb-1" />
+    } @else if (data().state === 'EXPIRED') {
+      <p-tag [value]="'card.reserveNotMet' | translate" severity="secondary" styleClass="!text-xs mb-1" />
+    } @else if (data().badge === 'NO RESERVE') {
       <p-tag [value]="'card.noReserve' | translate" styleClass="!bg-primary !text-white !text-xs mb-1" />
     }
     <h3 class="font-semibold text-white">{{ data().title }}</h3>

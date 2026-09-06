@@ -26,6 +26,16 @@ export class AuctionService {
     return firstValueFrom(this.http.get<Auction[]>('/api/auctions'));
   }
 
+  // Live auctions plus anything finished within the last two weeks, live ones first.
+  listFeed(): Promise<Auction[]> {
+    return firstValueFrom(this.http.get<Auction[]>('/api/auctions/feed'));
+  }
+
+  // Every auction ever, live ones first, then every finished one (most recent first).
+  listHistory(): Promise<Auction[]> {
+    return firstValueFrom(this.http.get<Auction[]>('/api/auctions/history'));
+  }
+
   getOne(id: number): Promise<Auction> {
     return firstValueFrom(this.http.get<Auction>(`/api/auctions/${id}`));
   }
@@ -60,6 +70,7 @@ export function toAuctionCardData(auction: Auction): AuctionCardData {
     // No "ad first listed" timestamp exists on Auction -- startDate is the closest proxy.
     listedAt: new Date(auction.startDate),
     mileage: ad.vehicle.mileage ?? 0,
+    state: auction.state,
   };
 }
 

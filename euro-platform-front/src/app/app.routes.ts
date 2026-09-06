@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
+import { AuctionsListComponent } from './auctions-list/auctions-list.component';
 import { AuctionDetailComponent } from './auction-detail/auction-detail.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { ProfileComponent } from './profile/profile.component';
@@ -10,6 +11,7 @@ import { authGuard, adminGuard } from './auth/auth.guard';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
+  { path: 'auctions', component: AuctionsListComponent },
   { path: 'auctions/:id', component: AuctionDetailComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },

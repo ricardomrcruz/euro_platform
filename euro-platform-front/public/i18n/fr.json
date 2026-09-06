@@ -11,7 +11,10 @@
   },
   "card": {
     "bid": "Enchère",
-    "noReserve": "SANS RÉSERVE"
+    "finalBid": "Enchère finale",
+    "noReserve": "SANS RÉSERVE",
+    "sold": "Vendu",
+    "reserveNotMet": "Réserve non atteinte"
   },
   "countdown": {
     "ended": "Terminée",
@@ -23,6 +26,7 @@
   },
   "auctions": {
     "heading": "Enchères",
+    "empty": "Aucune enchère à afficher pour le moment.",
     "filters": {
       "anyYear": "Année",
       "year2020": "2020+",

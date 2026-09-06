@@ -11,7 +11,10 @@
   },
   "card": {
     "bid": "Bid",
-    "noReserve": "NO RESERVE"
+    "finalBid": "Final bid",
+    "noReserve": "NO RESERVE",
+    "sold": "Sold",
+    "reserveNotMet": "Reserve not met"
   },
   "countdown": {
     "ended": "Ended",
@@ -23,6 +26,7 @@
   },
   "auctions": {
     "heading": "Auctions",
+    "empty": "No auctions to show yet.",
     "filters": {
       "anyYear": "Years",
       "year2020": "2020+",

@@ -55,11 +55,11 @@ export class AuctionsSectionComponent implements OnInit {
   private readonly auctionService = inject(AuctionService);
 
   readonly sortTabs = SORT_TABS;
-  readonly liveAuctions = signal<AuctionCardData[]>([]);
+  readonly feedAuctions = signal<AuctionCardData[]>([]);
 
   ngOnInit(): void {
-    this.auctionService.listLive().then((auctions) => {
-      this.liveAuctions.set(auctions.map(toAuctionCardData));
+    this.auctionService.listFeed().then((auctions) => {
+      this.feedAuctions.set(auctions.map(toAuctionCardData));
     });
   }
 
@@ -72,23 +72,32 @@ export class AuctionsSectionComponent implements OnInit {
 
   readonly activeSort = signal<SortKey>('ending-soon');
 
+  // Finished auctions always come after live ones, regardless of the active sort tab --
+  // the tabs are about browsing what's still biddable, not about ordering the whole feed.
   readonly auctions = computed(() => {
-    const items = [...this.liveAuctions()];
+    const live = this.feedAuctions().filter((a) => a.state === 'LIVE');
+    const finished = this.feedAuctions()
+      .filter((a) => a.state !== 'LIVE')
+      .sort((a, b) => b.endDate.getTime() - a.endDate.getTime());
+
     switch (this.activeSort()) {
       case 'newly-listed':
-        return items.sort((a, b) => b.listedAt.getTime() - a.listedAt.getTime());
+        live.sort((a, b) => b.listedAt.getTime() - a.listedAt.getTime());
+        break;
       case 'no-reserve':
-        return items
+        return live
           .filter((a) => a.badge === 'NO RESERVE')
           .sort((a, b) => a.endDate.getTime() - b.endDate.getTime());
       case 'lowest-mileage':
-        return items.sort((a, b) => a.mileage - b.mileage);
+        live.sort((a, b) => a.mileage - b.mileage);
+        break;
       case 'closest-to-me':
-        return items;
+        break;
       case 'ending-soon':
       default:
-        return items.sort((a, b) => a.endDate.getTime() - b.endDate.getTime());
+        live.sort((a, b) => a.endDate.getTime() - b.endDate.getTime());
     }
+    return [...live, ...finished];
   });
 
   selectSort(key: SortKey): void {

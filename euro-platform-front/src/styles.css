@@ -55,14 +55,17 @@ app-root {
   min-height: 100vh;
 }
 
-/* These "single boxed panel" pages need their own host to be a growing flex item too, so the
-   h-full chain inside each template's outer wrapper -> panel div actually has something
-   real to stretch against. */
+/* These "single boxed panel" pages need to grow to fill <main>'s remaining height, and their
+   panel needs to grow to fill the page in turn -- a flex-grow chain all the way down, rather
+   than h-full (percentage heights need every ancestor to have a definite height, which a
+   flex-grown box only reliably provides to a flex *child*, not to further percentage-based
+   descendants). */
 app-create-ad,
 app-launch-auction,
 app-admin-backoffice,
 app-profile {
-  display: block;
+  display: flex;
+  flex-direction: column;
   flex: 1;
 }
 

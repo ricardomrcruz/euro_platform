@@ -2,6 +2,7 @@
 // as a fallback when a real ad has no photos yet. Real data comes from AuctionService
 // (see toAuctionCardData/toFeaturedCar/toAuctionDetailData in ../auction/auction.service.ts) --
 // no mock listings are seeded from this file anymore.
+import type { AuctionState } from '../auction/interfaces/auction.interface';
 
 export interface AuctionCardData {
   id: number;
@@ -14,6 +15,7 @@ export interface AuctionCardData {
   listedAt: Date;
   mileage: number;
   badge?: 'NO RESERVE';
+  state: AuctionState;
 }
 
 export interface FeaturedCar {
