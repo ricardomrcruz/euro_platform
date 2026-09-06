@@ -6,4 +6,6 @@ export enum FuelType {
   PLUGIN_HYBRID = 'PLUGIN_HYBRID',
   LPG = 'LPG',
   ETHANOL = 'ETHANOL',
+  HYDROGEN = 'HYDROGEN',
+  CNG = 'CNG',
 }

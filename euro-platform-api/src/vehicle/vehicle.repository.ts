@@ -48,14 +48,11 @@ export class VehicleRepository {
     return this.modelRepository.findOneBy({ id });
   }
 
-  listTrimsByMakeModelYear(make: string, model: string, year?: number): Promise<VehicleTrim[]> {
+  listTrimsByMakeModel(make: string, model: string): Promise<VehicleTrim[]> {
     return this.trimRepository.find({
-      where: {
-        model: { name: model, make: { name: make } },
-        ...(year ? { year } : {}),
-      },
+      where: { model: { name: model, make: { name: make } } },
       relations: { model: { make: true } },
-      order: { year: 'ASC', name: 'ASC' },
+      order: { name: 'ASC' },
     });
   }
 
@@ -98,10 +95,10 @@ export class VehicleRepository {
     return this.modelRepository.save(this.modelRepository.create({ name: trimmed, make }));
   }
 
-  async findOrCreateTrimByName(modelId: number, name: string, year: number): Promise<VehicleTrim> {
+  async findOrCreateTrimByName(modelId: number, name: string, year?: number): Promise<VehicleTrim> {
     const trimmed = name.trim();
     const existing = await this.trimRepository.findOne({
-      where: { name: ILike(trimmed), year, model: { id: modelId } },
+      where: { name: ILike(trimmed), model: { id: modelId } },
     });
     if (existing) return existing;
 

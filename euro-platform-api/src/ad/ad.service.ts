@@ -51,6 +51,10 @@ export class AdService {
       mileage: dto.mileage,
       numberOfOwners: dto.numberOfOwners,
       plateCountry: dto.plateCountry,
+      fiscalPower: dto.fiscalPower,
+      critAir: dto.critAir,
+      numberOfSeats: dto.numberOfSeats,
+      numberOfDoors: dto.numberOfDoors,
     });
 
     const ad = this.adRepository.create({
@@ -90,6 +94,10 @@ export class AdService {
       mileage: dto.mileage,
       numberOfOwners: dto.numberOfOwners,
       plateCountry: dto.plateCountry,
+      fiscalPower: dto.fiscalPower,
+      critAir: dto.critAir,
+      numberOfSeats: dto.numberOfSeats,
+      numberOfDoors: dto.numberOfDoors,
     });
 
     ad.title = dto.title;

@@ -9,8 +9,7 @@ import { mapBodyType, mapFuelType } from '../catalog-mappers.util';
 // One-off (rerunnable) catalog seed, run manually: `npm run seed:catalog`.
 // Not part of the running app -- populates VehicleMake/VehicleModel/VehicleTrim from
 // Wikidata's public SPARQL endpoint, since neither CarAPI (2015-2020 only) nor NHTSA
-// (US-market-submission-biased) fit a European collectible-car catalog. See the plan /
-// CLAUDE.md for the research behind this.
+// (US-market-submission-biased) fit a European collectible-car catalog.
 //
 // Wikidata data quality caveats, deliberately not engineered around here:
 // - Coverage tracks notability, not completeness -- strong for well-documented/famous

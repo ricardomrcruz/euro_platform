@@ -1,10 +1,7 @@
-// Categories mirror Cars & Bids' official photo guide (carsandbids.com/photos/guide),
-// scoped down from their ~65-shot full gallery to the angles that matter most for review.
 // Categories with a fixed angle/purpose are REQUIRED -- an ad can't be submitted for review
 // until one photo of each exists. OTHER is unlimited and carries no special designation:
-// flaw close-ups, service records, keys, window sticker, mirrors/lights, anything extra.
-// REGISTRATION_DOCUMENT is an EU-market addition (carte grise) -- not part of the C&B list,
-// which instead expects US-specific items (window sticker, VIN stickers) we fold into OTHER.
+// flaw close-ups, service records, keys, mirrors/lights, anything extra.
+// REGISTRATION_DOCUMENT holds the vehicle's carte grise.
 export enum AdPhotoCategory {
   EXTERIOR_FRONT = 'EXTERIOR_FRONT',
   EXTERIOR_REAR = 'EXTERIOR_REAR',

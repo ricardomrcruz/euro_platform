@@ -34,12 +34,8 @@ export class VehicleCatalogController {
 
   @Public()
   @Get('trims')
-  getTrims(
-    @Query('make') make: string,
-    @Query('model') model: string,
-    @Query('year') year?: string,
-  ) {
-    return this.vehicleFactory.listTrims(make, model, year ? Number(year) : undefined);
+  getTrims(@Query('make') make: string, @Query('model') model: string) {
+    return this.vehicleFactory.listTrims(make, model);
   }
 
   // Find-or-create, resolved by the frontend at ad-submit time when a seller typed a make/

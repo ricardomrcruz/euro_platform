@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsPositive, IsString, MaxLength, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, MaxLength, Min } from 'class-validator';
 
 export class FindOrCreateTrimDto {
   @IsInt()
@@ -10,9 +10,10 @@ export class FindOrCreateTrimDto {
   @MaxLength(100)
   name!: string;
 
-  // VehicleTrim.year is a non-nullable column -- the ad's own year field is the natural source
-  // for this when the trim doesn't exist yet.
+  // A finition/trim name isn't tied to one specific model-year (see vehicle-trim.entity.ts) --
+  // year is optional context, not a required disambiguator.
+  @IsOptional()
   @IsInt()
   @Min(1886)
-  year!: number;
+  year?: number;
 }

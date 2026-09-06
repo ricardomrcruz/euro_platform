@@ -4,8 +4,11 @@ import { Transmission } from '../enums/transmission.enum';
 import { Drivetrain } from '../enums/drivetrain.enum';
 import { FuelType } from '../enums/fuel-type.enum';
 
+// A trim name isn't tied to one specific model-year -- e.g. "AMG Line" has existed across
+// several C-Class generations. year is kept for cases where it's actually known, but is no
+// longer part of what makes a trim unique.
 @Entity('vehicle_trims')
-@Index(['model', 'name', 'year'], { unique: true })
+@Index(['model', 'name'], { unique: true })
 export class VehicleTrim {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -13,8 +16,8 @@ export class VehicleTrim {
   @Column()
   name!: string;
 
-  @Column()
-  year!: number;
+  @Column({ nullable: true })
+  year?: number;
 
   @Column({ nullable: true })
   engine?: string;
@@ -36,9 +39,6 @@ export class VehicleTrim {
 
   @Column({ name: 'fuel_type', type: 'enum', enum: FuelType, nullable: true })
   fuelType?: FuelType;
-
-  @Column({ name: 'number_of_doors', nullable: true })
-  numberOfDoors?: number;
 
   @Column({ nullable: true })
   weight?: number;

@@ -8,6 +8,8 @@ import {
   Min,
 } from 'class-validator';
 import { VehicleCondition } from '../enums/vehicle-condition.enum';
+import { VehicleColor } from '../../vehicle/enums/vehicle-color.enum';
+import { CritAir } from '../../vehicle/enums/crit-air.enum';
 
 export class CreateAdDto {
   @IsString()
@@ -63,8 +65,8 @@ export class CreateAdDto {
   year!: number;
 
   @IsOptional()
-  @IsString()
-  exteriorColor?: string;
+  @IsEnum(VehicleColor)
+  exteriorColor?: VehicleColor;
 
   @IsOptional()
   @IsString()
@@ -83,4 +85,23 @@ export class CreateAdDto {
   @IsOptional()
   @IsString()
   plateCountry?: string;
+
+  // French administrative tax rating (cv).
+  @IsInt()
+  @Min(1)
+  fiscalPower!: number;
+
+  @IsOptional()
+  @IsEnum(CritAir)
+  critAir?: CritAir;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  numberOfSeats?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  numberOfDoors?: number;
 }

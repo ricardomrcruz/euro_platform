@@ -3,6 +3,8 @@ import { VehicleRepository } from './vehicle.repository';
 import { VehicleMake } from './entities/vehicle-make.entity';
 import { VehicleTrim } from './entities/vehicle-trim.entity';
 import { Vehicle } from './entities/vehicle.entity';
+import { VehicleColor } from './enums/vehicle-color.enum';
+import { CritAir } from './enums/crit-air.enum';
 import { decodeModelYear } from './vin-year.util';
 
 export interface VinLookupResult {
@@ -18,17 +20,21 @@ export interface CreateVehicleInput {
   trimId?: number;
   vin?: string;
   year: number;
-  exteriorColor?: string;
+  exteriorColor?: VehicleColor;
   interiorColor?: string;
   mileage?: number;
   numberOfOwners?: number;
   plateCountry?: string;
+  fiscalPower: number;
+  critAir?: CritAir;
+  numberOfSeats?: number;
+  numberOfDoors?: number;
 }
 
 // The design doc's Factory pattern for 6.2.1 "Creer une annonce": queries the catalog.
 // Backed by our own locally-seeded tables (see src/vehicle/seed/seed-catalog.ts), not a
 // live external API -- CarAPI's 2015-2020-only free tier and NHTSA's US-market bias both
-// don't fit a European collectible-car platform (see CLAUDE.md / the plan for the research).
+// don't fit a European collectible-car platform.
 @Injectable()
 export class VehicleFactoryService {
   constructor(private readonly vehicleRepository: VehicleRepository) {}
@@ -41,8 +47,8 @@ export class VehicleFactoryService {
     return this.vehicleRepository.listModelsByMakeName(make);
   }
 
-  listTrims(make: string, model: string, year?: number): Promise<VehicleTrim[]> {
-    return this.vehicleRepository.listTrimsByMakeModelYear(make, model, year);
+  listTrims(make: string, model: string): Promise<VehicleTrim[]> {
+    return this.vehicleRepository.listTrimsByMakeModel(make, model);
   }
 
   resolveTrim(id: number): Promise<VehicleTrim | null> {
@@ -57,7 +63,7 @@ export class VehicleFactoryService {
     return this.vehicleRepository.findOrCreateModelByName(makeId, name);
   }
 
-  findOrCreateTrim(modelId: number, name: string, year: number): Promise<VehicleTrim> {
+  findOrCreateTrim(modelId: number, name: string, year?: number): Promise<VehicleTrim> {
     return this.vehicleRepository.findOrCreateTrimByName(modelId, name, year);
   }
 
@@ -113,6 +119,10 @@ export class VehicleFactoryService {
         mileage: input.mileage,
         numberOfOwners: input.numberOfOwners,
         plateCountry: input.plateCountry,
+        fiscalPower: input.fiscalPower,
+        critAir: input.critAir,
+        numberOfSeats: input.numberOfSeats,
+        numberOfDoors: input.numberOfDoors,
       }),
     );
   }

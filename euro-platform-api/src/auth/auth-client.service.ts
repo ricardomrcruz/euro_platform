@@ -21,9 +21,9 @@ export interface AccessToken {
   accessToken: string;
 }
 
-// The real network call behind the architecture decision in CLAUDE.md: euro-platform-api
-// never verifies JWTs locally, it asks euro-auth on every protected request, so revocation
-// (tokenVersion bump) takes effect immediately instead of waiting for token expiry.
+// euro-platform-api never verifies JWTs locally -- it asks euro-auth on every protected
+// request, so revocation (tokenVersion bump) takes effect immediately instead of waiting
+// for token expiry.
 @Injectable()
 export class AuthClientService {
   private readonly logger = new Logger(AuthClientService.name);
