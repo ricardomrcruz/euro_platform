@@ -24,12 +24,12 @@
   "auctions": {
     "heading": "Auctions",
     "filters": {
-      "anyYear": "Any year",
+      "anyYear": "Years",
       "year2020": "2020+",
       "year2015": "2015-2019",
       "year2010": "2010-2014",
       "beforeYear2010": "Before 2010",
-      "anyTransmission": "Any transmission",
+      "anyTransmission": "Transmission",
       "manual": "Manual",
       "automatic": "Automatic",
       "anyBodyStyle": "Style",

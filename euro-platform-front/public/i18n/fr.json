@@ -24,12 +24,12 @@
   "auctions": {
     "heading": "Enchères",
     "filters": {
-      "anyYear": "Toute année",
+      "anyYear": "Année",
       "year2020": "2020+",
       "year2015": "2015-2019",
       "year2010": "2010-2014",
       "beforeYear2010": "Avant 2010",
-      "anyTransmission": "Toute transmission",
+      "anyTransmission": "Transmission",
       "manual": "Manuelle",
       "automatic": "Automatique",
       "anyBodyStyle": "Type",
