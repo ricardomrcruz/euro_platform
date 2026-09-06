@@ -170,13 +170,9 @@
       "heading": "Other Auctions"
     },
     "comments": {
-      "heading": "Comments & Bids",
+      "heading": "Comments",
       "addCommentPlaceholder": "Add a Comment...",
       "submit": "Submit",
-      "sortNewest": "Newest",
-      "sortMostUpvoted": "Most Upvoted",
-      "sortSellerComments": "Seller Comments",
-      "sortBidHistory": "Bid History",
       "reply": "Reply",
       "flagInappropriate": "Flag as inappropriate",
       "bidPrefix": "Bid",

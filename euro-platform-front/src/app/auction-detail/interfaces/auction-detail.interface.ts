@@ -74,10 +74,3 @@ export interface SpecRow {
   value?: string;
   valueKey?: string;
 }
-
-export type SortKey = 'newest' | 'most-upvoted' | 'seller-comments' | 'bid-history';
-
-export interface SortTab {
-  key: SortKey;
-  labelKey: string;
-}

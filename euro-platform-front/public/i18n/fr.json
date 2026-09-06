@@ -170,13 +170,9 @@
       "heading": "Autres enchères"
     },
     "comments": {
-      "heading": "Commentaires et enchères",
+      "heading": "Commentaires",
       "addCommentPlaceholder": "Ajouter un commentaire...",
       "submit": "Envoyer",
-      "sortNewest": "Plus récents",
-      "sortMostUpvoted": "Les plus votés",
-      "sortSellerComments": "Commentaires du vendeur",
-      "sortBidHistory": "Historique des enchères",
       "reply": "Répondre",
       "flagInappropriate": "Signaler comme inapproprié",
       "bidPrefix": "Enchère",
