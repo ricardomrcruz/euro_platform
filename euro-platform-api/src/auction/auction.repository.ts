@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Auction } from './entities/auction.entity';
 import { AuctionState } from './enums/auction-state.enum';
+import { SearchAuctionsDto } from './dto/search-auctions.dto';
 
 const FINISHED_STATES = [AuctionState.SOLD, AuctionState.EXPIRED] as const;
 
@@ -49,11 +50,92 @@ export class AuctionRepository extends Repository<Auction> {
     });
   }
 
-  findAllFinished(): Promise<Auction[]> {
-    return this.find({
-      where: FINISHED_STATES.map((state) => ({ state })),
-      relations: AUCTION_RELATIONS,
-      order: { endDate: 'DESC' },
-    });
+  // Live auctions first (soonest-ending first), then every finished match (most-recently-
+  // ended first) -- same ordering as the unfiltered browse feed, just with filters applied.
+  searchAuctions(filters: SearchAuctionsDto): Promise<Auction[]> {
+    const qb = this.createQueryBuilder('auction')
+      .leftJoinAndSelect('auction.ad', 'ad')
+      .leftJoinAndSelect('ad.vehicle', 'vehicle')
+      .leftJoinAndSelect('vehicle.make', 'make')
+      .leftJoinAndSelect('vehicle.model', 'model')
+      .leftJoinAndSelect('vehicle.trim', 'trim')
+      .leftJoinAndSelect('ad.photos', 'photos');
+
+    if (filters.q) {
+      qb.andWhere('ad.title ILIKE :q', { q: `%${filters.q}%` });
+    }
+    if (filters.make) {
+      qb.andWhere('make.name ILIKE :make', { make: filters.make });
+    }
+    if (filters.model) {
+      qb.andWhere('model.name ILIKE :model', { model: filters.model });
+    }
+    if (filters.trim) {
+      qb.andWhere('trim.name ILIKE :trim', { trim: filters.trim });
+    }
+    if (filters.yearMin != null) {
+      qb.andWhere('vehicle.year >= :yearMin', { yearMin: filters.yearMin });
+    }
+    if (filters.yearMax != null) {
+      qb.andWhere('vehicle.year <= :yearMax', { yearMax: filters.yearMax });
+    }
+    if (filters.mileageMin != null) {
+      qb.andWhere('vehicle.mileage >= :mileageMin', { mileageMin: filters.mileageMin });
+    }
+    if (filters.mileageMax != null) {
+      qb.andWhere('vehicle.mileage <= :mileageMax', { mileageMax: filters.mileageMax });
+    }
+    if (filters.horsepowerMin != null) {
+      qb.andWhere('trim.horsepower >= :horsepowerMin', { horsepowerMin: filters.horsepowerMin });
+    }
+    if (filters.horsepowerMax != null) {
+      qb.andWhere('trim.horsepower <= :horsepowerMax', { horsepowerMax: filters.horsepowerMax });
+    }
+    if (filters.fiscalPowerMin != null) {
+      qb.andWhere('vehicle.fiscalPower >= :fiscalPowerMin', { fiscalPowerMin: filters.fiscalPowerMin });
+    }
+    if (filters.fiscalPowerMax != null) {
+      qb.andWhere('vehicle.fiscalPower <= :fiscalPowerMax', { fiscalPowerMax: filters.fiscalPowerMax });
+    }
+    if (filters.fuelType) {
+      qb.andWhere('trim.fuelType = :fuelType', { fuelType: filters.fuelType });
+    }
+    if (filters.transmission) {
+      qb.andWhere('trim.transmission = :transmission', { transmission: filters.transmission });
+    }
+    if (filters.drivetrain) {
+      qb.andWhere('trim.drivetrain = :drivetrain', { drivetrain: filters.drivetrain });
+    }
+    if (filters.bodyType) {
+      qb.andWhere('model.bodyType = :bodyType', { bodyType: filters.bodyType });
+    }
+    if (filters.color) {
+      qb.andWhere('vehicle.exteriorColor = :color', { color: filters.color });
+    }
+    if (filters.condition) {
+      qb.andWhere('ad.condition = :condition', { condition: filters.condition });
+    }
+    if (filters.numberOfDoors != null) {
+      qb.andWhere('vehicle.numberOfDoors = :numberOfDoors', { numberOfDoors: filters.numberOfDoors });
+    }
+    if (filters.numberOfSeats != null) {
+      qb.andWhere('vehicle.numberOfSeats = :numberOfSeats', { numberOfSeats: filters.numberOfSeats });
+    }
+    if (filters.priceMin != null) {
+      qb.andWhere('COALESCE(auction.currentHighestBid, auction.reservePrice) >= :priceMin', {
+        priceMin: filters.priceMin,
+      });
+    }
+    if (filters.priceMax != null) {
+      qb.andWhere('COALESCE(auction.currentHighestBid, auction.reservePrice) <= :priceMax', {
+        priceMax: filters.priceMax,
+      });
+    }
+
+    qb.orderBy(`CASE WHEN auction.state = '${AuctionState.LIVE}' THEN 0 ELSE 1 END`, 'ASC')
+      .addOrderBy(`CASE WHEN auction.state = '${AuctionState.LIVE}' THEN auction.endDate END`, 'ASC')
+      .addOrderBy(`CASE WHEN auction.state != '${AuctionState.LIVE}' THEN auction.endDate END`, 'DESC');
+
+    return qb.getMany();
   }
 }

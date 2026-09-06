@@ -1,5 +1,17 @@
+import type { VehicleColor } from '../../vehicle/interfaces/vehicle-catalog.interface';
+
+export type CritAir = 'CRITAIR_0' | 'CRITAIR_1' | 'CRITAIR_2' | 'CRITAIR_3' | 'CRITAIR_4' | 'CRITAIR_5';
+
 export type AdStatus = 'DRAFT' | 'REVIEW' | 'VALIDATED' | 'REJECTED';
-export type VehicleCondition = 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR';
+export type VehicleCondition =
+  | 'EXCELLENT'
+  | 'NOT_DAMAGED'
+  | 'GOOD'
+  | 'NORMAL_WEAR'
+  | 'MINOR_REPAIRS_NEEDED'
+  | 'MAJOR_REPAIRS_NEEDED'
+  | 'DAMAGED'
+  | 'NOT_RUNNING';
 
 export type AdPhotoCategory =
   | 'EXTERIOR_FRONT'
@@ -33,11 +45,15 @@ export interface CreateAdPayload {
   trimId?: number;
   vin?: string;
   year: number;
-  exteriorColor?: string;
-  interiorColor?: string;
+  exteriorColor?: VehicleColor;
+  interiorColor?: VehicleColor;
   mileage?: number;
   numberOfOwners?: number;
   plateCountry?: string;
+  fiscalPower: number;
+  critAir?: CritAir;
+  numberOfSeats?: number;
+  numberOfDoors?: number;
 }
 
 export interface AdPhoto {
@@ -53,11 +69,15 @@ export interface AdVehicleSummary {
   id: number;
   vin?: string;
   year: number;
-  exteriorColor?: string;
-  interiorColor?: string;
+  exteriorColor?: VehicleColor;
+  interiorColor?: VehicleColor;
   mileage?: number;
   numberOfOwners?: number;
   plateCountry?: string;
+  fiscalPower: number;
+  critAir?: CritAir;
+  numberOfSeats?: number;
+  numberOfDoors?: number;
   make: { id: number; name: string };
   model: { id: number; name: string };
   trim?: { id: number; name: string };

@@ -92,11 +92,35 @@
           </div>
           <div>
             <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.exteriorColor' | translate }}</label>
-            <input type="text" pInputText [pSize]="'small'" formControlName="exteriorColor" class="w-full" />
+            <p-select
+              formControlName="exteriorColor"
+              [options]="colorOptions"
+              optionLabel="labelKey"
+              optionValue="value"
+              [placeholder]="'ad.create.exteriorColor' | translate"
+              [size]="'small'"
+              class="w-full"
+              styleClass="w-full"
+            >
+              <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+              <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+            </p-select>
           </div>
           <div>
             <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.interiorColor' | translate }}</label>
-            <input type="text" pInputText [pSize]="'small'" formControlName="interiorColor" class="w-full" />
+            <p-select
+              formControlName="interiorColor"
+              [options]="colorOptions"
+              optionLabel="labelKey"
+              optionValue="value"
+              [placeholder]="'ad.create.interiorColor' | translate"
+              [size]="'small'"
+              class="w-full"
+              styleClass="w-full"
+            >
+              <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+              <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+            </p-select>
           </div>
           <div>
             <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.mileage' | translate }}</label>
@@ -117,6 +141,37 @@
               class="w-full"
               styleClass="w-full"
             />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.fiscalPower' | translate }}</label>
+            <input type="number" pInputText [pSize]="'small'" formControlName="fiscalPower" class="w-full" />
+            @if (form.controls.fiscalPower.touched && form.controls.fiscalPower.invalid) {
+              <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
+            }
+          </div>
+          <div>
+            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.critAir' | translate }}</label>
+            <p-select
+              formControlName="critAir"
+              [options]="critAirOptions"
+              optionLabel="labelKey"
+              optionValue="value"
+              [placeholder]="'ad.create.critAir' | translate"
+              [size]="'small'"
+              class="w-full"
+              styleClass="w-full"
+            >
+              <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+              <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+            </p-select>
+          </div>
+          <div>
+            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.numberOfSeats' | translate }}</label>
+            <input type="number" pInputText [pSize]="'small'" formControlName="numberOfSeats" class="w-full" />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.numberOfDoors' | translate }}</label>
+            <input type="number" pInputText [pSize]="'small'" formControlName="numberOfDoors" class="w-full" />
           </div>
         </div>
       </section>
@@ -221,58 +276,103 @@
           </div>
         }
 
-        <div class="mt-4 max-w-sm">
-          <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.addPhotos' | translate }}</label>
-          <input
-            type="file"
+        <div class="mt-4">
+          <p-fileupload
+            name="photos[]"
+            [customUpload]="true"
+            [multiple]="true"
             accept="image/*"
-            multiple
-            class="w-full text-sm text-white"
-            (change)="onFilesSelected($event)"
-          />
-        </div>
-
-        <div class="mt-4 space-y-3">
-          @for (row of photoRows.controls; track row; let i = $index) {
-            <div [formGroup]="row" class="flex flex-wrap items-end gap-3">
-              @if (photoPreviewUrls()[i]; as preview) {
-                <div class="h-20 w-20 flex-none overflow-hidden bg-surface-800">
-                  <img [src]="preview" alt="" class="h-full w-full object-cover" />
-                </div>
-              }
-              <div class="w-56">
-                <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.photoCategory' | translate }}</label>
-                <p-select
-                  formControlName="category"
-                  [options]="photoCategoryOptions"
-                  optionLabel="labelKey"
-                  optionValue="value"
-                  [placeholder]="'ad.create.photoCategory' | translate"
-                  [size]="'small'"
-                  class="w-full"
-                  styleClass="w-full"
-                >
-                  <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
-                  <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
-                </p-select>
-              </div>
-              <div class="max-w-sm flex-1">
-                <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.photoCaption' | translate }}</label>
-                <input type="text" pInputText [pSize]="'small'" formControlName="caption" class="w-full" />
-              </div>
+            mode="advanced"
+            [showUploadButton]="false"
+            [showCancelButton]="false"
+            (onSelect)="onFilesSelected($event)"
+            styleClass="!border-0 !bg-transparent !p-0"
+          >
+            <ng-template #header let-chooseCallback="chooseCallback">
               <p-button
                 type="button"
-                [label]="'ad.create.removePhoto' | translate"
+                [label]="'ad.create.addPhotos' | translate"
+                icon="pi pi-plus"
                 [size]="'small'"
                 [outlined]="true"
-                severity="danger"
-                (onClick)="removePhotoRow(i)"
+                (onClick)="chooseCallback()"
               />
-              @if (photoUploadStatus()[i] === 'error') {
-                <p class="w-full text-xs text-red-400">{{ 'ad.create.photoUploadError' | translate }}</p>
+            </ng-template>
+
+            <ng-template #content let-removeFileCallback="removeFileCallback">
+              @if (photoRows.controls.length > 0) {
+                <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  @for (row of photoRows.controls; track row; let i = $index) {
+                    <div [formGroup]="row" class="space-y-2 bg-surface-800 p-3">
+                      <div class="relative aspect-[4/3] overflow-hidden bg-surface-700">
+                        @if (photoPreviewUrls()[i]; as preview) {
+                          <img [src]="preview" alt="" class="h-full w-full object-cover" />
+                        }
+                        @if (i === primaryPhotoIndex()) {
+                          <p-tag
+                            [value]="'ad.create.coverBadge' | translate"
+                            severity="success"
+                            styleClass="!absolute !left-1 !top-1 !text-xs"
+                          />
+                        }
+                        <p-button
+                          type="button"
+                          icon="pi pi-times"
+                          [size]="'small'"
+                          severity="danger"
+                          styleClass="!absolute !right-1 !top-1 !h-7 !w-7 !p-0"
+                          (onClick)="removeNewPhoto(i, removeFileCallback, $event)"
+                        />
+                      </div>
+
+                      @if (i !== primaryPhotoIndex()) {
+                        <p-button
+                          type="button"
+                          [label]="'ad.create.setAsCover' | translate"
+                          [size]="'small'"
+                          [outlined]="true"
+                          styleClass="w-full"
+                          (onClick)="setCoverPhoto(i)"
+                        />
+                      }
+
+                      <p-select
+                        formControlName="category"
+                        [options]="photoCategoryOptions"
+                        optionLabel="labelKey"
+                        optionValue="value"
+                        [placeholder]="'ad.create.photoCategory' | translate"
+                        [size]="'small'"
+                        styleClass="w-full"
+                      >
+                        <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+                        <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+                      </p-select>
+
+                      <input
+                        type="text"
+                        pInputText
+                        [pSize]="'small'"
+                        formControlName="caption"
+                        [placeholder]="'ad.create.photoCaption' | translate"
+                        class="w-full"
+                      />
+
+                      @if (photoUploadStatus()[i] === 'error') {
+                        <p class="text-xs text-red-400">{{ 'ad.create.photoUploadError' | translate }}</p>
+                      }
+                    </div>
+                  }
+                </div>
               }
-            </div>
-          }
+            </ng-template>
+
+            <ng-template #empty>
+              <div class="mt-4 border-2 border-dashed border-surface-600 p-8 text-center">
+                <p class="m-0 text-sm text-surface-400">{{ 'ad.create.dragDropPhotos' | translate }}</p>
+              </div>
+            </ng-template>
+          </p-fileupload>
         </div>
       </section>
 

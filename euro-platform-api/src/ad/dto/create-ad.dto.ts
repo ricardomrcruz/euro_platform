@@ -69,8 +69,8 @@ export class CreateAdDto {
   exteriorColor?: VehicleColor;
 
   @IsOptional()
-  @IsString()
-  interiorColor?: string;
+  @IsEnum(VehicleColor)
+  interiorColor?: VehicleColor;
 
   @IsOptional()
   @IsInt()

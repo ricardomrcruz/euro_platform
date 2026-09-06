@@ -15,6 +15,7 @@ import { AuctionRepository } from './auction.repository';
 import { AuctionGateway } from './auction.gateway';
 import { Auction } from './entities/auction.entity';
 import { LaunchAuctionDto } from './dto/launch-auction.dto';
+import { SearchAuctionsDto } from './dto/search-auctions.dto';
 
 const FEED_FINISHED_WINDOW_DAYS = 14;
 
@@ -106,16 +107,13 @@ export class AuctionService {
     return combined;
   }
 
-  // Every auction ever, live ones first (by soonest-ending), then every finished one
-  // (most-recently-ended first).
-  async listHistory(): Promise<Auction[]> {
-    const [live, finished] = await Promise.all([
-      this.auctionRepository.findLive(),
-      this.auctionRepository.findAllFinished(),
-    ]);
-    const combined = [...live, ...finished];
-    await this.resolveSellerNames(combined);
-    return combined;
+  // Every auction matching the given filters (all optional), live ones first (by
+  // soonest-ending), then every finished match (most-recently-ended first). Called with no
+  // filters at all, this is every auction ever -- the browse page's unfiltered default.
+  async search(filters: SearchAuctionsDto): Promise<Auction[]> {
+    const auctions = await this.auctionRepository.searchAuctions(filters);
+    await this.resolveSellerNames(auctions);
+    return auctions;
   }
 
   async findOne(id: number): Promise<Auction> {

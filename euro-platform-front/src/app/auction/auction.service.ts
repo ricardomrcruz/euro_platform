@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { Auction, Bid, LaunchAuctionPayload } from './interfaces/auction.interface';
+import type { AuctionSearchFilters } from '../auctions-list/interfaces/auction-search.interface';
 
 @Injectable({ providedIn: 'root' })
 export class AuctionService {
@@ -24,9 +25,17 @@ export class AuctionService {
     return firstValueFrom(this.http.get<Auction[]>('/api/auctions/feed'));
   }
 
-  // Every auction ever, live ones first, then every finished one (most recent first).
-  listHistory(): Promise<Auction[]> {
-    return firstValueFrom(this.http.get<Auction[]>('/api/auctions/history'));
+  // Every auction matching the given filters (all optional), live ones first, then every
+  // finished match (most recent first). Called with no filters, this is every auction ever --
+  // the browse page's unfiltered default.
+  search(filters: AuctionSearchFilters): Promise<Auction[]> {
+    let params = new HttpParams();
+    for (const [key, value] of Object.entries(filters)) {
+      if (value !== undefined && value !== null && value !== '') {
+        params = params.set(key, String(value));
+      }
+    }
+    return firstValueFrom(this.http.get<Auction[]>('/api/auctions/search', { params }));
   }
 
   getOne(id: number): Promise<Auction> {

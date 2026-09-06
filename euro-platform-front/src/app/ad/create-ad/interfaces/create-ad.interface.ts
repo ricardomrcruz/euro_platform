@@ -1,6 +1,7 @@
 import { FormControl, FormGroup } from '@angular/forms';
-import { AdPhotoCategory, VehicleCondition } from '../../interfaces/ad.interface';
+import { AdPhotoCategory, CritAir, VehicleCondition } from '../../interfaces/ad.interface';
 import {
+  VehicleColor,
   VehicleMake,
   VehicleModel,
   VehicleTrim,
@@ -8,6 +9,16 @@ import {
 
 export interface ConditionOption {
   value: VehicleCondition;
+  labelKey: string;
+}
+
+export interface ColorOption {
+  value: VehicleColor;
+  labelKey: string;
+}
+
+export interface CritAirOption {
+  value: CritAir;
   labelKey: string;
 }
 

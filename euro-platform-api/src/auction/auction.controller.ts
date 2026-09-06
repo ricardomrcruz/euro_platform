@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { AuctionService } from './auction.service';
 import { BidService } from './bid.service';
 import { LaunchAuctionDto } from './dto/launch-auction.dto';
 import { PlaceBidDto } from './dto/place-bid.dto';
+import { SearchAuctionsDto } from './dto/search-auctions.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 import type { RequestUser } from '../auth/interfaces/authenticated-request.interface';
@@ -58,9 +59,9 @@ export class AuctionController {
   }
 
   @Public()
-  @Get('auctions/history')
-  listHistory() {
-    return this.auctionService.listHistory();
+  @Get('auctions/search')
+  search(@Query() dto: SearchAuctionsDto) {
+    return this.auctionService.search(dto);
   }
 
   @Public()

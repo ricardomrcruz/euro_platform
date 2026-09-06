@@ -8,6 +8,9 @@ import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { Image } from 'primeng/image';
+import { FileUploadModule } from 'primeng/fileupload';
+import type { FileSelectEvent } from 'primeng/fileupload';
+import { TagModule } from 'primeng/tag';
 import { MessageService } from 'primeng/api';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdService } from '../ad.service';
@@ -15,17 +18,21 @@ import type {
   AdPhoto,
   AdPhotoCategory,
   AdStatus,
+  CritAir,
   VehicleCondition,
 } from '../interfaces/ad.interface';
 import { VehicleCatalogService } from '../../vehicle/vehicle-catalog.service';
 import type {
+  VehicleColor,
   VehicleMake,
   VehicleModel,
   VehicleTrim,
 } from '../../vehicle/interfaces/vehicle-catalog.interface';
 import { COUNTRIES } from '../../shared/utils/countries';
 import type {
+  ColorOption,
   ConditionOption,
+  CritAirOption,
   PhotoCategoryOption,
   PhotoRow,
   PhotoUploadStatus,
@@ -36,9 +43,42 @@ import type {
 
 const CONDITION_OPTIONS: ConditionOption[] = [
   { value: 'EXCELLENT', labelKey: 'ad.create.conditionExcellent' },
+  { value: 'NOT_DAMAGED', labelKey: 'ad.create.conditionNotDamaged' },
   { value: 'GOOD', labelKey: 'ad.create.conditionGood' },
-  { value: 'FAIR', labelKey: 'ad.create.conditionFair' },
-  { value: 'POOR', labelKey: 'ad.create.conditionPoor' },
+  { value: 'NORMAL_WEAR', labelKey: 'ad.create.conditionNormalWear' },
+  { value: 'MINOR_REPAIRS_NEEDED', labelKey: 'ad.create.conditionMinorRepairsNeeded' },
+  { value: 'MAJOR_REPAIRS_NEEDED', labelKey: 'ad.create.conditionMajorRepairsNeeded' },
+  { value: 'DAMAGED', labelKey: 'ad.create.conditionDamaged' },
+  { value: 'NOT_RUNNING', labelKey: 'ad.create.conditionNotRunning' },
+];
+
+const COLOR_OPTIONS: ColorOption[] = [
+  { value: 'SILVER', labelKey: 'ad.create.colorOptions.SILVER' },
+  { value: 'BEIGE', labelKey: 'ad.create.colorOptions.BEIGE' },
+  { value: 'WHITE', labelKey: 'ad.create.colorOptions.WHITE' },
+  { value: 'BLUE', labelKey: 'ad.create.colorOptions.BLUE' },
+  { value: 'BURGUNDY', labelKey: 'ad.create.colorOptions.BURGUNDY' },
+  { value: 'GOLD', labelKey: 'ad.create.colorOptions.GOLD' },
+  { value: 'GREY', labelKey: 'ad.create.colorOptions.GREY' },
+  { value: 'IVORY', labelKey: 'ad.create.colorOptions.IVORY' },
+  { value: 'YELLOW', labelKey: 'ad.create.colorOptions.YELLOW' },
+  { value: 'BROWN', labelKey: 'ad.create.colorOptions.BROWN' },
+  { value: 'BLACK', labelKey: 'ad.create.colorOptions.BLACK' },
+  { value: 'ORANGE', labelKey: 'ad.create.colorOptions.ORANGE' },
+  { value: 'PINK', labelKey: 'ad.create.colorOptions.PINK' },
+  { value: 'RED', labelKey: 'ad.create.colorOptions.RED' },
+  { value: 'GREEN', labelKey: 'ad.create.colorOptions.GREEN' },
+  { value: 'PURPLE', labelKey: 'ad.create.colorOptions.PURPLE' },
+  { value: 'OTHER', labelKey: 'ad.create.colorOptions.OTHER' },
+];
+
+const CRIT_AIR_OPTIONS: CritAirOption[] = [
+  { value: 'CRITAIR_0', labelKey: 'ad.create.critAirOptions.CRITAIR_0' },
+  { value: 'CRITAIR_1', labelKey: 'ad.create.critAirOptions.CRITAIR_1' },
+  { value: 'CRITAIR_2', labelKey: 'ad.create.critAirOptions.CRITAIR_2' },
+  { value: 'CRITAIR_3', labelKey: 'ad.create.critAirOptions.CRITAIR_3' },
+  { value: 'CRITAIR_4', labelKey: 'ad.create.critAirOptions.CRITAIR_4' },
+  { value: 'CRITAIR_5', labelKey: 'ad.create.critAirOptions.CRITAIR_5' },
 ];
 
 const AD_PHOTO_CATEGORY_OPTIONS: PhotoCategoryOption[] = [
@@ -98,6 +138,8 @@ function catalogName(value: { name: string } | string | null | undefined): strin
     InputText,
     InputTextarea,
     Image,
+    FileUploadModule,
+    TagModule,
     TranslatePipe,
   ],
   templateUrl: './create-ad.component.html',
@@ -128,6 +170,8 @@ export class CreateAdComponent implements OnDestroy {
   readonly errorKey = signal<string | null>(null);
 
   readonly conditionOptions = CONDITION_OPTIONS;
+  readonly colorOptions = COLOR_OPTIONS;
+  readonly critAirOptions = CRIT_AIR_OPTIONS;
   readonly photoCategoryOptions = AD_PHOTO_CATEGORY_OPTIONS;
   readonly plateCountryOptions = COUNTRIES;
 
@@ -147,11 +191,15 @@ export class CreateAdComponent implements OnDestroy {
     model: this.fb.control<ModelValue>({ value: null, disabled: true }, Validators.required),
     trim: this.fb.control<TrimValue>({ value: null, disabled: true }),
     year: this.fb.control<number | null>(null, [Validators.required, Validators.min(1886)]),
-    exteriorColor: [''],
-    interiorColor: [''],
+    exteriorColor: this.fb.control<VehicleColor | null>(null),
+    interiorColor: this.fb.control<VehicleColor | null>(null),
     mileage: this.fb.control<number | null>(null),
     numberOfOwners: this.fb.control<number | null>(null),
     plateCountry: [''],
+    fiscalPower: this.fb.control<number | null>(null, [Validators.required, Validators.min(1)]),
+    critAir: this.fb.control<CritAir | null>(null),
+    numberOfSeats: this.fb.control<number | null>(null),
+    numberOfDoors: this.fb.control<number | null>(null),
     title: ['', [Validators.required, Validators.maxLength(200)]],
     description: ['', Validators.required],
     condition: this.fb.control<VehicleCondition | null>(null, Validators.required),
@@ -164,12 +212,15 @@ export class CreateAdComponent implements OnDestroy {
 
   // Photo rows are entirely optional -- rows with no file picked are just skipped on save
   // rather than blocking the form. photoFiles/photoUploadStatus/photoPreviewUrls are kept in
-  // lockstep with photoRows by index (native <input type="file"> can't be driven through a
+  // lockstep with photoRows by index (p-fileupload's own file list can't be driven through a
   // FormControl). Rows are created in batches by onFilesSelected(), one per picked file.
   readonly photoRows = this.fb.array<PhotoRow>([]);
   readonly photoFiles = signal<(File | null)[]>([]);
   readonly photoUploadStatus = signal<PhotoUploadStatus[]>([]);
   readonly photoPreviewUrls = signal<(string | null)[]>([]);
+  // Which of the newly-added photos (index into photoRows) becomes the ad's primary/cover
+  // photo -- defaults to the first one picked, changeable via setCoverPhoto().
+  readonly primaryPhotoIndex = signal(0);
 
   constructor() {
     this.form.controls.make.valueChanges.subscribe((make) => {
@@ -235,23 +286,34 @@ export class CreateAdComponent implements OnDestroy {
     this.photoFiles.update((files) => files.filter((_, i) => i !== index));
     this.photoUploadStatus.update((statuses) => statuses.filter((_, i) => i !== index));
     this.photoPreviewUrls.update((urls) => urls.filter((_, i) => i !== index));
+    this.primaryPhotoIndex.update((current) => {
+      if (index < current) return current - 1;
+      if (index === current) return 0;
+      return current;
+    });
   }
 
-  // Picking multiple files at once appends one row per file (existing rows are untouched, so
-  // the file picker can be reopened later to add more without losing what's already there).
-  onFilesSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const files = input.files;
-    if (files) {
-      for (const file of Array.from(files)) {
-        this.addPhotoRow();
-        const index = this.photoRows.length - 1;
-        const previewUrl = URL.createObjectURL(file);
-        this.photoFiles.update((arr) => arr.map((f, i) => (i === index ? file : f)));
-        this.photoPreviewUrls.update((arr) => arr.map((u, i) => (i === index ? previewUrl : u)));
-      }
+  // p-fileupload's own internal file list must stay in sync with our photoRows array (both
+  // are index-aligned in selection order) -- removing through this button, not its own.
+  removeNewPhoto(index: number, removeFileCallback: (event: Event, index: number) => void, event: Event): void {
+    removeFileCallback(event, index);
+    this.removePhotoRow(index);
+  }
+
+  setCoverPhoto(index: number): void {
+    this.primaryPhotoIndex.set(index);
+  }
+
+  // onSelect only carries the newly-picked files (not the whole running list) -- appends one
+  // row per file, existing rows untouched, so the picker can be reopened to add more later.
+  onFilesSelected(event: FileSelectEvent): void {
+    for (const file of event.files) {
+      this.addPhotoRow();
+      const index = this.photoRows.length - 1;
+      const previewUrl = URL.createObjectURL(file);
+      this.photoFiles.update((arr) => arr.map((f, i) => (i === index ? file : f)));
+      this.photoPreviewUrls.update((arr) => arr.map((u, i) => (i === index ? previewUrl : u)));
     }
-    input.value = '';
   }
 
   async removeExistingPhoto(photo: AdPhoto): Promise<void> {
@@ -304,11 +366,15 @@ export class CreateAdComponent implements OnDestroy {
       this.form.patchValue({
         vin: ad.vehicle.vin ?? '',
         year: ad.vehicle.year,
-        exteriorColor: ad.vehicle.exteriorColor ?? '',
-        interiorColor: ad.vehicle.interiorColor ?? '',
+        exteriorColor: ad.vehicle.exteriorColor ?? null,
+        interiorColor: ad.vehicle.interiorColor ?? null,
         mileage: ad.vehicle.mileage ?? null,
         numberOfOwners: ad.vehicle.numberOfOwners ?? null,
         plateCountry: ad.vehicle.plateCountry ?? '',
+        fiscalPower: ad.vehicle.fiscalPower,
+        critAir: ad.vehicle.critAir ?? null,
+        numberOfSeats: ad.vehicle.numberOfSeats ?? null,
+        numberOfDoors: ad.vehicle.numberOfDoors ?? null,
         title: ad.title,
         description: ad.description,
         condition: ad.condition,
@@ -330,6 +396,10 @@ export class CreateAdComponent implements OnDestroy {
         this.form.controls.mileage.disable();
         this.form.controls.numberOfOwners.disable();
         this.form.controls.plateCountry.disable();
+        this.form.controls.fiscalPower.disable();
+        this.form.controls.critAir.disable();
+        this.form.controls.numberOfSeats.disable();
+        this.form.controls.numberOfDoors.disable();
         this.form.controls.title.disable();
         this.form.controls.condition.disable();
         this.form.controls.location.disable();
@@ -413,7 +483,7 @@ export class CreateAdComponent implements OnDestroy {
           category,
           caption: row.controls.caption.value.trim() || undefined,
           sortOrder: i,
-          isPrimary: i === 0,
+          isPrimary: i === this.primaryPhotoIndex(),
         });
       } catch {
         this.photoUploadStatus.update((statuses) =>
@@ -496,6 +566,10 @@ export class CreateAdComponent implements OnDestroy {
         mileage: v.mileage ?? undefined,
         numberOfOwners: v.numberOfOwners ?? undefined,
         plateCountry: v.plateCountry || undefined,
+        fiscalPower: v.fiscalPower!,
+        critAir: v.critAir || undefined,
+        numberOfSeats: v.numberOfSeats ?? undefined,
+        numberOfDoors: v.numberOfDoors ?? undefined,
       };
 
       const existingId = this.editingAdId();

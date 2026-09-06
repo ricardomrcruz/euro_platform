@@ -31,16 +31,20 @@
           }
         }
       </div>
-      <p-iconfield class="hidden sm:block">
-        <p-inputicon class="pi pi-search" />
-        <input
-          type="text"
-          pInputText
-          [pSize]="'small'"
-          [placeholder]="'nav.searchPlaceholder' | translate"
-          class="w-72"
-        />
-      </p-iconfield>
+      @if (!onAuctionsPage()) {
+        <p-iconfield class="hidden sm:block">
+          <p-inputicon class="pi pi-search" />
+          <input
+            type="text"
+            pInputText
+            [pSize]="'small'"
+            [(ngModel)]="searchText"
+            [placeholder]="'nav.searchPlaceholder' | translate"
+            (keyup.enter)="submitSearch()"
+            class="w-72"
+          />
+        </p-iconfield>
+      }
 
       @if (currentUser(); as user) {
         <a

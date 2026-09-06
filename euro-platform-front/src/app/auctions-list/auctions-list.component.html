@@ -1,15 +1,248 @@
 <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
   <h1 class="text-2xl font-bold text-white">{{ 'auctions.heading' | translate }}</h1>
 
-  @if (loading()) {
-    <p class="mt-4 text-sm text-surface-300">...</p>
-  } @else if (auctions().length === 0) {
-    <p class="mt-4 text-sm text-surface-300">{{ 'auctions.empty' | translate }}</p>
-  } @else {
-    <div class="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-      @for (auction of auctions(); track auction.id) {
-        <app-auction-card [data]="auction" />
+  <div class="mt-4">
+    <p-iconfield>
+      <p-inputicon class="pi pi-search" />
+      <input
+        type="text"
+        pInputText
+        [(ngModel)]="searchText"
+        [placeholder]="'auctionsSearch.searchPlaceholder' | translate"
+        (keyup.enter)="submitSearch()"
+        class="w-full"
+      />
+    </p-iconfield>
+  </div>
+
+  <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-4">
+    <aside class="space-y-4 bg-surface-700 p-4 lg:col-span-1">
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-surface-400">
+        {{ 'auctionsSearch.filtersHeading' | translate }}
+      </h2>
+
+      <div>
+        <label class="mb-1 block text-sm text-surface-300">{{ 'auctionsSearch.make' | translate }}</label>
+        <p-select
+          [ngModel]="selectedMake()"
+          (ngModelChange)="selectedMake.set($event); onMakeChange($event)"
+          [options]="makes()"
+          optionLabel="name"
+          [showClear]="true"
+          [placeholder]="'auctionsSearch.anyMake' | translate"
+          [size]="'small'"
+          styleClass="w-full"
+        />
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm text-surface-300">{{ 'auctionsSearch.model' | translate }}</label>
+        <p-select
+          [ngModel]="selectedModel()"
+          (ngModelChange)="selectedModel.set($event); onModelChange($event)"
+          [options]="models()"
+          optionLabel="name"
+          [showClear]="true"
+          [disabled]="models().length === 0"
+          [placeholder]="'auctionsSearch.anyModel' | translate"
+          [size]="'small'"
+          styleClass="w-full"
+        />
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm text-surface-300">{{ 'auctionsSearch.trim' | translate }}</label>
+        <p-select
+          [(ngModel)]="selectedTrim"
+          [options]="trims()"
+          optionLabel="name"
+          [showClear]="true"
+          [disabled]="trims().length === 0"
+          [placeholder]="'auctionsSearch.anyTrim' | translate"
+          [size]="'small'"
+          styleClass="w-full"
+        />
+      </div>
+
+      <hr class="border-surface-600" />
+
+      <div>
+        <label class="mb-1 block text-sm text-surface-300">{{ 'auctionsSearch.year' | translate }}</label>
+        <div class="grid grid-cols-2 gap-2">
+          <p-inputnumber [(ngModel)]="yearMin" [placeholder]="'auctionsSearch.min' | translate" [useGrouping]="false" [size]="'small'" styleClass="w-full" inputStyleClass="w-full" />
+          <p-inputnumber [(ngModel)]="yearMax" [placeholder]="'auctionsSearch.max' | translate" [useGrouping]="false" [size]="'small'" styleClass="w-full" inputStyleClass="w-full" />
+        </div>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm text-surface-300">{{ 'auctionsSearch.price' | translate }}</label>
+        <div class="grid grid-cols-2 gap-2">
+          <p-inputnumber [(ngModel)]="priceMin" [placeholder]="'auctionsSearch.min' | translate" [size]="'small'" styleClass="w-full" inputStyleClass="w-full" />
+          <p-inputnumber [(ngModel)]="priceMax" [placeholder]="'auctionsSearch.max' | translate" [size]="'small'" styleClass="w-full" inputStyleClass="w-full" />
+        </div>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm text-surface-300">{{ 'auctionsSearch.mileage' | translate }}</label>
+        <div class="grid grid-cols-2 gap-2">
+          <p-inputnumber [(ngModel)]="mileageMin" [placeholder]="'auctionsSearch.min' | translate" [size]="'small'" styleClass="w-full" inputStyleClass="w-full" />
+          <p-inputnumber [(ngModel)]="mileageMax" [placeholder]="'auctionsSearch.max' | translate" [size]="'small'" styleClass="w-full" inputStyleClass="w-full" />
+        </div>
+      </div>
+
+      <hr class="border-surface-600" />
+
+      <div>
+        <label class="mb-1 block text-sm text-surface-300">{{ 'vehicle.fuelType' | translate }}</label>
+        <p-select
+          [(ngModel)]="fuelType"
+          [options]="fuelTypeOptions"
+          optionLabel="labelKey"
+          optionValue="value"
+          [showClear]="true"
+          [placeholder]="'auctionsSearch.anyFuelType' | translate"
+          [size]="'small'"
+          styleClass="w-full"
+        >
+          <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+          <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+        </p-select>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm text-surface-300">{{ 'vehicle.transmission' | translate }}</label>
+        <p-select
+          [(ngModel)]="transmission"
+          [options]="transmissionOptions"
+          optionLabel="labelKey"
+          optionValue="value"
+          [showClear]="true"
+          [placeholder]="'auctionsSearch.anyTransmission' | translate"
+          [size]="'small'"
+          styleClass="w-full"
+        >
+          <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+          <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+        </p-select>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm text-surface-300">{{ 'vehicle.drivetrain' | translate }}</label>
+        <p-select
+          [(ngModel)]="drivetrain"
+          [options]="drivetrainOptions"
+          optionLabel="labelKey"
+          optionValue="value"
+          [showClear]="true"
+          [placeholder]="'auctionsSearch.anyDrivetrain' | translate"
+          [size]="'small'"
+          styleClass="w-full"
+        >
+          <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+          <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+        </p-select>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm text-surface-300">{{ 'vehicle.bodyType' | translate }}</label>
+        <p-select
+          [(ngModel)]="bodyType"
+          [options]="bodyTypeOptions"
+          optionLabel="labelKey"
+          optionValue="value"
+          [showClear]="true"
+          [placeholder]="'auctionsSearch.anyBodyType' | translate"
+          [size]="'small'"
+          styleClass="w-full"
+        >
+          <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+          <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+        </p-select>
+      </div>
+
+      <hr class="border-surface-600" />
+
+      <div>
+        <label class="mb-1 block text-sm text-surface-300">{{ 'auctionsSearch.horsepower' | translate }}</label>
+        <div class="grid grid-cols-2 gap-2">
+          <p-inputnumber [(ngModel)]="horsepowerMin" [placeholder]="'auctionsSearch.min' | translate" [size]="'small'" styleClass="w-full" inputStyleClass="w-full" />
+          <p-inputnumber [(ngModel)]="horsepowerMax" [placeholder]="'auctionsSearch.max' | translate" [size]="'small'" styleClass="w-full" inputStyleClass="w-full" />
+        </div>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm text-surface-300">{{ 'auctionsSearch.fiscalPower' | translate }}</label>
+        <div class="grid grid-cols-2 gap-2">
+          <p-inputnumber [(ngModel)]="fiscalPowerMin" [placeholder]="'auctionsSearch.min' | translate" [size]="'small'" styleClass="w-full" inputStyleClass="w-full" />
+          <p-inputnumber [(ngModel)]="fiscalPowerMax" [placeholder]="'auctionsSearch.max' | translate" [size]="'small'" styleClass="w-full" inputStyleClass="w-full" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="mb-1 block text-sm text-surface-300">{{ 'auctionsSearch.doors' | translate }}</label>
+          <p-inputnumber [(ngModel)]="numberOfDoors" [size]="'small'" styleClass="w-full" inputStyleClass="w-full" />
+        </div>
+        <div>
+          <label class="mb-1 block text-sm text-surface-300">{{ 'auctionsSearch.seats' | translate }}</label>
+          <p-inputnumber [(ngModel)]="numberOfSeats" [size]="'small'" styleClass="w-full" inputStyleClass="w-full" />
+        </div>
+      </div>
+
+      <hr class="border-surface-600" />
+
+      <div>
+        <label class="mb-1 block text-sm text-surface-300">{{ 'auctionsSearch.color' | translate }}</label>
+        <p-select
+          [(ngModel)]="color"
+          [options]="colorOptions"
+          optionLabel="labelKey"
+          optionValue="value"
+          [showClear]="true"
+          [placeholder]="'auctionsSearch.anyColor' | translate"
+          [size]="'small'"
+          styleClass="w-full"
+        >
+          <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+          <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+        </p-select>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm text-surface-300">{{ 'auctionsSearch.condition' | translate }}</label>
+        <p-select
+          [(ngModel)]="condition"
+          [options]="conditionOptions"
+          optionLabel="labelKey"
+          optionValue="value"
+          [showClear]="true"
+          [placeholder]="'auctionsSearch.anyCondition' | translate"
+          [size]="'small'"
+          styleClass="w-full"
+        >
+          <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+          <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+        </p-select>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <p-button [label]="'auctionsSearch.applyFilters' | translate" [size]="'small'" [raised]="true" styleClass="flex-1" (onClick)="applyFilters()" />
+        <p-button [label]="'auctionsSearch.resetFilters' | translate" [size]="'small'" [outlined]="true" (onClick)="resetFilters()" />
+      </div>
+    </aside>
+
+    <div class="lg:col-span-3">
+      @if (loading()) {
+        <p class="text-sm text-surface-300">...</p>
+      } @else if (auctions().length === 0) {
+        <p class="text-sm text-surface-300">{{ 'auctions.empty' | translate }}</p>
+      } @else {
+        <div class="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+          @for (auction of auctions(); track auction.id) {
+            <app-auction-card [data]="auction" />
+          }
+        </div>
       }
     </div>
-  }
+  </div>
 </div>

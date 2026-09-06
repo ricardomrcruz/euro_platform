@@ -16,11 +16,11 @@ export class Vehicle {
   @Column()
   year!: number;
 
-  @Column({ name: 'exterior_color', type: 'enum', enum: VehicleColor, nullable: true })
+  @Column({ name: 'exterior_color', type: 'enum', enum: VehicleColor, enumName: 'vehicle_color_enum', nullable: true })
   exteriorColor?: VehicleColor;
 
-  @Column({ name: 'interior_color', nullable: true })
-  interiorColor?: string;
+  @Column({ name: 'interior_color', type: 'enum', enum: VehicleColor, enumName: 'vehicle_color_enum', nullable: true })
+  interiorColor?: VehicleColor;
 
   @Column({ nullable: true })
   mileage?: number;

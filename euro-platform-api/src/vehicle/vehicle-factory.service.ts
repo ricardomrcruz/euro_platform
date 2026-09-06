@@ -21,7 +21,7 @@ export interface CreateVehicleInput {
   vin?: string;
   year: number;
   exteriorColor?: VehicleColor;
-  interiorColor?: string;
+  interiorColor?: VehicleColor;
   mileage?: number;
   numberOfOwners?: number;
   plateCountry?: string;
