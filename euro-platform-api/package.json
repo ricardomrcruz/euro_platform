@@ -22,7 +22,8 @@
     "migration:generate": "npm run typeorm -- migration:generate -d src/data-source.ts",
     "migration:run": "npm run typeorm -- migration:run -d src/data-source.ts",
     "migration:revert": "npm run typeorm -- migration:revert -d src/data-source.ts",
-    "seed:catalog": "ts-node src/vehicle/seed/seed-catalog.ts"
+    "seed:catalog": "ts-node src/vehicle/seed/seed-catalog.ts",
+    "seed:vehicle-catalog": "ts-node src/vehicle/seed/seed-vehicle-catalog.ts"
   },
   "dependencies": {
     "@google-cloud/storage": "^8.0.1",
