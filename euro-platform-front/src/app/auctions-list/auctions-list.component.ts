@@ -14,6 +14,7 @@ import { toAuctionCardData } from '../auction/auction.mappers';
 import { AuctionCardData } from '../shared/models/auction.model';
 import { VehicleCatalogService } from '../vehicle/vehicle-catalog.service';
 import type { VehicleMake, VehicleModel, VehicleTrim } from '../vehicle/interfaces/vehicle-catalog.interface';
+import { stripMakePrefix } from '../shared/utils/vehicle-name.util';
 import type { AuctionSearchFilters } from './interfaces/auction-search.interface';
 import type { EnumOption } from './interfaces/enum-option.interface';
 
@@ -92,6 +93,14 @@ function catalogName(value: { name: string } | string | null): string | undefine
   return typeof value === 'string' ? value : value.name;
 }
 
+// Model dropdown options carry an extra display-only label with the make prefix stripped
+// (e.g. "AUDI A3" -> "A3") -- .name itself stays untouched, still what's sent as the filter.
+type DisplayModel = VehicleModel & { displayName: string };
+
+function toDisplayModels(models: VehicleModel[], makeName: string | undefined): DisplayModel[] {
+  return models.map((model) => ({ ...model, displayName: stripMakePrefix(model.name, makeName) }));
+}
+
 @Component({
   selector: 'app-auctions-list',
   standalone: true,
@@ -129,7 +138,7 @@ export class AuctionsListComponent {
   readonly conditionOptions = CONDITION_OPTIONS;
 
   readonly makes = signal<VehicleMake[]>([]);
-  readonly models = signal<VehicleModel[]>([]);
+  readonly models = signal<DisplayModel[]>([]);
   readonly trims = signal<VehicleTrim[]>([]);
 
   readonly selectedMake = signal<VehicleMake | null>(null);
@@ -172,7 +181,9 @@ export class AuctionsListComponent {
     this.trims.set([]);
     const makeName = catalogName(make);
     if (makeName) {
-      this.catalog.listModels(makeName).then((models) => this.models.set(models));
+      this.catalog
+        .listModels(makeName)
+        .then((models) => this.models.set(toDisplayModels(models, makeName)));
     } else {
       this.models.set([]);
     }

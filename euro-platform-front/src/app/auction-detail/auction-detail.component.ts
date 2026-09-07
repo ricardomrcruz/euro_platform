@@ -18,6 +18,7 @@ import { AuctionCardData } from '../shared/models/auction.model';
 import { AuctionService } from '../auction/auction.service';
 import { toAuctionCardData, toAuctionDetailData } from '../auction/auction.mappers';
 import { AuctionSocketService } from '../auction/auction-socket.service';
+import type { AuctionClosedEvent } from '../auction/interfaces/auction.interface';
 
 @Component({
   selector: 'app-auction-detail',
@@ -99,7 +100,7 @@ export class AuctionDetailComponent implements OnDestroy {
       .pipe(takeUntilDestroyed())
       .subscribe((event) => {
         if (event.auctionId !== Number(this.id())) return;
-        this.refreshAuction();
+        this.loadAuction(event.auctionId).then(() => this.announceAuctionClosed(event));
       });
   }
 
@@ -114,6 +115,38 @@ export class AuctionDetailComponent implements OnDestroy {
   // flashing to "not found".
   refreshAuction(): void {
     this.loadAuction(Number(this.id()));
+  }
+
+  // A dedicated, top-center, larger toast -- distinct from the routine bottom-right "new bid"
+  // notices, since an auction actually ending is the one moment on this page worth
+  // interrupting the user for. Reads the just-refreshed detail() rather than the bare
+  // websocket event, since that's what already has the resolved winner name/final amount.
+  private announceAuctionClosed(event: AuctionClosedEvent): void {
+    const d = this.detail();
+    if (!d) return;
+
+    const now = this.datePipe.transform(new Date(), 'HH:mm:ss');
+    if (event.state === 'SOLD') {
+      this.messageService.add({
+        key: 'celebration',
+        severity: 'success',
+        summary: this.translate.instant('auctionDetail.closed.soldSummary'),
+        detail: this.translate.instant('auctionDetail.closed.soldDetail', {
+          winner: d.bidderName,
+          amount: this.currencyPipe.transform(d.currentBid, 'EUR', 'symbol', '1.0-0'),
+          time: now,
+        }),
+        life: 10000,
+      });
+    } else {
+      this.messageService.add({
+        key: 'celebration',
+        severity: 'warn',
+        summary: this.translate.instant('auctionDetail.closed.expiredSummary'),
+        detail: this.translate.instant('auctionDetail.closed.expiredDetail', { time: now }),
+        life: 8000,
+      });
+    }
   }
 
   private async loadAuction(auctionId: number): Promise<void> {

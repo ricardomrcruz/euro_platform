@@ -29,6 +29,7 @@ import type {
   VehicleTrim,
 } from '../../vehicle/interfaces/vehicle-catalog.interface';
 import { COUNTRIES } from '../../shared/utils/countries';
+import { stripMakePrefix } from '../../shared/utils/vehicle-name.util';
 import type {
   ColorOption,
   ConditionOption,
@@ -127,6 +128,15 @@ function catalogName(value: { name: string } | string | null | undefined): strin
   return value.name;
 }
 
+// Model dropdown options carry an extra display-only label with the make prefix stripped
+// (e.g. "AUDI A3" -> "A3") -- .name itself stays untouched since it's still what gets sent
+// to the trim-cascade lookup and at submit time.
+type DisplayModel = VehicleModel & { displayName: string };
+
+function toDisplayModels(models: VehicleModel[], makeName: string | undefined): DisplayModel[] {
+  return models.map((model) => ({ ...model, displayName: stripMakePrefix(model.name, makeName) }));
+}
+
 @Component({
   selector: 'app-create-ad',
   standalone: true,
@@ -176,7 +186,7 @@ export class CreateAdComponent implements OnDestroy {
   readonly plateCountryOptions = COUNTRIES;
 
   readonly makes = signal<VehicleMake[]>([]);
-  readonly models = signal<VehicleModel[]>([]);
+  readonly models = signal<DisplayModel[]>([]);
   readonly trims = signal<VehicleTrim[]>([]);
 
   readonly vinLoading = signal(false);
@@ -230,7 +240,9 @@ export class CreateAdComponent implements OnDestroy {
       const makeName = catalogName(make);
       if (makeName) {
         this.form.controls.model.enable();
-        this.catalog.listModels(makeName).then((models) => this.models.set(models));
+        this.catalog
+          .listModels(makeName)
+          .then((models) => this.models.set(toDisplayModels(models, makeName)));
       } else {
         this.form.controls.model.disable();
         this.models.set([]);
@@ -346,7 +358,7 @@ export class CreateAdComponent implements OnDestroy {
       this.form.controls.make.setValue(make, { emitEvent: false });
 
       if (make) {
-        const models = await this.catalog.listModels(make.name);
+        const models = toDisplayModels(await this.catalog.listModels(make.name), make.name);
         this.models.set(models);
         this.form.controls.model.enable();
         const model = models.find((m) => m.id === ad.vehicle.model.id) ?? null;

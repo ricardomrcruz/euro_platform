@@ -173,6 +173,12 @@
       "summary": "New bid",
       "detail": "{{name}} bid {{amount}} at {{time}}"
     },
+    "closed": {
+      "soldSummary": "🎉 Auction won!",
+      "soldDetail": "{{winner}} won the auction with a bid of {{amount}}, placed at {{time}}.",
+      "expiredSummary": "Auction ended",
+      "expiredDetail": "The auction ended at {{time}} without meeting the reserve price."
+    },
     "bidPanel": {
       "seller": "Seller",
       "ending": "Ending",
@@ -265,13 +271,25 @@
       "successMessage": "Your account has been created. You can now sign in.",
       "signInButton": "Sign in",
       "emailTakenError": "This email is already registered.",
-      "genericError": "Something went wrong. Please try again."
+      "genericError": "Something went wrong. Please try again.",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in"
     },
     "login": {
       "heading": "Sign in",
       "submit": "Sign in",
       "invalidCredentialsError": "Incorrect email or password.",
-      "genericError": "Something went wrong. Please try again."
+      "genericError": "Something went wrong. Please try again.",
+      "rememberMe": "Keep me signed in",
+      "sessionExpiredNotice": "Your session has expired. Please sign in again to continue.",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Register"
+    },
+    "sessionWarning": {
+      "heading": "Session expiring soon",
+      "message": "Your session is about to expire. Would you like to stay signed in?",
+      "staySignedIn": "Stay signed in",
+      "dismiss": "Dismiss"
     },
     "validation": {
       "required": "This field is required.",

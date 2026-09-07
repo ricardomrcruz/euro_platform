@@ -6,6 +6,8 @@ import { TokenResponseDto } from './dto/token-response.dto';
 import { ValidatedUserDto } from './dto/validated-user.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 
+const REMEMBER_ME_EXPIRES_IN = '30d';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -27,7 +29,10 @@ export class AuthService {
       role: user.role,
       tokenVersion: user.tokenVersion,
     };
-    const accessToken = await this.jwtService.signAsync(payload);
+    const accessToken = await this.jwtService.signAsync(
+      payload,
+      dto.rememberMe ? { expiresIn: REMEMBER_ME_EXPIRES_IN } : {},
+    );
 
     return { accessToken };
   }

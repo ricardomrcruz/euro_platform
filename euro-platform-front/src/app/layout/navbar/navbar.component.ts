@@ -64,6 +64,10 @@ export class NavbarComponent {
     this.authService.openLoginDialog();
   }
 
+  openRegisterDialog(): void {
+    this.authService.openRegisterDialog();
+  }
+
   signOut(): void {
     this.authService.logout();
   }

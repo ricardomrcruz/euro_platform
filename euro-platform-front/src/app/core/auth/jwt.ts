@@ -7,6 +7,9 @@ export interface JwtPayload {
   lastName: string;
   role: UserRole;
   tokenVersion: number;
+  // Standard JWT claim (seconds since epoch, UTC) -- always present, @nestjs/jwt sets it
+  // automatically from the module's signOptions.expiresIn.
+  exp: number;
 }
 
 // Hand-rolled rather than a library, but still UTF-8 safe -- names on a European site will

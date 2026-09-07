@@ -69,3 +69,18 @@ app-profile {
   flex: 1;
 }
 
+/* The "auction just ended" toast is the one moment on the detail page worth interrupting the
+   user for -- deliberately larger and higher-contrast than the routine bottom-right notices. */
+.celebration-toast .p-toast-message {
+  width: 28rem;
+  max-width: 90vw;
+}
+
+.celebration-toast .p-toast-summary {
+  font-size: 1.125rem;
+}
+
+.celebration-toast .p-toast-detail {
+  font-size: 1rem;
+}
+

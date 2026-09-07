@@ -2,7 +2,7 @@
   <h1 class="text-2xl font-bold text-white">{{ 'auctions.heading' | translate }}</h1>
 
   <div class="mt-4">
-    <p-iconfield>
+    <p-iconfield class="relative">
       <p-inputicon class="pi pi-search" />
       <input
         type="text"
@@ -10,8 +10,17 @@
         [(ngModel)]="searchText"
         [placeholder]="'auctionsSearch.searchPlaceholder' | translate"
         (keyup.enter)="submitSearch()"
-        class="w-full"
+        class="w-full pr-7"
       />
+      @if (searchText()) {
+        <button
+          type="button"
+          (click)="searchText.set('')"
+          class="absolute right-2 top-1/2 -translate-y-1/2 text-surface-400 hover:text-white"
+        >
+          <i class="pi pi-times text-xs"></i>
+        </button>
+      }
     </p-iconfield>
   </div>
 
@@ -41,7 +50,7 @@
           [ngModel]="selectedModel()"
           (ngModelChange)="selectedModel.set($event); onModelChange($event)"
           [options]="models()"
-          optionLabel="name"
+          optionLabel="displayName"
           [showClear]="true"
           [disabled]="models().length === 0"
           [placeholder]="'auctionsSearch.anyModel' | translate"

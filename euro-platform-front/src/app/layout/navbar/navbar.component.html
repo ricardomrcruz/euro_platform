@@ -32,7 +32,7 @@
         }
       </div>
       @if (!onAuctionsPage()) {
-        <p-iconfield class="hidden sm:block">
+        <p-iconfield class="relative hidden sm:block">
           <p-inputicon class="pi pi-search" />
           <input
             type="text"
@@ -41,8 +41,17 @@
             [(ngModel)]="searchText"
             [placeholder]="'nav.searchPlaceholder' | translate"
             (keyup.enter)="submitSearch()"
-            class="w-72"
+            class="w-72 pr-7"
           />
+          @if (searchText()) {
+            <button
+              type="button"
+              (click)="searchText.set('')"
+              class="absolute right-2 top-1/2 -translate-y-1/2 text-surface-400 hover:text-white"
+            >
+              <i class="pi pi-times text-xs"></i>
+            </button>
+          }
         </p-iconfield>
       }
 
@@ -63,9 +72,13 @@
           (onClick)="signOut()"
         />
       } @else {
-        <a routerLink="/register" class="hidden text-sm font-medium text-surface-300 hover:text-white sm:block">
+        <button
+          type="button"
+          (click)="openRegisterDialog()"
+          class="hidden text-sm font-medium text-surface-300 hover:text-white sm:block"
+        >
           {{ 'nav.register' | translate }}
-        </a>
+        </button>
         <p-button [label]="'nav.signIn' | translate" [size]="'small'" [raised]="true" (onClick)="openLoginDialog()" />
       }
     </div>

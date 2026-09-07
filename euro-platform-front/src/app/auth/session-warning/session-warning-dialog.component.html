@@ -1,0 +1,27 @@
+<p-dialog
+  [visible]="visible()"
+  [modal]="true"
+  [closable]="false"
+  [header]="'auth.sessionWarning.heading' | translate"
+  [style]="{ width: '22rem' }"
+>
+  <p class="text-sm text-surface-300">{{ 'auth.sessionWarning.message' | translate }}</p>
+
+  <div class="mt-4 flex gap-2">
+    <p-button
+      type="button"
+      [label]="'auth.sessionWarning.staySignedIn' | translate"
+      [size]="'small'"
+      [raised]="true"
+      styleClass="flex-1"
+      (onClick)="extendSession()"
+    />
+    <p-button
+      type="button"
+      [label]="'auth.sessionWarning.dismiss' | translate"
+      [size]="'small'"
+      [outlined]="true"
+      (onClick)="dismiss()"
+    />
+  </div>
+</p-dialog>

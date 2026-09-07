@@ -2,20 +2,25 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Dialog } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/auth/auth.service';
 
+// Mounted once in the app shell, mirroring app-login-dialog -- opened from anywhere via
+// AuthService.openRegisterDialog().
 @Component({
-  selector: 'app-register',
+  selector: 'app-register-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonModule, InputText, TranslatePipe],
-  templateUrl: './register.component.html',
+  imports: [CommonModule, ReactiveFormsModule, Dialog, ButtonModule, InputText, TranslatePipe],
+  templateUrl: './register-dialog.component.html',
 })
-export class RegisterComponent {
+export class RegisterDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+
+  readonly visible = this.authService.registerDialogVisible;
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -49,7 +54,19 @@ export class RegisterComponent {
     }
   }
 
-  openLoginDialog(): void {
+  onVisibleChange(visible: boolean): void {
+    if (!visible) this.close();
+  }
+
+  switchToLogin(): void {
+    this.close();
     this.authService.openLoginDialog();
+  }
+
+  close(): void {
+    this.authService.closeRegisterDialog();
+    // Reset so reopening later starts fresh rather than showing the previous success screen.
+    this.registered.set(false);
+    this.form.reset();
   }
 }

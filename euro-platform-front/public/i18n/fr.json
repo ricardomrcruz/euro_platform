@@ -173,6 +173,12 @@
       "summary": "Nouvelle enchère",
       "detail": "{{name}} a enchéri {{amount}} à {{time}}"
     },
+    "closed": {
+      "soldSummary": "🎉 Enchère remportée !",
+      "soldDetail": "{{winner}} a remporté l'enchère avec une offre de {{amount}}, placée à {{time}}.",
+      "expiredSummary": "Enchère terminée",
+      "expiredDetail": "L'enchère s'est terminée à {{time}} sans atteindre le prix de réserve."
+    },
     "bidPanel": {
       "seller": "Vendeur",
       "ending": "Fin",
@@ -265,13 +271,25 @@
       "successMessage": "Votre compte a été créé. Vous pouvez maintenant vous connecter.",
       "signInButton": "Se connecter",
       "emailTakenError": "Cet e-mail est déjà utilisé.",
-      "genericError": "Une erreur est survenue. Veuillez réessayer."
+      "genericError": "Une erreur est survenue. Veuillez réessayer.",
+      "hasAccount": "Vous avez déjà un compte ?",
+      "loginLink": "Se connecter"
     },
     "login": {
       "heading": "Connexion",
       "submit": "Se connecter",
       "invalidCredentialsError": "E-mail ou mot de passe incorrect.",
-      "genericError": "Une erreur est survenue. Veuillez réessayer."
+      "genericError": "Une erreur est survenue. Veuillez réessayer.",
+      "rememberMe": "Rester connecté",
+      "sessionExpiredNotice": "Votre session a expiré. Veuillez vous reconnecter pour continuer.",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "registerLink": "S'inscrire"
+    },
+    "sessionWarning": {
+      "heading": "Session bientôt expirée",
+      "message": "Votre session est sur le point d'expirer. Voulez-vous rester connecté ?",
+      "staySignedIn": "Rester connecté",
+      "dismiss": "Ignorer"
     },
     "validation": {
       "required": "Ce champ est requis.",
