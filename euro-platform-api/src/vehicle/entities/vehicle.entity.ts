@@ -4,6 +4,9 @@ import { VehicleModel } from './vehicle-model.entity';
 import { VehicleTrim } from './vehicle-trim.entity';
 import { VehicleColor } from '../enums/vehicle-color.enum';
 import { CritAir } from '../enums/crit-air.enum';
+import { Transmission } from '../enums/transmission.enum';
+import { Drivetrain } from '../enums/drivetrain.enum';
+import { FuelType } from '../enums/fuel-type.enum';
 
 @Entity('vehicles')
 export class Vehicle {
@@ -47,6 +50,33 @@ export class Vehicle {
   // and 5-door body variant, so door count is a per-car fact, not a catalog-level trim fact.
   @Column({ name: 'number_of_doors', nullable: true })
   numberOfDoors?: number;
+
+  // The 8 fields below default to whatever the selected finition's matching powertrain
+  // specifies (see VehicleTrimPowertrain) but are this car's own values -- a seller can
+  // override any of them individually when their actual car differs from the catalog entry.
+  @Column({ nullable: true })
+  engine?: string;
+
+  @Column({ type: 'float', nullable: true })
+  displacement?: number;
+
+  @Column({ nullable: true })
+  horsepower?: number;
+
+  @Column({ nullable: true })
+  torque?: number;
+
+  @Column({ type: 'enum', enum: Transmission, enumName: 'transmission_enum', nullable: true })
+  transmission?: Transmission;
+
+  @Column({ type: 'enum', enum: Drivetrain, enumName: 'drivetrain_enum', nullable: true })
+  drivetrain?: Drivetrain;
+
+  @Column({ name: 'fuel_type', type: 'enum', enum: FuelType, enumName: 'fuel_type_enum', nullable: true })
+  fuelType?: FuelType;
+
+  @Column({ nullable: true })
+  weight?: number;
 
   @ManyToOne(() => VehicleMake)
   make!: VehicleMake;

@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import {
+  FuelType,
   VehicleMake,
   VehicleModel,
   VehicleTrim,
@@ -51,9 +52,13 @@ export class VehicleCatalogService {
     );
   }
 
-  findOrCreateTrim(modelId: number, name: string, year: number): Promise<VehicleTrim> {
+  findOrCreateTrim(
+    modelId: number,
+    name: string,
+    fuelType: FuelType | undefined,
+  ): Promise<VehicleTrim> {
     return firstValueFrom(
-      this.http.post<VehicleTrim>('/api/vehicles/trims', { modelId, name, year }),
+      this.http.post<VehicleTrim>('/api/vehicles/trims', { modelId, name, fuelType }),
     );
   }
 }

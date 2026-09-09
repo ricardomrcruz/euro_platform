@@ -2,7 +2,7 @@ import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Select } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
@@ -23,10 +23,14 @@ import type {
 } from '../interfaces/ad.interface';
 import { VehicleCatalogService } from '../../vehicle/vehicle-catalog.service';
 import type {
+  Drivetrain,
+  FuelType,
+  Transmission,
   VehicleColor,
   VehicleMake,
   VehicleModel,
   VehicleTrim,
+  VehicleTrimPowertrain,
 } from '../../vehicle/interfaces/vehicle-catalog.interface';
 import { COUNTRIES } from '../../shared/utils/countries';
 import { stripMakePrefix } from '../../shared/utils/vehicle-name.util';
@@ -34,13 +38,29 @@ import type {
   ColorOption,
   ConditionOption,
   CritAirOption,
+  DrivetrainOption,
+  FuelTypeOption,
   PhotoCategoryOption,
   PhotoRow,
   PhotoUploadStatus,
+  TransmissionOption,
   MakeValue,
   ModelValue,
   TrimValue,
 } from './interfaces/create-ad.interface';
+
+// Mechanical fields that default to the selected finition's matching powertrain (see
+// VehicleTrimPowertrain) but can be overridden per car -- shared between the cascade's
+// reset-on-upstream-change logic and the pre-fill-on-finition-pick logic.
+const TRIM_SPEC_KEYS = [
+  'engine',
+  'displacement',
+  'horsepower',
+  'torque',
+  'transmission',
+  'drivetrain',
+  'weight',
+] as const;
 
 const CONDITION_OPTIONS: ConditionOption[] = [
   { value: 'EXCELLENT', labelKey: 'ad.create.conditionExcellent' },
@@ -80,6 +100,32 @@ const CRIT_AIR_OPTIONS: CritAirOption[] = [
   { value: 'CRITAIR_3', labelKey: 'ad.create.critAirOptions.CRITAIR_3' },
   { value: 'CRITAIR_4', labelKey: 'ad.create.critAirOptions.CRITAIR_4' },
   { value: 'CRITAIR_5', labelKey: 'ad.create.critAirOptions.CRITAIR_5' },
+];
+
+const FUEL_TYPE_OPTIONS: FuelTypeOption[] = [
+  { value: 'GASOLINE', labelKey: 'vehicle.fuelTypeOptions.GASOLINE' },
+  { value: 'DIESEL', labelKey: 'vehicle.fuelTypeOptions.DIESEL' },
+  { value: 'ELECTRIC', labelKey: 'vehicle.fuelTypeOptions.ELECTRIC' },
+  { value: 'HYBRID', labelKey: 'vehicle.fuelTypeOptions.HYBRID' },
+  { value: 'PLUGIN_HYBRID', labelKey: 'vehicle.fuelTypeOptions.PLUGIN_HYBRID' },
+  { value: 'LPG', labelKey: 'vehicle.fuelTypeOptions.LPG' },
+  { value: 'ETHANOL', labelKey: 'vehicle.fuelTypeOptions.ETHANOL' },
+  { value: 'HYDROGEN', labelKey: 'vehicle.fuelTypeOptions.HYDROGEN' },
+  { value: 'CNG', labelKey: 'vehicle.fuelTypeOptions.CNG' },
+];
+
+const TRANSMISSION_OPTIONS: TransmissionOption[] = [
+  { value: 'MANUAL', labelKey: 'vehicle.transmissionOptions.MANUAL' },
+  { value: 'AUTOMATIC', labelKey: 'vehicle.transmissionOptions.AUTOMATIC' },
+  { value: 'CVT', labelKey: 'vehicle.transmissionOptions.CVT' },
+  { value: 'SEMI_AUTOMATIC', labelKey: 'vehicle.transmissionOptions.SEMI_AUTOMATIC' },
+];
+
+const DRIVETRAIN_OPTIONS: DrivetrainOption[] = [
+  { value: 'FWD', labelKey: 'vehicle.drivetrainOptions.FWD' },
+  { value: 'RWD', labelKey: 'vehicle.drivetrainOptions.RWD' },
+  { value: 'AWD', labelKey: 'vehicle.drivetrainOptions.AWD' },
+  { value: 'FOUR_WD', labelKey: 'vehicle.drivetrainOptions.FOUR_WD' },
 ];
 
 const AD_PHOTO_CATEGORY_OPTIONS: PhotoCategoryOption[] = [
@@ -137,6 +183,16 @@ function toDisplayModels(models: VehicleModel[], makeName: string | undefined): 
   return models.map((model) => ({ ...model, displayName: stripMakePrefix(model.name, makeName) }));
 }
 
+// Objects (make/model/trim) are compared by id, since the same catalog entry can arrive as a
+// different object reference (a fresh fetch, or the one loaded from an existing ad).
+function valuesEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (a && b && typeof a === 'object' && typeof b === 'object' && 'id' in a && 'id' in b) {
+    return (a as { id: unknown }).id === (b as { id: unknown }).id;
+  }
+  return false;
+}
+
 @Component({
   selector: 'app-create-ad',
   standalone: true,
@@ -182,12 +238,34 @@ export class CreateAdComponent implements OnDestroy {
   readonly conditionOptions = CONDITION_OPTIONS;
   readonly colorOptions = COLOR_OPTIONS;
   readonly critAirOptions = CRIT_AIR_OPTIONS;
+  readonly fuelTypeOptions = FUEL_TYPE_OPTIONS;
+  readonly transmissionOptions = TRANSMISSION_OPTIONS;
+  readonly drivetrainOptions = DRIVETRAIN_OPTIONS;
   readonly photoCategoryOptions = AD_PHOTO_CATEGORY_OPTIONS;
   readonly plateCountryOptions = COUNTRIES;
 
   readonly makes = signal<VehicleMake[]>([]);
   readonly models = signal<DisplayModel[]>([]);
   readonly trims = signal<VehicleTrim[]>([]);
+  // trims() narrowed to the currently selected fuel type -- a trim with no known powertrain
+  // data at all stays visible under every fuel type rather than being hidden outright.
+  readonly filteredTrims = signal<VehicleTrim[]>([]);
+
+  // Snapshot of the form exactly as it stands in the DB (taken right after loadForEdit
+  // finishes) vs. its live value, compared field-by-field so the template can flag which
+  // fields the seller has actually changed since loading an existing ad.
+  readonly originalFormValue = signal<Record<string, unknown> | null>(null);
+  readonly liveFormValue = signal<Record<string, unknown>>({});
+  readonly changedFieldKeys = computed(() => {
+    const original = this.originalFormValue();
+    if (!original) return new Set<string>();
+    const current = this.liveFormValue();
+    const keys = new Set<string>();
+    for (const key of Object.keys(current)) {
+      if (!valuesEqual(current[key], original[key])) keys.add(key);
+    }
+    return keys;
+  });
 
   readonly vinLoading = signal(false);
   readonly vinResultKey = signal<string | null>(null);
@@ -199,7 +277,17 @@ export class CreateAdComponent implements OnDestroy {
     vin: [''],
     make: this.fb.control<MakeValue>(null, Validators.required),
     model: this.fb.control<ModelValue>({ value: null, disabled: true }, Validators.required),
+    // Fuel type is picked before finition -- the same finition name commonly ships with
+    // several distinct engines, so this is what disambiguates which one is meant.
+    fuelType: this.fb.control<FuelType | null>({ value: null, disabled: true }),
     trim: this.fb.control<TrimValue>({ value: null, disabled: true }),
+    engine: this.fb.control<string | null>(null),
+    displacement: this.fb.control<number | null>(null),
+    horsepower: this.fb.control<number | null>(null),
+    torque: this.fb.control<number | null>(null),
+    transmission: this.fb.control<Transmission | null>(null),
+    drivetrain: this.fb.control<Drivetrain | null>(null),
+    weight: this.fb.control<number | null>(null),
     year: this.fb.control<number | null>(null, [Validators.required, Validators.min(1886)]),
     exteriorColor: this.fb.control<VehicleColor | null>(null),
     interiorColor: this.fb.control<VehicleColor | null>(null),
@@ -235,8 +323,10 @@ export class CreateAdComponent implements OnDestroy {
   constructor() {
     this.form.controls.make.valueChanges.subscribe((make) => {
       this.form.controls.model.setValue(null);
+      this.form.controls.fuelType.setValue(null);
       this.form.controls.trim.setValue(null);
       this.trims.set([]);
+      this.filteredTrims.set([]);
       const makeName = catalogName(make);
       if (makeName) {
         this.form.controls.model.enable();
@@ -250,17 +340,51 @@ export class CreateAdComponent implements OnDestroy {
     });
 
     this.form.controls.model.valueChanges.subscribe((model) => {
+      this.form.controls.fuelType.setValue(null);
       this.form.controls.trim.setValue(null);
+      this.filteredTrims.set([]);
       const makeName = catalogName(this.form.controls.make.value);
       const modelName = catalogName(model);
       if (modelName && makeName) {
-        this.form.controls.trim.enable();
+        this.form.controls.fuelType.enable();
         this.catalog.listTrims(makeName, modelName).then((trims) => this.trims.set(trims));
       } else {
-        this.form.controls.trim.disable();
+        this.form.controls.fuelType.disable();
         this.trims.set([]);
       }
     });
+
+    // Changing fuel type invalidates whatever finition/specs were already picked -- they
+    // belonged to the previous fuel type's set of engines.
+    this.form.controls.fuelType.valueChanges.subscribe((fuelType) => {
+      this.resetTrimAndSpecs();
+      if (fuelType) {
+        this.form.controls.trim.enable();
+        this.filteredTrims.set(
+          this.trims().filter(
+            (t) => t.powertrains.length === 0 || t.powertrains.some((p) => p.fuelType === fuelType),
+          ),
+        );
+      } else {
+        this.form.controls.trim.disable();
+        this.filteredTrims.set([]);
+      }
+    });
+
+    // Pre-fills the mechanical fields from the selected finition's matching powertrain. Only
+    // fields still holding what a previous pre-fill applied get overwritten, so switching
+    // finitions never silently replaces a value the seller typed in themselves.
+    this.form.controls.trim.valueChanges.subscribe((trim) => {
+      if (trim && typeof trim === 'object') {
+        const fuelType = this.form.controls.fuelType.value;
+        const powertrain = fuelType
+          ? trim.powertrains.find((p) => p.fuelType === fuelType)
+          : undefined;
+        this.applyPowertrainPrefill(powertrain);
+      }
+    });
+
+    this.form.valueChanges.subscribe(() => this.liveFormValue.set(this.form.getRawValue()));
 
     this.catalog.listMakes().then(async (makes) => {
       this.makes.set(makes);
@@ -271,10 +395,45 @@ export class CreateAdComponent implements OnDestroy {
     });
   }
 
+  // What applyPowertrainPrefill() itself last wrote into each mechanical field -- lets it
+  // tell "still holds our own pre-fill" apart from "the seller edited this" on a later call.
+  private readonly lastPowertrainPrefill: Partial<Record<(typeof TRIM_SPEC_KEYS)[number], unknown>> = {};
+
   ngOnDestroy(): void {
     for (const url of this.photoPreviewUrls()) {
       if (url) URL.revokeObjectURL(url);
     }
+  }
+
+  private resetTrimAndSpecs(): void {
+    this.form.controls.trim.setValue(null);
+    this.filteredTrims.set([]);
+    for (const key of TRIM_SPEC_KEYS) {
+      (this.form.controls[key] as FormControl<unknown>).setValue(null);
+    }
+  }
+
+  private applyPowertrainPrefill(powertrain: VehicleTrimPowertrain | undefined): void {
+    for (const key of TRIM_SPEC_KEYS) {
+      const control = this.form.controls[key] as FormControl<unknown>;
+      const newValue = (powertrain?.[key] ?? null) as unknown;
+      const current = control.value;
+      if (current === null || current === this.lastPowertrainPrefill[key]) {
+        control.setValue(newValue);
+        this.lastPowertrainPrefill[key] = newValue;
+      }
+    }
+  }
+
+  isFieldChanged(key: string): boolean {
+    return this.changedFieldKeys().has(key);
+  }
+
+  // Reloads the ad exactly as it stands in the DB -- discards every unsaved edit, including
+  // ones made after switching to a different finition/fuel type.
+  async resetToOriginal(): Promise<void> {
+    const id = this.editingAdId();
+    if (id) await this.loadForEdit(id);
   }
 
   private newPhotoRow(): PhotoRow {
@@ -367,6 +526,15 @@ export class CreateAdComponent implements OnDestroy {
         if (model) {
           const trims = await this.catalog.listTrims(make.name, model.name);
           this.trims.set(trims);
+          this.form.controls.fuelType.enable();
+          this.form.controls.fuelType.setValue(ad.vehicle.fuelType ?? null, { emitEvent: false });
+          this.filteredTrims.set(
+            trims.filter(
+              (t) =>
+                t.powertrains.length === 0 ||
+                t.powertrains.some((p) => p.fuelType === ad.vehicle.fuelType),
+            ),
+          );
           this.form.controls.trim.enable();
           const trim = ad.vehicle.trim
             ? (trims.find((t) => t.id === ad.vehicle.trim!.id) ?? null)
@@ -387,6 +555,13 @@ export class CreateAdComponent implements OnDestroy {
         critAir: ad.vehicle.critAir ?? null,
         numberOfSeats: ad.vehicle.numberOfSeats ?? null,
         numberOfDoors: ad.vehicle.numberOfDoors ?? null,
+        engine: ad.vehicle.engine ?? null,
+        displacement: ad.vehicle.displacement ?? null,
+        horsepower: ad.vehicle.horsepower ?? null,
+        torque: ad.vehicle.torque ?? null,
+        transmission: ad.vehicle.transmission ?? null,
+        drivetrain: ad.vehicle.drivetrain ?? null,
+        weight: ad.vehicle.weight ?? null,
         title: ad.title,
         description: ad.description,
         condition: ad.condition,
@@ -401,7 +576,15 @@ export class CreateAdComponent implements OnDestroy {
         this.form.controls.vin.disable();
         this.form.controls.make.disable();
         this.form.controls.model.disable();
+        this.form.controls.fuelType.disable();
         this.form.controls.trim.disable();
+        this.form.controls.engine.disable();
+        this.form.controls.displacement.disable();
+        this.form.controls.horsepower.disable();
+        this.form.controls.torque.disable();
+        this.form.controls.transmission.disable();
+        this.form.controls.drivetrain.disable();
+        this.form.controls.weight.disable();
         this.form.controls.year.disable();
         this.form.controls.exteriorColor.disable();
         this.form.controls.interiorColor.disable();
@@ -416,6 +599,10 @@ export class CreateAdComponent implements OnDestroy {
         this.form.controls.condition.disable();
         this.form.controls.location.disable();
       }
+
+      const snapshot = this.form.getRawValue();
+      this.originalFormValue.set(snapshot);
+      this.liveFormValue.set(snapshot);
     } finally {
       this.loadingExisting.set(false);
     }
@@ -457,12 +644,12 @@ export class CreateAdComponent implements OnDestroy {
   private async resolveTrim(
     modelId: number,
     value: TrimValue,
-    year: number,
+    fuelType: FuelType | null,
   ): Promise<VehicleTrim | undefined> {
     if (!value) return undefined;
     if (typeof value === 'object') return value;
     const name = catalogName(value);
-    return name ? this.catalog.findOrCreateTrim(modelId, name, year) : undefined;
+    return name ? this.catalog.findOrCreateTrim(modelId, name, fuelType ?? undefined) : undefined;
   }
 
   async saveDraft(): Promise<void> {
@@ -557,7 +744,7 @@ export class CreateAdComponent implements OnDestroy {
     try {
       const make = await this.resolveMake(v.make);
       const model = await this.resolveModel(make.id, v.model);
-      const trim = await this.resolveTrim(model.id, v.trim, v.year!);
+      const trim = await this.resolveTrim(model.id, v.trim, v.fuelType);
 
       const payload = {
         title: v.title!,
@@ -582,6 +769,14 @@ export class CreateAdComponent implements OnDestroy {
         critAir: v.critAir || undefined,
         numberOfSeats: v.numberOfSeats ?? undefined,
         numberOfDoors: v.numberOfDoors ?? undefined,
+        engine: v.engine || undefined,
+        displacement: v.displacement ?? undefined,
+        horsepower: v.horsepower ?? undefined,
+        torque: v.torque ?? undefined,
+        transmission: v.transmission || undefined,
+        drivetrain: v.drivetrain || undefined,
+        fuelType: v.fuelType || undefined,
+        weight: v.weight ?? undefined,
       };
 
       const existingId = this.editingAdId();

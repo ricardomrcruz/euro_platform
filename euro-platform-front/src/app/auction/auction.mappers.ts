@@ -48,8 +48,8 @@ export function toFeaturedCar(auction: Auction): FeaturedCar {
 
 // Real Auction -> the detail page's shape. Several mock-only fields have no backend
 // equivalent at all (videos, comments, view/watch counts, bidder/seller display name,
-// engine/drivetrain/transmission/bodyStyle/titleStatus) -- these are emptied/placeholdered
-// here rather than invented, matching mock-detail-data.ts's own '—' fallback convention.
+// bodyStyle/titleStatus) -- these are emptied/placeholdered here rather than invented,
+// matching mock-detail-data.ts's own '—' fallback convention.
 export function toAuctionDetailData(auction: Auction, bids: Bid[] = []): AuctionDetailData {
   const { ad } = auction;
   const mainUrl = primaryPhotoUrl(ad.photos, ad.title);
@@ -113,10 +113,10 @@ export function toAuctionDetailData(auction: Auction, bids: Bid[] = []): Auction
     specs: {
       make: ad.vehicle.make.name,
       model: ad.vehicle.model.name,
-      engine: '—',
-      drivetrain: '—',
+      engine: ad.vehicle.engine ?? '—',
+      drivetrain: ad.vehicle.drivetrain ?? '—',
       mileage: ad.vehicle.mileage ?? 0,
-      transmission: '—',
+      transmission: ad.vehicle.transmission ?? '—',
       vin: ad.vehicle.vin ?? '—',
       bodyStyle: '—',
       titleStatus: '—',

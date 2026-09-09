@@ -52,6 +52,6 @@ export class VehicleCatalogController {
 
   @Post('trims')
   createTrim(@Body() dto: FindOrCreateTrimDto) {
-    return this.vehicleFactory.findOrCreateTrim(dto.modelId, dto.name, dto.year);
+    return this.vehicleFactory.findOrCreateTrim(dto.modelId, dto.name, dto.fuelType);
   }
 }

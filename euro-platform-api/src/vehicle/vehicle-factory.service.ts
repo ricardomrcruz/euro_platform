@@ -5,6 +5,9 @@ import { VehicleTrim } from './entities/vehicle-trim.entity';
 import { Vehicle } from './entities/vehicle.entity';
 import { VehicleColor } from './enums/vehicle-color.enum';
 import { CritAir } from './enums/crit-air.enum';
+import { Transmission } from './enums/transmission.enum';
+import { Drivetrain } from './enums/drivetrain.enum';
+import { FuelType } from './enums/fuel-type.enum';
 import { decodeModelYear } from './vin-year.util';
 
 export interface VinLookupResult {
@@ -29,6 +32,14 @@ export interface CreateVehicleInput {
   critAir?: CritAir;
   numberOfSeats?: number;
   numberOfDoors?: number;
+  engine?: string;
+  displacement?: number;
+  horsepower?: number;
+  torque?: number;
+  transmission?: Transmission;
+  drivetrain?: Drivetrain;
+  fuelType?: FuelType;
+  weight?: number;
 }
 
 // The design doc's Factory pattern for 6.2.1 "Creer une annonce": queries the catalog.
@@ -63,8 +74,8 @@ export class VehicleFactoryService {
     return this.vehicleRepository.findOrCreateModelByName(makeId, name);
   }
 
-  findOrCreateTrim(modelId: number, name: string, year?: number): Promise<VehicleTrim> {
-    return this.vehicleRepository.findOrCreateTrimByName(modelId, name, year);
+  findOrCreateTrim(modelId: number, name: string, fuelType?: FuelType): Promise<VehicleTrim> {
+    return this.vehicleRepository.findOrCreateTrimByName(modelId, name, fuelType);
   }
 
   // Best-effort VIN recognition (design doc 6.2.1.1 "VIN reconnu" -- a separate scenario
@@ -123,6 +134,14 @@ export class VehicleFactoryService {
         critAir: input.critAir,
         numberOfSeats: input.numberOfSeats,
         numberOfDoors: input.numberOfDoors,
+        engine: input.engine,
+        displacement: input.displacement,
+        horsepower: input.horsepower,
+        torque: input.torque,
+        transmission: input.transmission,
+        drivetrain: input.drivetrain,
+        fuelType: input.fuelType,
+        weight: input.weight,
       }),
     );
   }

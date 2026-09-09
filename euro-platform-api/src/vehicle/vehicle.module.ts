@@ -6,13 +6,16 @@ import { VehicleRepository } from './vehicle.repository';
 import { VehicleMake } from './entities/vehicle-make.entity';
 import { VehicleModel } from './entities/vehicle-model.entity';
 import { VehicleTrim } from './entities/vehicle-trim.entity';
+import { VehicleTrimPowertrain } from './entities/vehicle-trim-powertrain.entity';
 import { Vehicle } from './entities/vehicle.entity';
 
 // CarAPI's HttpModule/CarApiClientService are deliberately not wired in here -- dormant,
 // not deleted (see car-api/). The catalog is backed by locally-seeded data instead
 // (see src/vehicle/seed/seed-catalog.ts).
 @Module({
-  imports: [TypeOrmModule.forFeature([VehicleMake, VehicleModel, VehicleTrim, Vehicle])],
+  imports: [
+    TypeOrmModule.forFeature([VehicleMake, VehicleModel, VehicleTrim, VehicleTrimPowertrain, Vehicle]),
+  ],
   controllers: [VehicleCatalogController],
   providers: [VehicleFactoryService, VehicleRepository],
   exports: [VehicleFactoryService],

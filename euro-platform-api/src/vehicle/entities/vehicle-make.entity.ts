@@ -15,9 +15,6 @@ export class VehicleMake {
   @Column({ name: 'logo_url', nullable: true })
   logoUrl?: string;
 
-  @Column({ name: 'external_id', nullable: true })
-  externalId?: number;
-
   // World Manufacturer Identifier(s) -- first 3 characters of a VIN. A make can have
   // several (different plants/regions), so this is an array, not a single value. Used by
   // VehicleFactoryService.resolveByVin() for best-effort make recognition from a VIN.

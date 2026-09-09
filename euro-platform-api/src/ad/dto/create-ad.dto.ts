@@ -1,6 +1,7 @@
 import {
   IsEnum,
   IsInt,
+  IsNumber,
   IsOptional,
   IsPositive,
   IsString,
@@ -10,6 +11,9 @@ import {
 import { VehicleCondition } from '../enums/vehicle-condition.enum';
 import { VehicleColor } from '../../vehicle/enums/vehicle-color.enum';
 import { CritAir } from '../../vehicle/enums/crit-air.enum';
+import { Transmission } from '../../vehicle/enums/transmission.enum';
+import { Drivetrain } from '../../vehicle/enums/drivetrain.enum';
+import { FuelType } from '../../vehicle/enums/fuel-type.enum';
 
 export class CreateAdDto {
   @IsString()
@@ -104,4 +108,42 @@ export class CreateAdDto {
   @IsInt()
   @Min(1)
   numberOfDoors?: number;
+
+  // The 8 fields below default to the selected finition's matching powertrain but can be
+  // overridden individually -- see vehicle.entity.ts.
+  @IsOptional()
+  @IsString()
+  engine?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  displacement?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  horsepower?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  torque?: number;
+
+  @IsOptional()
+  @IsEnum(Transmission)
+  transmission?: Transmission;
+
+  @IsOptional()
+  @IsEnum(Drivetrain)
+  drivetrain?: Drivetrain;
+
+  @IsOptional()
+  @IsEnum(FuelType)
+  fuelType?: FuelType;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  weight?: number;
 }

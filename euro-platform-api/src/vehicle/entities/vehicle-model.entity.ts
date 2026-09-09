@@ -15,18 +15,6 @@ export class VehicleModel {
   @Column({ name: 'body_type', type: 'enum', enum: BodyType, nullable: true })
   bodyType?: BodyType;
 
-  @Column({ name: 'year_start', nullable: true })
-  yearStart?: number;
-
-  @Column({ name: 'year_end', nullable: true })
-  yearEnd?: number;
-
-  @Column({ name: 'external_id', nullable: true })
-  externalId?: number;
-
-  @Column({ name: 'image_url', nullable: true })
-  imageUrl?: string;
-
   @ManyToOne(() => VehicleMake, (make) => make.models)
   make!: VehicleMake;
 

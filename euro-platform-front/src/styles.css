@@ -84,3 +84,7 @@ app-profile {
   font-size: 1rem;
 }
 
+app-create-ad .p-fileupload-header {
+  border-width: 0;
+}
+

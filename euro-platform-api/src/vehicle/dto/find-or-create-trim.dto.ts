@@ -1,4 +1,5 @@
-import { IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, MaxLength, Min } from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, MaxLength } from 'class-validator';
+import { FuelType } from '../enums/fuel-type.enum';
 
 export class FindOrCreateTrimDto {
   @IsInt()
@@ -10,10 +11,9 @@ export class FindOrCreateTrimDto {
   @MaxLength(100)
   name!: string;
 
-  // A finition/trim name isn't tied to one specific model-year (see vehicle-trim.entity.ts) --
-  // year is optional context, not a required disambiguator.
+  // The fuel type the seller is building the ad with -- lets this find-or-create also
+  // resolve the right VehicleTrimPowertrain row for a brand-new finition name.
   @IsOptional()
-  @IsInt()
-  @Min(1886)
-  year?: number;
+  @IsEnum(FuelType)
+  fuelType?: FuelType;
 }

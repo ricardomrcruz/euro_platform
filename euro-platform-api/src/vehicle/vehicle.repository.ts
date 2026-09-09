@@ -4,7 +4,9 @@ import { ILike, Repository } from 'typeorm';
 import { VehicleMake } from './entities/vehicle-make.entity';
 import { VehicleModel } from './entities/vehicle-model.entity';
 import { VehicleTrim } from './entities/vehicle-trim.entity';
+import { VehicleTrimPowertrain } from './entities/vehicle-trim-powertrain.entity';
 import { Vehicle } from './entities/vehicle.entity';
+import { FuelType } from './enums/fuel-type.enum';
 
 // Make/model/trim/vehicle are one catalog hierarchy always queried together -- kept as a
 // single repository rather than one class per entity.
@@ -17,6 +19,8 @@ export class VehicleRepository {
     private readonly modelRepository: Repository<VehicleModel>,
     @InjectRepository(VehicleTrim)
     private readonly trimRepository: Repository<VehicleTrim>,
+    @InjectRepository(VehicleTrimPowertrain)
+    private readonly trimPowertrainRepository: Repository<VehicleTrimPowertrain>,
     @InjectRepository(Vehicle)
     private readonly vehicleRepository: Repository<Vehicle>,
   ) {}
@@ -51,13 +55,16 @@ export class VehicleRepository {
   listTrimsByMakeModel(make: string, model: string): Promise<VehicleTrim[]> {
     return this.trimRepository.find({
       where: { model: { name: model, make: { name: make } } },
-      relations: { model: { make: true } },
+      relations: { model: { make: true }, powertrains: true },
       order: { name: 'ASC' },
     });
   }
 
   findTrimByIdWithMakeModel(id: number): Promise<VehicleTrim | null> {
-    return this.trimRepository.findOne({ where: { id }, relations: { model: { make: true } } });
+    return this.trimRepository.findOne({
+      where: { id },
+      relations: { model: { make: true }, powertrains: true },
+    });
   }
 
   findTrimById(id: number): Promise<VehicleTrim | null> {
@@ -95,17 +102,38 @@ export class VehicleRepository {
     return this.modelRepository.save(this.modelRepository.create({ name: trimmed, make }));
   }
 
-  async findOrCreateTrimByName(modelId: number, name: string, year?: number): Promise<VehicleTrim> {
+  // A finition typed by a seller isn't necessarily new -- it may already exist under a
+  // different fuel type. Also find-or-creates the specific fuel-type powertrain row so the
+  // trim always has one for whichever fuel type the seller is actually building the ad with.
+  async findOrCreateTrimByName(
+    modelId: number,
+    name: string,
+    fuelType?: FuelType,
+  ): Promise<VehicleTrim> {
     const trimmed = name.trim();
-    const existing = await this.trimRepository.findOne({
+    let trim = await this.trimRepository.findOne({
       where: { name: ILike(trimmed), model: { id: modelId } },
     });
-    if (existing) return existing;
 
-    const model = await this.findModelById(modelId);
-    if (!model) {
-      throw new NotFoundException('Vehicle model not found');
+    if (!trim) {
+      const model = await this.findModelById(modelId);
+      if (!model) {
+        throw new NotFoundException('Vehicle model not found');
+      }
+      trim = await this.trimRepository.save(this.trimRepository.create({ name: trimmed, model }));
     }
-    return this.trimRepository.save(this.trimRepository.create({ name: trimmed, year, model }));
+
+    if (fuelType) {
+      const existingPowertrain = await this.trimPowertrainRepository.findOne({
+        where: { trim: { id: trim.id }, fuelType },
+      });
+      if (!existingPowertrain) {
+        await this.trimPowertrainRepository.save(
+          this.trimPowertrainRepository.create({ trim, fuelType }),
+        );
+      }
+    }
+
+    return trim;
   }
 }

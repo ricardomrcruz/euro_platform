@@ -14,7 +14,18 @@
       }
 
       <section class="mt-6">
-        <h2 class="text-lg font-bold text-white">{{ 'ad.create.vehicleSection' | translate }}</h2>
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold text-white">{{ 'ad.create.vehicleSection' | translate }}</h2>
+          @if (editingAdId() && !isContentEditMode()) {
+            <p-button
+              type="button"
+              [label]="'ad.create.resetToOriginal' | translate"
+              [size]="'small'"
+              [text]="true"
+              (onClick)="resetToOriginal()"
+            />
+          }
+        </div>
 
         <div class="mt-4 flex flex-wrap items-end gap-2">
           <div class="max-w-sm flex-1">
@@ -34,9 +45,14 @@
           <p class="mt-1 text-xs text-surface-300">{{ vinResultKey()! | translate }}</p>
         }
 
-        <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.make' | translate }}</label>
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.make' | translate }}
+              @if (isFieldChanged('make')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
             <p-select
               formControlName="make"
               [options]="makes()"
@@ -45,14 +61,19 @@
               [placeholder]="'ad.create.selectMake' | translate"
               [size]="'small'"
               class="w-full"
-              styleClass="w-full"
+              [styleClass]="'w-full' + (isFieldChanged('make') ? ' ring-1 ring-amber-500' : '')"
             />
             @if (form.controls.make.touched && form.controls.make.invalid) {
               <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
             }
           </div>
           <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.model' | translate }}</label>
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.model' | translate }}
+              @if (isFieldChanged('model')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
             <p-select
               formControlName="model"
               [options]="models()"
@@ -61,37 +82,81 @@
               [placeholder]="'ad.create.selectModel' | translate"
               [size]="'small'"
               class="w-full"
-              styleClass="w-full"
+              [styleClass]="'w-full' + (isFieldChanged('model') ? ' ring-1 ring-amber-500' : '')"
             />
             @if (form.controls.model.touched && form.controls.model.invalid) {
               <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
             }
           </div>
           <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.trim' | translate }}</label>
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.fuelType' | translate }}
+              @if (isFieldChanged('fuelType')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
+            <p-select
+              formControlName="fuelType"
+              [options]="fuelTypeOptions"
+              optionLabel="labelKey"
+              optionValue="value"
+              [placeholder]="'ad.create.selectFuelType' | translate"
+              [size]="'small'"
+              class="w-full"
+              [styleClass]="'w-full' + (isFieldChanged('fuelType') ? ' ring-1 ring-amber-500' : '')"
+            >
+              <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+              <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+            </p-select>
+          </div>
+          <div>
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.trim' | translate }}
+              @if (isFieldChanged('trim')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
             <p-select
               formControlName="trim"
-              [options]="trims()"
+              [options]="filteredTrims()"
               optionLabel="name"
               [editable]="true"
               [placeholder]="'ad.create.selectTrim' | translate"
               [size]="'small'"
               class="w-full"
-              styleClass="w-full"
+              [styleClass]="'w-full' + (isFieldChanged('trim') ? ' ring-1 ring-amber-500' : '')"
             />
           </div>
         </div>
 
         <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.year' | translate }}</label>
-            <input type="number" pInputText [pSize]="'small'" formControlName="year" class="w-full" />
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.year' | translate }}
+              @if (isFieldChanged('year')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
+            <input
+              type="number"
+              pInputText
+              [pSize]="'small'"
+              formControlName="year"
+              class="w-full"
+              [class.ring-1]="isFieldChanged('year')"
+              [class.ring-amber-500]="isFieldChanged('year')"
+            />
             @if (form.controls.year.touched && form.controls.year.invalid) {
               <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
             }
           </div>
           <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.exteriorColor' | translate }}</label>
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.exteriorColor' | translate }}
+              @if (isFieldChanged('exteriorColor')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
             <p-select
               formControlName="exteriorColor"
               [options]="colorOptions"
@@ -100,14 +165,19 @@
               [placeholder]="'ad.create.exteriorColor' | translate"
               [size]="'small'"
               class="w-full"
-              styleClass="w-full"
+              [styleClass]="'w-full' + (isFieldChanged('exteriorColor') ? ' ring-1 ring-amber-500' : '')"
             >
               <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
               <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
             </p-select>
           </div>
           <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.interiorColor' | translate }}</label>
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.interiorColor' | translate }}
+              @if (isFieldChanged('interiorColor')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
             <p-select
               formControlName="interiorColor"
               [options]="colorOptions"
@@ -116,22 +186,53 @@
               [placeholder]="'ad.create.interiorColor' | translate"
               [size]="'small'"
               class="w-full"
-              styleClass="w-full"
+              [styleClass]="'w-full' + (isFieldChanged('interiorColor') ? ' ring-1 ring-amber-500' : '')"
             >
               <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
               <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
             </p-select>
           </div>
           <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.mileage' | translate }}</label>
-            <input type="number" pInputText [pSize]="'small'" formControlName="mileage" class="w-full" />
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.mileage' | translate }}
+              @if (isFieldChanged('mileage')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
+            <input
+              type="number"
+              pInputText
+              [pSize]="'small'"
+              formControlName="mileage"
+              class="w-full"
+              [class.ring-1]="isFieldChanged('mileage')"
+              [class.ring-amber-500]="isFieldChanged('mileage')"
+            />
           </div>
           <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.numberOfOwners' | translate }}</label>
-            <input type="number" pInputText [pSize]="'small'" formControlName="numberOfOwners" class="w-full" />
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.numberOfOwners' | translate }}
+              @if (isFieldChanged('numberOfOwners')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
+            <input
+              type="number"
+              pInputText
+              [pSize]="'small'"
+              formControlName="numberOfOwners"
+              class="w-full"
+              [class.ring-1]="isFieldChanged('numberOfOwners')"
+              [class.ring-amber-500]="isFieldChanged('numberOfOwners')"
+            />
           </div>
           <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.plateCountry' | translate }}</label>
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.plateCountry' | translate }}
+              @if (isFieldChanged('plateCountry')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
             <p-select
               formControlName="plateCountry"
               [options]="plateCountryOptions"
@@ -139,18 +240,36 @@
               [placeholder]="'ad.create.plateCountry' | translate"
               [size]="'small'"
               class="w-full"
-              styleClass="w-full"
+              [styleClass]="'w-full' + (isFieldChanged('plateCountry') ? ' ring-1 ring-amber-500' : '')"
             />
           </div>
           <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.fiscalPower' | translate }}</label>
-            <input type="number" pInputText [pSize]="'small'" formControlName="fiscalPower" class="w-full" />
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.fiscalPower' | translate }}
+              @if (isFieldChanged('fiscalPower')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
+            <input
+              type="number"
+              pInputText
+              [pSize]="'small'"
+              formControlName="fiscalPower"
+              class="w-full"
+              [class.ring-1]="isFieldChanged('fiscalPower')"
+              [class.ring-amber-500]="isFieldChanged('fiscalPower')"
+            />
             @if (form.controls.fiscalPower.touched && form.controls.fiscalPower.invalid) {
               <p class="mt-1 text-xs text-red-400">{{ 'auth.validation.required' | translate }}</p>
             }
           </div>
           <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.critAir' | translate }}</label>
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.critAir' | translate }}
+              @if (isFieldChanged('critAir')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
             <p-select
               formControlName="critAir"
               [options]="critAirOptions"
@@ -159,19 +278,179 @@
               [placeholder]="'ad.create.critAir' | translate"
               [size]="'small'"
               class="w-full"
-              styleClass="w-full"
+              [styleClass]="'w-full' + (isFieldChanged('critAir') ? ' ring-1 ring-amber-500' : '')"
             >
               <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
               <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
             </p-select>
           </div>
           <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.numberOfSeats' | translate }}</label>
-            <input type="number" pInputText [pSize]="'small'" formControlName="numberOfSeats" class="w-full" />
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.numberOfSeats' | translate }}
+              @if (isFieldChanged('numberOfSeats')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
+            <input
+              type="number"
+              pInputText
+              [pSize]="'small'"
+              formControlName="numberOfSeats"
+              class="w-full"
+              [class.ring-1]="isFieldChanged('numberOfSeats')"
+              [class.ring-amber-500]="isFieldChanged('numberOfSeats')"
+            />
           </div>
           <div>
-            <label class="mb-1 block text-sm text-surface-300">{{ 'ad.create.numberOfDoors' | translate }}</label>
-            <input type="number" pInputText [pSize]="'small'" formControlName="numberOfDoors" class="w-full" />
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.numberOfDoors' | translate }}
+              @if (isFieldChanged('numberOfDoors')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
+            <input
+              type="number"
+              pInputText
+              [pSize]="'small'"
+              formControlName="numberOfDoors"
+              class="w-full"
+              [class.ring-1]="isFieldChanged('numberOfDoors')"
+              [class.ring-amber-500]="isFieldChanged('numberOfDoors')"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="mt-6">
+        <h2 class="text-lg font-bold text-white">{{ 'ad.create.mechanicalSection' | translate }}</h2>
+
+        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.engine' | translate }}
+              @if (isFieldChanged('engine')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
+            <input
+              type="text"
+              pInputText
+              [pSize]="'small'"
+              formControlName="engine"
+              class="w-full"
+              [class.ring-1]="isFieldChanged('engine')"
+              [class.ring-amber-500]="isFieldChanged('engine')"
+            />
+          </div>
+          <div>
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.displacement' | translate }}
+              @if (isFieldChanged('displacement')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
+            <input
+              type="number"
+              pInputText
+              [pSize]="'small'"
+              formControlName="displacement"
+              class="w-full"
+              [class.ring-1]="isFieldChanged('displacement')"
+              [class.ring-amber-500]="isFieldChanged('displacement')"
+            />
+          </div>
+          <div>
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.horsepower' | translate }}
+              @if (isFieldChanged('horsepower')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
+            <input
+              type="number"
+              pInputText
+              [pSize]="'small'"
+              formControlName="horsepower"
+              class="w-full"
+              [class.ring-1]="isFieldChanged('horsepower')"
+              [class.ring-amber-500]="isFieldChanged('horsepower')"
+            />
+          </div>
+          <div>
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.torque' | translate }}
+              @if (isFieldChanged('torque')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
+            <input
+              type="number"
+              pInputText
+              [pSize]="'small'"
+              formControlName="torque"
+              class="w-full"
+              [class.ring-1]="isFieldChanged('torque')"
+              [class.ring-amber-500]="isFieldChanged('torque')"
+            />
+          </div>
+          <div>
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.transmission' | translate }}
+              @if (isFieldChanged('transmission')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
+            <p-select
+              formControlName="transmission"
+              [options]="transmissionOptions"
+              optionLabel="labelKey"
+              optionValue="value"
+              [placeholder]="'ad.create.transmission' | translate"
+              [size]="'small'"
+              class="w-full"
+              [styleClass]="'w-full' + (isFieldChanged('transmission') ? ' ring-1 ring-amber-500' : '')"
+            >
+              <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+              <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+            </p-select>
+          </div>
+          <div>
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.drivetrain' | translate }}
+              @if (isFieldChanged('drivetrain')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
+            <p-select
+              formControlName="drivetrain"
+              [options]="drivetrainOptions"
+              optionLabel="labelKey"
+              optionValue="value"
+              [placeholder]="'ad.create.drivetrain' | translate"
+              [size]="'small'"
+              class="w-full"
+              [styleClass]="'w-full' + (isFieldChanged('drivetrain') ? ' ring-1 ring-amber-500' : '')"
+            >
+              <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+              <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+            </p-select>
+          </div>
+          <div>
+            <label class="mb-1 flex items-center gap-1 text-sm text-surface-300">
+              {{ 'ad.create.weight' | translate }}
+              @if (isFieldChanged('weight')) {
+                <span class="text-xs font-normal text-amber-400">({{ 'ad.create.modifiedTag' | translate }})</span>
+              }
+            </label>
+            <input
+              type="number"
+              pInputText
+              [pSize]="'small'"
+              formControlName="weight"
+              class="w-full"
+              [class.ring-1]="isFieldChanged('weight')"
+              [class.ring-amber-500]="isFieldChanged('weight')"
+            />
           </div>
         </div>
       </section>
@@ -288,6 +567,8 @@
             (onSelect)="onFilesSelected($event)"
             styleClass="!border-0 !bg-transparent !p-0"
           >
+            <ng-template #file></ng-template>
+
             <ng-template #header let-chooseCallback="chooseCallback">
               <p-button
                 type="button"
@@ -326,14 +607,16 @@
                       </div>
 
                       @if (i !== primaryPhotoIndex()) {
-                        <p-button
-                          type="button"
-                          [label]="'ad.create.setAsCover' | translate"
-                          [size]="'small'"
-                          [outlined]="true"
-                          styleClass="w-full"
-                          (onClick)="setCoverPhoto(i)"
-                        />
+                        <div>
+                          <p-button
+                            type="button"
+                            [label]="'ad.create.setAsCover' | translate"
+                            [size]="'small'"
+                            [outlined]="true"
+                            styleClass="w-full"
+                            (onClick)="setCoverPhoto(i)"
+                          />
+                        </div>
                       }
 
                       <p-select

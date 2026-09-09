@@ -1,4 +1,9 @@
-import type { VehicleColor } from '../../vehicle/interfaces/vehicle-catalog.interface';
+import type {
+  Drivetrain,
+  FuelType,
+  Transmission,
+  VehicleColor,
+} from '../../vehicle/interfaces/vehicle-catalog.interface';
 
 export type CritAir = 'CRITAIR_0' | 'CRITAIR_1' | 'CRITAIR_2' | 'CRITAIR_3' | 'CRITAIR_4' | 'CRITAIR_5';
 
@@ -54,6 +59,14 @@ export interface CreateAdPayload {
   critAir?: CritAir;
   numberOfSeats?: number;
   numberOfDoors?: number;
+  engine?: string;
+  displacement?: number;
+  horsepower?: number;
+  torque?: number;
+  transmission?: Transmission;
+  drivetrain?: Drivetrain;
+  fuelType?: FuelType;
+  weight?: number;
 }
 
 export interface AdPhoto {
@@ -78,6 +91,14 @@ export interface AdVehicleSummary {
   critAir?: CritAir;
   numberOfSeats?: number;
   numberOfDoors?: number;
+  engine?: string;
+  displacement?: number;
+  horsepower?: number;
+  torque?: number;
+  transmission?: Transmission;
+  drivetrain?: Drivetrain;
+  fuelType?: FuelType;
+  weight?: number;
   make: { id: number; name: string };
   model: { id: number; name: string };
   trim?: { id: number; name: string };

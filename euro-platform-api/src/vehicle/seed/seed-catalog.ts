@@ -4,6 +4,7 @@ import dataSource from '../../data-source';
 import { VehicleMake } from '../entities/vehicle-make.entity';
 import { VehicleModel } from '../entities/vehicle-model.entity';
 import { VehicleTrim } from '../entities/vehicle-trim.entity';
+import { VehicleTrimPowertrain } from '../entities/vehicle-trim-powertrain.entity';
 import { mapBodyType, mapFuelType } from '../catalog-mappers.util';
 
 // One-off (rerunnable) catalog seed, run manually: `npm run seed:catalog`.
@@ -54,11 +55,9 @@ interface SparqlValue {
 }
 
 interface SparqlBinding {
-  model: SparqlValue;
   modelLabel?: SparqlValue;
   manufacturerLabel?: SparqlValue;
   classLabel?: SparqlValue;
-  inception?: SparqlValue;
   displacement?: SparqlValue;
   power?: SparqlValue;
   torque?: SparqlValue;
@@ -66,8 +65,6 @@ interface SparqlBinding {
   poweredByLabel?: SparqlValue;
   wmiCode?: SparqlValue;
   countryLabel?: SparqlValue;
-  discontinued?: SparqlValue;
-  image?: SparqlValue;
 }
 
 interface SparqlResponse {
@@ -77,24 +74,21 @@ interface SparqlResponse {
 function buildQuery(): string {
   const values = COUNTRY_QIDS.map((qid) => `wd:${qid}`).join(' ');
   return `
-    SELECT ?model ?modelLabel ?manufacturerLabel ?classLabel ?inception
+    SELECT ?modelLabel ?manufacturerLabel ?classLabel
            ?displacement ?power ?torque ?engineConfigLabel ?poweredByLabel ?wmiCode
-           ?countryLabel ?discontinued ?image
+           ?countryLabel
     WHERE {
       VALUES ?country { ${values} }
       ?model wdt:P31 ?class .
       ?class wdt:P279* wd:Q3231690 .
       ?model wdt:P176 ?manufacturer .
       ?manufacturer wdt:P17 ?country .
-      OPTIONAL { ?model wdt:P571 ?inception . }
       OPTIONAL { ?model wdt:P8628 ?displacement . }
       OPTIONAL { ?model wdt:P2109 ?power . }
       OPTIONAL { ?model wdt:P2230 ?torque . }
       OPTIONAL { ?model wdt:P1002 ?engineConfig . }
       OPTIONAL { ?model wdt:P516 ?poweredBy . }
       OPTIONAL { ?manufacturer wdt:P6793 ?wmiCode . }
-      OPTIONAL { ?model wdt:P2669 ?discontinued . }
-      OPTIONAL { ?model wdt:P18 ?image . }
       SERVICE wikibase:label {
         bd:serviceParam wikibase:language "en,fr,de,it,ja,es,sv,nl,cs,pl".
       }
@@ -103,22 +97,11 @@ function buildQuery(): string {
   `;
 }
 
-function qidFromUri(uri: string): number | undefined {
-  const match = /Q(\d+)$/.exec(uri);
-  return match ? Number(match[1]) : undefined;
-}
-
 // When an entity has no label in any of the requested languages, Wikidata's label service
 // falls back to returning the raw entity ID (e.g. "Q53098") instead of failing -- that's
 // worse than skipping the row, since a QID isn't a usable name in the catalog.
 function isUsableLabel(value?: string): value is string {
   return !!value && !/^Q\d+$/.test(value);
-}
-
-function yearFromInception(inception?: string): number | undefined {
-  if (!inception) return undefined;
-  const year = new Date(inception).getFullYear();
-  return Number.isNaN(year) ? undefined : year;
 }
 
 async function fetchWikidataRows(): Promise<SparqlBinding[]> {
@@ -139,6 +122,7 @@ async function run(): Promise<void> {
   const makeRepository = dataSource.getRepository(VehicleMake);
   const modelRepository = dataSource.getRepository(VehicleModel);
   const trimRepository = dataSource.getRepository(VehicleTrim);
+  const trimPowertrainRepository = dataSource.getRepository(VehicleTrimPowertrain);
 
   console.log('Querying Wikidata...');
   const rows = await fetchWikidataRows();
@@ -176,18 +160,9 @@ async function run(): Promise<void> {
         make = await makeRepository.save(make);
       }
 
-      // Two distinct Wikidata items can render to the identical label under the same
-      // manufacturer (e.g. a model-line item and a generation-specific item both called
-      // "Skoda Favorit") -- externalId lookup alone would miss that and then collide with
-      // our own (make, name) uniqueness on insert. Fall back to a name-based lookup before
-      // deciding to create, since (make, name) is our actual identity for a model anyway.
-      const modelExternalId = qidFromUri(row.model.value);
-      let model = modelExternalId
-        ? await modelRepository.findOneBy({ externalId: modelExternalId })
-        : null;
-      if (!model) {
-        model = await modelRepository.findOne({ where: { make: { id: make.id }, name: modelName } });
-      }
+      // (make, name) and (model, name) are a model's/trim's actual identity in this
+      // catalog -- looked up by name directly, same as make above.
+      let model = await modelRepository.findOne({ where: { make: { id: make.id }, name: modelName } });
 
       if (!model) {
         model = await modelRepository.save(
@@ -195,64 +170,40 @@ async function run(): Promise<void> {
             make,
             name: modelName,
             bodyType: mapBodyType(row.classLabel?.value),
-            yearStart: yearFromInception(row.inception?.value),
-            yearEnd: yearFromInception(row.discontinued?.value),
-            imageUrl: row.image?.value,
-            externalId: modelExternalId,
           }),
         );
         modelsCreated++;
-      } else {
-        // Backfill fields added after this model may have first been seeded, same pattern
-        // as the make-level country/wmiCodes backfill above.
-        let modelChanged = false;
-        const discontinuedYear = yearFromInception(row.discontinued?.value);
-        if (!model.yearEnd && discontinuedYear) {
-          model.yearEnd = discontinuedYear;
-          modelChanged = true;
-        }
-        if (!model.imageUrl && row.image?.value) {
-          model.imageUrl = row.image.value;
-          modelChanged = true;
-        }
-        if (modelChanged) {
-          model = await modelRepository.save(model);
-        }
       }
 
-      const trimYear = yearFromInception(row.inception?.value);
-      if (!trimYear) {
-        // VehicleTrim.year is required -- skip creating a trim if we have nothing to put there.
-        continue;
-      }
-
-      let existingTrim = modelExternalId
-        ? await trimRepository.findOneBy({ externalId: modelExternalId })
-        : null;
-      if (!existingTrim) {
-        existingTrim = await trimRepository.findOne({
-          where: { model: { id: model.id }, name: 'Standard', year: trimYear },
-        });
-      }
+      let existingTrim = await trimRepository.findOne({
+        where: { model: { id: model.id }, name: 'Standard' },
+      });
 
       if (!existingTrim) {
-        // P516 ("powered by") is multi-valued for hybrids (e.g. both a gasoline engine and
-        // an electric motor) -- SPARQL returns one row per value, and since we key on
-        // modelExternalId, only whichever row is processed first sets fuelType here. Good
-        // enough for a best-effort seed; not worth a GROUP_CONCAT rewrite for this.
-        await trimRepository.save(
+        const trim = await trimRepository.save(
           trimRepository.create({
             model,
             name: 'Standard',
-            year: trimYear,
-            externalId: modelExternalId,
-            displacement: row.displacement ? Number(row.displacement.value) : undefined,
-            horsepower: row.power ? Math.round(Number(row.power.value)) : undefined,
-            torque: row.torque ? Math.round(Number(row.torque.value)) : undefined,
-            engine: row.engineConfigLabel?.value,
-            fuelType: mapFuelType(row.poweredByLabel?.value),
           }),
         );
+
+        // P516 ("powered by") is multi-valued for hybrids (e.g. both a gasoline engine and
+        // an electric motor) -- SPARQL returns one row per value, so this only captures
+        // whichever fuel type is processed first for this trim. Good enough for a
+        // best-effort seed; not worth a GROUP_CONCAT rewrite for this.
+        const fuelType = mapFuelType(row.poweredByLabel?.value);
+        if (fuelType) {
+          await trimPowertrainRepository.save(
+            trimPowertrainRepository.create({
+              trim,
+              fuelType,
+              displacement: row.displacement ? Number(row.displacement.value) : undefined,
+              horsepower: row.power ? Math.round(Number(row.power.value)) : undefined,
+              torque: row.torque ? Math.round(Number(row.torque.value)) : undefined,
+              engine: row.engineConfigLabel?.value,
+            }),
+          );
+        }
         trimsCreated++;
       }
     } catch (error) {

@@ -55,6 +55,14 @@ export class AdService {
       critAir: dto.critAir,
       numberOfSeats: dto.numberOfSeats,
       numberOfDoors: dto.numberOfDoors,
+      engine: dto.engine,
+      displacement: dto.displacement,
+      horsepower: dto.horsepower,
+      torque: dto.torque,
+      transmission: dto.transmission,
+      drivetrain: dto.drivetrain,
+      fuelType: dto.fuelType,
+      weight: dto.weight,
     });
 
     const ad = this.adRepository.create({
@@ -98,6 +106,14 @@ export class AdService {
       critAir: dto.critAir,
       numberOfSeats: dto.numberOfSeats,
       numberOfDoors: dto.numberOfDoors,
+      engine: dto.engine,
+      displacement: dto.displacement,
+      horsepower: dto.horsepower,
+      torque: dto.torque,
+      transmission: dto.transmission,
+      drivetrain: dto.drivetrain,
+      fuelType: dto.fuelType,
+      weight: dto.weight,
     });
 
     ad.title = dto.title;

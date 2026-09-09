@@ -22,6 +22,9 @@ export interface AuctionVehicleSummary {
   exteriorColor?: string;
   interiorColor?: string;
   mileage?: number;
+  engine?: string;
+  transmission?: string;
+  drivetrain?: string;
   make: { id: number; name: string };
   model: { id: number; name: string };
   trim?: { id: number; name: string };

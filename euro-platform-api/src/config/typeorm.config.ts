@@ -13,6 +13,7 @@ export default registerAs(
     schema: process.env.DB_SCHEMA ?? 'public',
     autoLoadEntities: true,
     synchronize: false,
+    migrationsRun: true,
     migrations: [__dirname + '/../migrations/*{.ts,.js}'],
   }),
 );

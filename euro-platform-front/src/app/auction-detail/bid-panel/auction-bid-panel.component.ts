@@ -12,10 +12,11 @@ import { AuthService } from '../../core/auth/auth.service';
 import { AuctionService } from '../../auction/auction.service';
 import type { AuctionDetailData } from '../interfaces/auction-detail.interface';
 
-// Mirrors Auction.registerBid()'s server-side rule (MIN_STARTING_BID = MIN_COMMISSION * 2)
-// in euro-platform-api/src/auction/entities/auction.entity.ts -- keep both in sync. Only used
-// here for an immediate client-side hint; the server's own response is always authoritative.
-const MIN_STARTING_BID = 500;
+// Suggested step above whatever's currently shown as the price (itself already the highest
+// real bid, or the reserve price when there isn't one yet -- see toAuctionDetailData) -- just
+// a client-side hint for a sensible next amount, never lower than what's already displayed.
+// The server's own response is always the authoritative minimum.
+const SUGGESTED_BID_STEP = 500;
 
 @Component({
   selector: 'app-auction-bid-panel',
@@ -44,9 +45,7 @@ export class AuctionBidPanelComponent {
   readonly isSeller = computed(() => this.currentUser()?.sub === this.detail().sellerId);
   readonly isLive = computed(() => this.detail().state === 'LIVE');
   readonly canBid = computed(() => this.isLoggedIn() && !this.isSeller() && this.isLive());
-  readonly minNextBid = computed(() =>
-    this.detail().bidsCount > 0 ? this.detail().currentBid + 1 : MIN_STARTING_BID,
-  );
+  readonly minNextBid = computed(() => this.detail().currentBid + SUGGESTED_BID_STEP);
 
   openLogin(): void {
     this.authService.openLoginDialog();
