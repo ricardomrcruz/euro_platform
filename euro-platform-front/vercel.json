@@ -1,5 +1,5 @@
 {
-  "outputDirectory": "dist/euro-platform-front",
+  "outputDirectory": "dist/euro-platform-front/browser",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
