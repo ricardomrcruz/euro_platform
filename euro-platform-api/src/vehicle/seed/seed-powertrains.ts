@@ -66,8 +66,9 @@ async function run(): Promise<void> {
           });
 
           if (existing) {
+            const target = existing as unknown as Record<string, unknown>;
             for (const field of POWERTRAIN_FIELDS) {
-              (existing as Record<string, unknown>)[field] = pt[field] ?? null;
+              target[field] = pt[field] ?? null;
             }
             await powertrainRepo.save(existing);
             powertrainsUpdated++;
