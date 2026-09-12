@@ -187,7 +187,28 @@ npm test
 
 Backends also have `npm run test:e2e` and `npm run test:cov`.
 
+## CI/CD and staging deployment
+
+GitHub Actions (`.github/workflows/`) runs two workflows:
+
+- **`ci.yml`** — on every PR into `stag`/`main` and every push to `dev`, installs
+  dependencies and builds all three projects (`euro-auth`, `euro-platform-api`,
+  `euro-platform-front`). Build-only for now: no lint/test gate yet.
+- **`deploy-staging.yml`** — on push to `stag`, builds Docker images for `euro-auth` and
+  `euro-platform-api`, pushes them to GitHub Container Registry (tagged `latest` and the
+  commit SHA), then redeploys those services on Railway via the Railway CLI.
+
+The frontend deploys separately through Vercel's own Git integration (`euro-platform-front/
+vercel.json`, `npm run build:staging`), not through GitHub Actions. In this split-hosting
+setup the frontend and API are on different origins, so the Angular build for staging
+(`environment.staging.ts`) points `apiBaseUrl` at the API's Railway domain and an HTTP
+interceptor (`api-base-url.interceptor.ts`) rewrites relative `/api/...` calls to that
+absolute URL.
+
+Only a `stag` (staging) environment is wired up this way today — there's no production
+deploy pipeline yet. Local development still runs entirely via Docker Compose as described
+above, and doesn't touch any of this.
+
 ## Notes on scope
 
-This is a school project run locally via Docker Compose — there's no CI/CD pipeline or
-cloud hosting configured. The notification system is a stub (logs only, no real email).
+This is a school project. The notification system is a stub (logs only, no real email).
