@@ -11,6 +11,7 @@ import { routes } from './app.routes';
 import { EuroCarsPreset } from '../theme/eurocars-preset';
 import { getStoredLang, DEFAULT_LANG } from './core/i18n/lang-storage';
 import { authInterceptor } from './core/auth/auth.interceptor';
+import { apiBaseUrlInterceptor } from './core/api-base-url.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -21,7 +22,7 @@ export const appConfig: ApplicationConfig = {
       withInMemoryScrolling({ scrollPositionRestoration: 'enabled' }),
     ),
     provideAnimationsAsync(),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, apiBaseUrlInterceptor])),
     MessageService,
     providePrimeNG({
       theme: {

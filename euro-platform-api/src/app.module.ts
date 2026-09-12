@@ -3,8 +3,6 @@ import { ConfigModule, ConfigType } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import authConfig from './config/auth.config';
 import typeormConfig from './config/typeorm.config';
 import carApiConfig from './vehicle/car-api/car-api.config';
@@ -38,9 +36,7 @@ import { AccountModule } from './account/account.module';
     SchedulerModule,
     AccountModule,
   ],
-  controllers: [AppController],
   providers: [
-    AppService,
     // Order matters: AuthGuard runs first and attaches request.user, RolesGuard reads it.
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
