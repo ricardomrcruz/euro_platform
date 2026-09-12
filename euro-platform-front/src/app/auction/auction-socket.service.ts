@@ -1,19 +1,21 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import { environment } from '../../environments/environment';
 import type { BidPlacedEvent, AuctionClosedEvent } from './interfaces/auction.interface';
 
 // Kept separate from the HTTP-only AuctionService -- this is purely a server -> client push
 // channel for live updates, never used to mutate anything (bids/buy-now stay authenticated
-// REST calls). Connects same-origin with no explicit URL, which works through both the
-// nginx prod path and the ng-serve dev proxy (see nginx.conf / proxy.conf.json).
+// REST calls). Connects same-origin with no explicit URL locally (works through both the
+// nginx prod path and the ng-serve dev proxy -- see nginx.conf / proxy.conf.json), or
+// directly to the API's own origin when the frontend is hosted separately from it.
 @Injectable({ providedIn: 'root' })
 export class AuctionSocketService {
   private socket: Socket | null = null;
 
   private ensureConnected(): Socket {
     if (!this.socket) {
-      this.socket = io();
+      this.socket = environment.apiBaseUrl ? io(environment.apiBaseUrl) : io();
     }
     return this.socket;
   }
