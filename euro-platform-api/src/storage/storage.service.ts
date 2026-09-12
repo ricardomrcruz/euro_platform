@@ -10,8 +10,6 @@ export interface SignedUpload {
 
 const SIGNED_URL_TTL_MS = 15 * 60 * 1000;
 
-// GOOGLE_APPLICATION_CREDENTIALS (set in docker-compose, pointing at the mounted
-// service-account key) is picked up automatically by the client library -- no keyFilename here.
 @Injectable()
 export class StorageService {
   private readonly storage: Storage;
@@ -20,7 +18,14 @@ export class StorageService {
     @Inject(storageConfig.KEY)
     private readonly config: ConfigType<typeof storageConfig>,
   ) {
-    this.storage = new Storage({ projectId: config.projectId });
+    // Inline credentials when provided (Railway); otherwise the client picks up
+    // GOOGLE_APPLICATION_CREDENTIALS, the mounted key-file path used by docker-compose.
+    this.storage = new Storage({
+      projectId: config.projectId,
+      ...(config.credentialsJson
+        ? { credentials: JSON.parse(config.credentialsJson) as Record<string, unknown> }
+        : {}),
+    });
   }
 
   async generateUploadUrl(objectKey: string, contentType: string): Promise<SignedUpload> {
