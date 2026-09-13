@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -169,9 +169,15 @@ export class AuctionsListComponent {
 
     // Re-runs whenever the `q` route input changes -- including a fresh navbar search fired
     // while this page is already open (same route/component instance, just a new query param).
+    // runSearch() reads searchText and every other filter signal, so without untracked() here
+    // those reads become dependencies of THIS effect too -- re-firing (and re-searching) on
+    // every keystroke/filter change instead of only on navigation.
     effect(() => {
-      this.searchText.set(this.q());
-      this.runSearch();
+      const query = this.q();
+      untracked(() => {
+        this.searchText.set(query);
+        this.runSearch();
+      });
     });
   }
 
