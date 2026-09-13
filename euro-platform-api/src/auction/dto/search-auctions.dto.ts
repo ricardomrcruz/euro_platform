@@ -8,7 +8,7 @@ import { Drivetrain } from '../../vehicle/enums/drivetrain.enum';
 import { BodyType } from '../../vehicle/enums/body-type.enum';
 
 export class SearchAuctionsDto {
-  // %LIKE against the ad title.
+  // %LIKE against the ad title or description.
   @IsOptional()
   @IsString()
   q?: string;

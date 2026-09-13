@@ -62,7 +62,7 @@ export class AuctionRepository extends Repository<Auction> {
       .leftJoinAndSelect('ad.photos', 'photos');
 
     if (filters.q) {
-      qb.andWhere('ad.title ILIKE :q', { q: `%${filters.q}%` });
+      qb.andWhere('(ad.title ILIKE :q OR ad.description ILIKE :q)', { q: `%${filters.q}%` });
     }
     if (filters.make) {
       qb.andWhere('make.name ILIKE :make', { make: filters.make });
@@ -86,10 +86,10 @@ export class AuctionRepository extends Repository<Auction> {
       qb.andWhere('vehicle.mileage <= :mileageMax', { mileageMax: filters.mileageMax });
     }
     if (filters.horsepowerMin != null) {
-      qb.andWhere('trim.horsepower >= :horsepowerMin', { horsepowerMin: filters.horsepowerMin });
+      qb.andWhere('vehicle.horsepower >= :horsepowerMin', { horsepowerMin: filters.horsepowerMin });
     }
     if (filters.horsepowerMax != null) {
-      qb.andWhere('trim.horsepower <= :horsepowerMax', { horsepowerMax: filters.horsepowerMax });
+      qb.andWhere('vehicle.horsepower <= :horsepowerMax', { horsepowerMax: filters.horsepowerMax });
     }
     if (filters.fiscalPowerMin != null) {
       qb.andWhere('vehicle.fiscalPower >= :fiscalPowerMin', { fiscalPowerMin: filters.fiscalPowerMin });
@@ -98,13 +98,13 @@ export class AuctionRepository extends Repository<Auction> {
       qb.andWhere('vehicle.fiscalPower <= :fiscalPowerMax', { fiscalPowerMax: filters.fiscalPowerMax });
     }
     if (filters.fuelType) {
-      qb.andWhere('trim.fuelType = :fuelType', { fuelType: filters.fuelType });
+      qb.andWhere('vehicle.fuelType = :fuelType', { fuelType: filters.fuelType });
     }
     if (filters.transmission) {
-      qb.andWhere('trim.transmission = :transmission', { transmission: filters.transmission });
+      qb.andWhere('vehicle.transmission = :transmission', { transmission: filters.transmission });
     }
     if (filters.drivetrain) {
-      qb.andWhere('trim.drivetrain = :drivetrain', { drivetrain: filters.drivetrain });
+      qb.andWhere('vehicle.drivetrain = :drivetrain', { drivetrain: filters.drivetrain });
     }
     if (filters.bodyType) {
       qb.andWhere('model.bodyType = :bodyType', { bodyType: filters.bodyType });
