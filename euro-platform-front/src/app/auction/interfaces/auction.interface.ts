@@ -26,7 +26,7 @@ export interface AuctionVehicleSummary {
   transmission?: string;
   drivetrain?: string;
   make: { id: number; name: string };
-  model: { id: number; name: string };
+  model: { id: number; name: string; bodyType?: string };
   trim?: { id: number; name: string };
 }
 

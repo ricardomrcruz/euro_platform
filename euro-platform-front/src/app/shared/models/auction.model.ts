@@ -12,6 +12,9 @@ export interface AuctionCardData {
   mileage: number;
   badge?: 'NO RESERVE';
   state: AuctionState;
+  year: number;
+  transmission?: string;
+  bodyType?: string;
 }
 
 export interface FeaturedCar {

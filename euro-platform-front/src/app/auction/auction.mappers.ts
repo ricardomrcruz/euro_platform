@@ -24,6 +24,9 @@ export function toAuctionCardData(auction: Auction): AuctionCardData {
     listedAt: new Date(auction.startDate),
     mileage: ad.vehicle.mileage ?? 0,
     state: auction.state,
+    year: ad.vehicle.year,
+    transmission: ad.vehicle.transmission,
+    bodyType: ad.vehicle.model.bodyType,
   };
 }
 
