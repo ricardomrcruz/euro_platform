@@ -1,7 +1,8 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuctionCardComponent } from '../../shared/components/auction-card/auction-card.component';
 import { AuctionService } from '../../auction/auction.service';
 import { toAuctionCardData } from '../../auction/auction.mappers';
@@ -11,6 +12,11 @@ type SortKey = 'ending-soon' | 'newly-listed' | 'no-reserve' | 'lowest-mileage' 
 
 interface SortTab {
   key: SortKey;
+  labelKey: string;
+}
+
+interface FilterOption {
+  value: string;
   labelKey: string;
 }
 
@@ -24,35 +30,37 @@ const SORT_TABS: SortTab[] = [
   { key: 'closest-to-me', labelKey: 'auctions.sort.closestToMe' },
 ];
 
-const YEAR_OPTION_KEYS = [
-  'auctions.filters.anyYear',
-  'auctions.filters.year2020',
-  'auctions.filters.year2015',
-  'auctions.filters.year2010',
-  'auctions.filters.beforeYear2010',
+// Non-overlapping year buckets, matching the existing label text exactly ("2020+",
+// "2015-2019", "2010-2014", "Before 2010") -- not an open-ended ">= threshold" filter.
+const YEAR_FILTER_OPTIONS: FilterOption[] = [
+  { value: '2020+', labelKey: 'auctions.filters.year2020' },
+  { value: '2015-2019', labelKey: 'auctions.filters.year2015' },
+  { value: '2010-2014', labelKey: 'auctions.filters.year2010' },
+  { value: 'before2010', labelKey: 'auctions.filters.beforeYear2010' },
 ];
-const TRANSMISSION_OPTION_KEYS = [
-  'auctions.filters.anyTransmission',
-  'auctions.filters.manual',
-  'auctions.filters.automatic',
+
+// CVT/SEMI_AUTOMATIC fold into "Automatic" here -- this is a simplified 2-way filter, not a
+// full transmission-type breakdown (that granularity exists on the /auctions filter sidebar).
+const TRANSMISSION_FILTER_OPTIONS: FilterOption[] = [
+  { value: 'MANUAL', labelKey: 'auctions.filters.manual' },
+  { value: 'AUTOMATIC', labelKey: 'auctions.filters.automatic' },
 ];
-const BODY_STYLE_OPTION_KEYS = [
-  'auctions.filters.anyBodyStyle',
-  'auctions.filters.coupe',
-  'auctions.filters.sedan',
-  'auctions.filters.convertible',
-  'auctions.filters.wagon',
-  'auctions.filters.suv',
+
+const BODY_STYLE_FILTER_OPTIONS: FilterOption[] = [
+  { value: 'COUPE', labelKey: 'auctions.filters.coupe' },
+  { value: 'SEDAN', labelKey: 'auctions.filters.sedan' },
+  { value: 'CONVERTIBLE', labelKey: 'auctions.filters.convertible' },
+  { value: 'WAGON', labelKey: 'auctions.filters.wagon' },
+  { value: 'SUV', labelKey: 'auctions.filters.suv' },
 ];
 
 @Component({
   selector: 'app-auctions-section',
   standalone: true,
-  imports: [CommonModule, Select, AuctionCardComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, Select, AuctionCardComponent, TranslatePipe],
   templateUrl: './auctions-section.component.html',
 })
 export class AuctionsSectionComponent implements OnInit {
-  private readonly translate = inject(TranslateService);
   private readonly auctionService = inject(AuctionService);
 
   readonly sortTabs = SORT_TABS;
@@ -64,20 +72,22 @@ export class AuctionsSectionComponent implements OnInit {
     });
   }
 
-  // These dropdowns bind their [options] to plain display strings (not value/key pairs),
-  // so the option lists themselves have to be re-translated as computed signals whenever
-  // the language changes, rather than translated once at template-render time.
-  readonly yearOptions = computed(() => this.translateAll(YEAR_OPTION_KEYS));
-  readonly transmissionOptions = computed(() => this.translateAll(TRANSMISSION_OPTION_KEYS));
-  readonly bodyStyleOptions = computed(() => this.translateAll(BODY_STYLE_OPTION_KEYS));
+  readonly yearOptions = YEAR_FILTER_OPTIONS;
+  readonly transmissionOptions = TRANSMISSION_FILTER_OPTIONS;
+  readonly bodyStyleOptions = BODY_STYLE_FILTER_OPTIONS;
+
+  readonly selectedYearBucket = signal<string | null>(null);
+  readonly selectedTransmission = signal<string | null>(null);
+  readonly selectedBodyStyle = signal<string | null>(null);
 
   readonly activeSort = signal<SortKey>('ending-soon');
 
   // Finished auctions always come after live ones, regardless of the active sort tab --
   // the tabs are about browsing what's still biddable, not about ordering the whole feed.
   readonly auctions = computed(() => {
-    const live = this.feedAuctions().filter((a) => a.state === 'LIVE');
-    const finished = this.feedAuctions()
+    const filtered = this.feedAuctions().filter((a) => this.matchesFilters(a));
+    const live = filtered.filter((a) => a.state === 'LIVE');
+    const finished = filtered
       .filter((a) => a.state !== 'LIVE')
       .sort((a, b) => b.endDate.getTime() - a.endDate.getTime());
 
@@ -105,8 +115,26 @@ export class AuctionsSectionComponent implements OnInit {
     this.activeSort.set(key);
   }
 
-  private translateAll(keys: string[]): string[] {
-    this.translate.currentLang();
-    return keys.map((key) => this.translate.instant(key));
+  private matchesFilters(auction: AuctionCardData): boolean {
+    const yearBucket = this.selectedYearBucket();
+    if (yearBucket) {
+      const year = auction.year;
+      if (yearBucket === '2020+' && year < 2020) return false;
+      if (yearBucket === '2015-2019' && (year < 2015 || year > 2019)) return false;
+      if (yearBucket === '2010-2014' && (year < 2010 || year > 2014)) return false;
+      if (yearBucket === 'before2010' && year >= 2010) return false;
+    }
+
+    const transmission = this.selectedTransmission();
+    if (transmission) {
+      const isManual = auction.transmission === 'MANUAL';
+      if (transmission === 'MANUAL' && !isManual) return false;
+      if (transmission === 'AUTOMATIC' && (isManual || !auction.transmission)) return false;
+    }
+
+    const bodyStyle = this.selectedBodyStyle();
+    if (bodyStyle && auction.bodyType !== bodyStyle) return false;
+
+    return true;
   }
 }

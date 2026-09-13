@@ -3,44 +3,9 @@ import { VehicleRepository } from './vehicle.repository';
 import { VehicleMake } from './entities/vehicle-make.entity';
 import { VehicleTrim } from './entities/vehicle-trim.entity';
 import { Vehicle } from './entities/vehicle.entity';
-import { VehicleColor } from './enums/vehicle-color.enum';
-import { CritAir } from './enums/crit-air.enum';
-import { Transmission } from './enums/transmission.enum';
-import { Drivetrain } from './enums/drivetrain.enum';
 import { FuelType } from './enums/fuel-type.enum';
 import { decodeModelYear } from './vin-year.util';
-
-export interface VinLookupResult {
-  recognized: boolean;
-  wmi: string;
-  make: VehicleMake | null;
-  modelYear?: number;
-}
-
-export interface CreateVehicleInput {
-  makeId: number;
-  modelId: number;
-  trimId?: number;
-  vin?: string;
-  year: number;
-  exteriorColor?: VehicleColor;
-  interiorColor?: VehicleColor;
-  mileage?: number;
-  numberOfOwners?: number;
-  plateCountry?: string;
-  fiscalPower: number;
-  critAir?: CritAir;
-  numberOfSeats?: number;
-  numberOfDoors?: number;
-  engine?: string;
-  displacement?: number;
-  horsepower?: number;
-  torque?: number;
-  transmission?: Transmission;
-  drivetrain?: Drivetrain;
-  fuelType?: FuelType;
-  weight?: number;
-}
+import { VinLookupResult, CreateVehicleInput } from './interfaces/vehicle-factory.interface';
 
 // The design doc's Factory pattern for 6.2.1 "Creer une annonce": queries the catalog.
 // Backed by our own locally-seeded tables (see src/vehicle/seed/seed-catalog.ts), not a

@@ -2,9 +2,45 @@
   <div class="flex flex-wrap items-center justify-between gap-4">
     <div class="flex flex-wrap items-center gap-3">
       <h2 class="text-2xl font-bold text-white">{{ 'auctions.heading' | translate }}</h2>
-      <p-select [options]="yearOptions()" [placeholder]="yearOptions()[0]" [size]="'small'" />
-      <p-select [options]="transmissionOptions()" [placeholder]="transmissionOptions()[0]" [size]="'small'" />
-      <p-select [options]="bodyStyleOptions()" [placeholder]="bodyStyleOptions()[0]" [size]="'small'" />
+      <p-select
+        [ngModel]="selectedYearBucket()"
+        (ngModelChange)="selectedYearBucket.set($event)"
+        [options]="yearOptions"
+        optionLabel="labelKey"
+        optionValue="value"
+        [showClear]="true"
+        [placeholder]="'auctions.filters.anyYear' | translate"
+        [size]="'small'"
+      >
+        <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+        <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+      </p-select>
+      <p-select
+        [ngModel]="selectedTransmission()"
+        (ngModelChange)="selectedTransmission.set($event)"
+        [options]="transmissionOptions"
+        optionLabel="labelKey"
+        optionValue="value"
+        [showClear]="true"
+        [placeholder]="'auctions.filters.anyTransmission' | translate"
+        [size]="'small'"
+      >
+        <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+        <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+      </p-select>
+      <p-select
+        [ngModel]="selectedBodyStyle()"
+        (ngModelChange)="selectedBodyStyle.set($event)"
+        [options]="bodyStyleOptions"
+        optionLabel="labelKey"
+        optionValue="value"
+        [showClear]="true"
+        [placeholder]="'auctions.filters.anyBodyStyle' | translate"
+        [size]="'small'"
+      >
+        <ng-template let-option pTemplate="item">{{ option.labelKey | translate }}</ng-template>
+        <ng-template let-option pTemplate="selectedItem">{{ option.labelKey | translate }}</ng-template>
+      </p-select>
     </div>
 
     <div class="flex flex-wrap items-center gap-4 text-sm">
