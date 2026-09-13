@@ -5,21 +5,9 @@ import type { AxiosError } from 'axios';
 import { firstValueFrom } from 'rxjs';
 import authConfig from '../config/auth.config';
 import { RequestUser } from './interfaces/authenticated-request.interface';
+import { RegisteredUser, AccessToken } from './interfaces/auth-client.interface';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { UserRole } from './enums/user-role.enum';
-
-export interface RegisteredUser {
-  id: number;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: UserRole;
-}
-
-export interface AccessToken {
-  accessToken: string;
-}
 
 // euro-platform-api never verifies JWTs locally -- it asks euro-auth on every protected
 // request, so revocation (tokenVersion bump) takes effect immediately instead of waiting

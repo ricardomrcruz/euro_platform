@@ -1,7 +1,8 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { VehicleFactoryService } from '../vehicle/vehicle-factory.service';
 import { NotificationService } from '../notification/notification.service';
-import { StorageService, SignedUpload } from '../storage/storage.service';
+import { StorageService } from '../storage/storage.service';
+import { SignedUpload } from '../storage/interfaces/signed-upload.interface';
 import type { RequestUser } from '../auth/interfaces/authenticated-request.interface';
 import { UserRole } from '../auth/enums/user-role.enum';
 import { AdStatus } from './enums/ad-status.enum';

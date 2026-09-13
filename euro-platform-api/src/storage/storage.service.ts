@@ -2,11 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import { Storage } from '@google-cloud/storage';
 import storageConfig from './storage.config';
-
-export interface SignedUpload {
-  uploadUrl: string;
-  publicUrl: string;
-}
+import { SignedUpload } from './interfaces/signed-upload.interface';
 
 const SIGNED_URL_TTL_MS = 15 * 60 * 1000;
 
