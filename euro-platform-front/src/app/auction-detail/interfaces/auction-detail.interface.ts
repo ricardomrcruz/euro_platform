@@ -38,16 +38,18 @@ export interface AuctionSpecs {
   location: string;
 }
 
+// thumbnailUrls is padded/cycled to exactly 7 entries for the 2-col x 4-row grid (the 8th
+// tile is the "see all" overlay, driven by totalPhotoCount); photoUrls is the real,
+// deduplicated set (cover photo first) that the fullscreen slideshow browses instead.
 export interface AuctionDetailData {
   id: number;
   title: string;
   subtitle: string;
   reserveStatus: 'reserve' | 'no-reserve';
   mainPhotoUrl: string;
-  // Exactly 7 real thumbnails are shown plainly (2-col x 4-row grid); the gallery adds an
-  // 8th "see all" tile on top of a blurred photo, driven by totalPhotoCount.
   thumbnailUrls: string[];
   totalPhotoCount: number;
+  photoUrls: string[];
   currentBid: number;
   buyNowPrice?: number;
   sellerId: number;

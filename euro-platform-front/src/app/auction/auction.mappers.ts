@@ -68,6 +68,8 @@ export function toAuctionDetailData(auction: Auction, bids: Bid[] = []): Auction
     { length: GALLERY_THUMBNAIL_COUNT },
     (_, i) => otherUrls[i % otherUrls.length],
   );
+  // The fullscreen slideshow browses the real set instead -- no padding or repeated photos.
+  const photoUrls = photos.length > 0 ? [mainUrl, ...otherPhotos.map((p) => p.url)] : [mainUrl];
 
   const detailSections: DetailSection[] = [
     { headingKey: 'auctionDetail.sections.description', paragraphs: [ad.description] },
@@ -100,6 +102,7 @@ export function toAuctionDetailData(auction: Auction, bids: Bid[] = []): Auction
     mainPhotoUrl: mainUrl,
     thumbnailUrls,
     totalPhotoCount: photos.length,
+    photoUrls,
     currentBid: auction.currentHighestBid ?? auction.reservePrice,
     buyNowPrice: auction.buyNowPrice,
     sellerId: ad.sellerId,
