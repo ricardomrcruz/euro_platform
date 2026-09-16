@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, HostListener, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -16,7 +16,43 @@ export class AuctionGalleryComponent {
   // is built from the last one with a blur overlay, so it isn't part of this list.
   thumbnailUrls = input.required<string[]>();
   totalPhotoCount = input.required<number>();
+  // The real, deduplicated photo set (cover photo first) -- what the fullscreen slideshow
+  // actually browses, as opposed to the grid's padded/cycled thumbnailUrls.
+  photoUrls = input.required<string[]>();
 
-  // Slideshow isn't built yet -- this is a placeholder for that click, per plan.
-  openGallery(): void {}
+  readonly lightboxIndex = signal<number | null>(null);
+
+  // Opens on whichever real photo this grid tile's URL corresponds to -- falls back to the
+  // first photo if the URL somehow isn't found (shouldn't happen, photoUrls always contains
+  // every URL the grid can show).
+  openAt(url: string): void {
+    const index = this.photoUrls().indexOf(url);
+    this.lightboxIndex.set(index === -1 ? 0 : index);
+  }
+
+  openAll(): void {
+    this.lightboxIndex.set(0);
+  }
+
+  closeLightbox(): void {
+    this.lightboxIndex.set(null);
+  }
+
+  next(): void {
+    const count = this.photoUrls().length;
+    this.lightboxIndex.update((i) => (i === null ? null : (i + 1) % count));
+  }
+
+  prev(): void {
+    const count = this.photoUrls().length;
+    this.lightboxIndex.update((i) => (i === null ? null : (i - 1 + count) % count));
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onKeydown(event: KeyboardEvent): void {
+    if (this.lightboxIndex() === null) return;
+    if (event.key === 'Escape') this.closeLightbox();
+    if (event.key === 'ArrowRight') this.next();
+    if (event.key === 'ArrowLeft') this.prev();
+  }
 }
