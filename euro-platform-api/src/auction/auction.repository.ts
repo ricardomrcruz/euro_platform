@@ -65,13 +65,13 @@ export class AuctionRepository extends Repository<Auction> {
       qb.andWhere('(ad.title ILIKE :q OR ad.description ILIKE :q)', { q: `%${filters.q}%` });
     }
     if (filters.make) {
-      qb.andWhere('make.name ILIKE :make', { make: filters.make });
+      qb.andWhere('make.name ILIKE :make', { make: `%${filters.make}%` });
     }
     if (filters.model) {
-      qb.andWhere('model.name ILIKE :model', { model: filters.model });
+      qb.andWhere('model.name ILIKE :model', { model: `%${filters.model}%` });
     }
     if (filters.trim) {
-      qb.andWhere('trim.name ILIKE :trim', { trim: filters.trim });
+      qb.andWhere('trim.name ILIKE :trim', { trim: `%${filters.trim}%` });
     }
     if (filters.yearMin != null) {
       qb.andWhere('vehicle.year >= :yearMin', { yearMin: filters.yearMin });
