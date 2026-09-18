@@ -11,7 +11,7 @@ import { Image } from 'primeng/image';
 import { FileUploadModule } from 'primeng/fileupload';
 import type { FileSelectEvent } from 'primeng/fileupload';
 import { TagModule } from 'primeng/tag';
-import { MessageService } from 'primeng/api';
+import { MessageService, PrimeTemplate } from 'primeng/api';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdService } from '../ad.service';
 import { AuthService } from '../../core/auth/auth.service';
@@ -202,6 +202,7 @@ function valuesEqual(a: unknown, b: unknown): boolean {
     ReactiveFormsModule,
     FormsModule,
     Select,
+    PrimeTemplate,
     ButtonModule,
     InputText,
     InputTextarea,

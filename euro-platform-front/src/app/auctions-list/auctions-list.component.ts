@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { Select } from 'primeng/select';
+import { PrimeTemplate } from 'primeng/api';
 import { InputText } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
 import { IconField } from 'primeng/iconfield';
@@ -108,6 +109,7 @@ function toDisplayModels(models: VehicleModel[], makeName: string | undefined): 
     FormsModule,
     ButtonModule,
     Select,
+    PrimeTemplate,
     InputText,
     InputNumber,
     IconField,
