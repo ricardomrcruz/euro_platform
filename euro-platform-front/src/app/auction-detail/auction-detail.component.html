@@ -28,7 +28,9 @@
       <div class="flex flex-wrap items-center gap-6 text-sm">
         <div>
           <div class="text-xs text-surface-300">{{ 'auctionDetail.quickStats.timeLeft' | translate }}</div>
-          <div class="font-semibold text-white"><app-countdown [endDate]="d.endDate" /></div>
+          <div class="font-semibold text-white">
+            <app-countdown [endDate]="d.endDate" [state]="d.state" [closedAt]="d.closedAt" />
+          </div>
         </div>
         <div>
           <div class="text-xs text-surface-300">{{ 'auctionDetail.quickStats.highBid' | translate }}</div>

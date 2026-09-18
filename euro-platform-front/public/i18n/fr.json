@@ -18,6 +18,7 @@
   },
   "countdown": {
     "ended": "Terminée",
+    "endedOn": "Terminée le {{date}}",
     "weekAbbr": "sem",
     "dayAbbr": "j",
     "hourAbbr": "h",

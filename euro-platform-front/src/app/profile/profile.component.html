@@ -94,7 +94,11 @@
                       <p-tag [value]="'profile.myAds.launch.live' | translate" severity="success" />
                       <span class="text-surface-300">
                         {{ 'profile.myAds.launch.endsIn' | translate }}
-                        <app-countdown [endDate]="endDateOf(auction)" class="font-semibold text-white" />
+                        <app-countdown
+                          [endDate]="endDateOf(auction)"
+                          [state]="auction.state"
+                          class="font-semibold text-white"
+                        />
                       </span>
                     </div>
                   } @else if (ad.status === 'VALIDATED') {
