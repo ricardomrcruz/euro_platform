@@ -41,6 +41,11 @@ export class Auction {
   @Column({ type: 'enum', enum: AuctionState, default: AuctionState.LIVE })
   state!: AuctionState;
 
+  // Only set for a buy-now close -- endDate is the scheduled end and stays accurate for every
+  // other way an auction closes, so this is the one case where endDate alone would mislead.
+  @Column({ name: 'closed_at', nullable: true })
+  closedAt?: Date;
+
   @OneToOne(() => Ad)
   @JoinColumn()
   ad!: Ad;

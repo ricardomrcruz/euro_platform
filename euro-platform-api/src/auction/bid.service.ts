@@ -116,6 +116,7 @@ export class BidService {
       const amount = auction.buyNowPrice;
       auction.currentHighestBid = amount;
       auction.sell();
+      auction.closedAt = new Date();
       await auctionRepo.save(auction);
 
       const commission = this.commissionService.calculate(amount);
