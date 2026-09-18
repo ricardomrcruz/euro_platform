@@ -7,7 +7,11 @@
         {{ (editingAdId() ? 'ad.create.editHeading' : 'ad.create.heading') | translate }}
       </h1>
 
-      @if (isContentEditMode()) {
+      @if (isAdminReviewMode()) {
+        <p class="mt-4 bg-amber-950 p-3 text-sm text-amber-400">
+          {{ 'admin.reviewingAsAdmin' | translate }}
+        </p>
+      } @else if (isContentEditMode()) {
         <p class="mt-4 bg-sky-950 p-3 text-sm text-sky-400">
           {{ 'ad.create.contentEditNotice' | translate }}
         </p>
@@ -664,7 +668,32 @@
       }
 
       <div class="mt-6 flex flex-wrap gap-2">
-        @if (isContentEditMode()) {
+        @if (isAdminReviewMode()) {
+          <p-button
+            type="button"
+            [label]="'ad.create.saveChanges' | translate"
+            [size]="'small'"
+            [outlined]="true"
+            [loading]="savingAdminEdits()"
+            (onClick)="saveAdminEdits()"
+          />
+          <p-button
+            type="button"
+            [label]="'admin.validate' | translate"
+            [size]="'small'"
+            [raised]="true"
+            [loading]="validatingAd()"
+            (onClick)="validateFromReview()"
+          />
+          <p-button
+            type="button"
+            [label]="'admin.reject' | translate"
+            [size]="'small'"
+            [outlined]="true"
+            severity="danger"
+            (onClick)="showRejectBox.set(!showRejectBox())"
+          />
+        } @else if (isContentEditMode()) {
           <p-button
             type="button"
             [label]="'ad.create.saveChanges' | translate"
@@ -692,6 +721,41 @@
           />
         }
       </div>
+
+      @if (isAdminReviewMode() && showRejectBox()) {
+        <div class="mt-3 bg-surface-600 p-3">
+          <textarea
+            pInputTextarea
+            [ngModel]="rejectReason()"
+            (ngModelChange)="rejectReason.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+            rows="3"
+            class="w-full"
+            [placeholder]="'admin.rejectReasonPlaceholder' | translate"
+          ></textarea>
+          @if (rejectReasonMissing()) {
+            <p class="mt-1 text-xs text-red-400">{{ 'admin.rejectReasonRequired' | translate }}</p>
+          }
+          <div class="mt-2 flex gap-2">
+            <p-button
+              type="button"
+              [label]="'admin.confirmReject' | translate"
+              [size]="'small'"
+              [raised]="true"
+              severity="danger"
+              [loading]="rejectingAd()"
+              (onClick)="rejectFromReview()"
+            />
+            <p-button
+              type="button"
+              [label]="'admin.cancel' | translate"
+              [size]="'small'"
+              [text]="true"
+              (onClick)="showRejectBox.set(false)"
+            />
+          </div>
+        </div>
+      }
     </form>
   }
 </div>

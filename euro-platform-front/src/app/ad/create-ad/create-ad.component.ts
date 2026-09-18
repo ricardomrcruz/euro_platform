@@ -2,7 +2,7 @@ import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Select } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
@@ -14,6 +14,7 @@ import { TagModule } from 'primeng/tag';
 import { MessageService } from 'primeng/api';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdService } from '../ad.service';
+import { AuthService } from '../../core/auth/auth.service';
 import type {
   AdPhoto,
   AdPhotoCategory,
@@ -199,6 +200,7 @@ function valuesEqual(a: unknown, b: unknown): boolean {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     Select,
     ButtonModule,
     InputText,
@@ -218,6 +220,7 @@ export class CreateAdComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly messageService = inject(MessageService);
   private readonly translate = inject(TranslateService);
+  private readonly auth = inject(AuthService);
 
   readonly editingAdId = signal<number | null>(null);
   readonly editingAdStatus = signal<AdStatus | null>(null);
@@ -229,6 +232,20 @@ export class CreateAdComponent implements OnDestroy {
   // modifications/serviceHistory) and photos edited -- title/location/condition/vehicle
   // fundamentals are locked forever. Editing content always resubmits for review.
   readonly isContentEditMode = computed(() => this.editingAdStatus() === 'VALIDATED');
+
+  // An admin opening an ad that's waiting on review gets the same full form the seller had,
+  // plus the validate/reject decision -- so a listing can be corrected in place during
+  // moderation instead of being bounced back over a small mistake.
+  readonly isAdminReviewMode = computed(
+    () => this.auth.currentUser()?.role === 'ADMIN' && this.editingAdStatus() === 'REVIEW',
+  );
+
+  readonly savingAdminEdits = signal(false);
+  readonly validatingAd = signal(false);
+  readonly rejectingAd = signal(false);
+  readonly showRejectBox = signal(false);
+  readonly rejectReason = signal('');
+  readonly rejectReasonMissing = signal(false);
 
   readonly savingDraft = signal(false);
   readonly savingAndSubmitting = signal(false);
@@ -728,6 +745,63 @@ export class CreateAdComponent implements OnDestroy {
     }
   }
 
+  // Saves the admin's corrections to the seller's ad without deciding on it yet -- the
+  // validate/reject call is a separate, deliberate second step.
+  saveAdminEdits(): Promise<void> {
+    return this.persistAndMaybeSubmit(false, this.savingAdminEdits);
+  }
+
+  async validateFromReview(): Promise<void> {
+    const id = this.editingAdId();
+    if (!id) return;
+
+    this.validatingAd.set(true);
+    this.errorKey.set(null);
+    try {
+      await this.adService.validate(id);
+      this.messageService.add({
+        severity: 'success',
+        summary: this.translate.instant('admin.validate'),
+        detail: this.translate.instant('ad.create.toastValidatedDetail'),
+        life: 5000,
+      });
+      this.router.navigateByUrl('/admin');
+    } catch {
+      this.errorKey.set('ad.create.genericError');
+    } finally {
+      this.validatingAd.set(false);
+    }
+  }
+
+  async rejectFromReview(): Promise<void> {
+    const id = this.editingAdId();
+    if (!id) return;
+
+    const reason = this.rejectReason().trim();
+    if (!reason) {
+      this.rejectReasonMissing.set(true);
+      return;
+    }
+
+    this.rejectingAd.set(true);
+    this.rejectReasonMissing.set(false);
+    this.errorKey.set(null);
+    try {
+      await this.adService.reject(id, reason);
+      this.messageService.add({
+        severity: 'warn',
+        summary: this.translate.instant('admin.reject'),
+        detail: this.translate.instant('ad.create.toastRejectedDetail'),
+        life: 5000,
+      });
+      this.router.navigateByUrl('/admin');
+    } catch {
+      this.errorKey.set('ad.create.genericError');
+    } finally {
+      this.rejectingAd.set(false);
+    }
+  }
+
   private async persistAndMaybeSubmit(
     thenSubmit: boolean,
     loadingSignal: ReturnType<typeof signal<boolean>>,
@@ -794,6 +868,13 @@ export class CreateAdComponent implements OnDestroy {
           detail: this.translate.instant('ad.create.toastSubmittedDetail'),
           life: 5000,
         });
+      } else if (this.isAdminReviewMode()) {
+        this.messageService.add({
+          severity: 'success',
+          summary: this.translate.instant('ad.create.saveChanges'),
+          detail: this.translate.instant('ad.create.toastAdminSavedDetail'),
+          life: 5000,
+        });
       } else {
         this.messageService.add({
           severity: 'success',
@@ -803,7 +884,9 @@ export class CreateAdComponent implements OnDestroy {
         });
       }
 
-      this.router.navigateByUrl('/profile');
+      // An admin who just corrected a listing is mid-moderation, so send them back to the
+      // queue rather than to their own profile's ad list.
+      this.router.navigateByUrl(this.isAdminReviewMode() ? '/admin' : '/profile');
     } catch (error) {
       const status = error instanceof HttpErrorResponse ? error.status : 0;
       this.errorKey.set(
