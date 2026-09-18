@@ -93,9 +93,9 @@ describe('AdService ownership guards', () => {
       buildAd({ sellerId: 10 }),
     );
 
-    await expect(service.updateAd(999, 1, {} as never)).rejects.toThrow(
-      ForbiddenException,
-    );
+    await expect(
+      service.updateAd(buildUser({ id: 999 }), 1, {} as never),
+    ).rejects.toThrow(ForbiddenException);
   });
 
   it('updateAd throws ForbiddenException when the owner tries to edit a non-editable ad', async () => {
@@ -104,18 +104,50 @@ describe('AdService ownership guards', () => {
       buildAd({ sellerId: 10, status: AdStatus.REVIEW }),
     );
 
-    await expect(service.updateAd(10, 1, {} as never)).rejects.toThrow(
-      ForbiddenException,
-    );
+    await expect(
+      service.updateAd(buildUser({ id: 10 }), 1, {} as never),
+    ).rejects.toThrow(ForbiddenException);
   });
 
   it('throws NotFoundException when the ad does not exist at all', async () => {
     const { service, adRepository } = buildHarness();
     adRepository.findByIdWithRelations.mockResolvedValue(null);
 
-    await expect(service.updateAd(10, 1, {} as never)).rejects.toThrow(
-      NotFoundException,
+    await expect(
+      service.updateAd(buildUser({ id: 10 }), 1, {} as never),
+    ).rejects.toThrow(NotFoundException);
+  });
+});
+
+describe('AdService admin edit during review', () => {
+  it('lets an admin edit an ad sitting in REVIEW, which its own owner cannot', async () => {
+    const { service, adRepository } = buildHarness();
+    adRepository.findByIdWithRelations.mockResolvedValue(
+      buildAd({ sellerId: 10, status: AdStatus.REVIEW }),
     );
+
+    await expect(
+      service.updateAd(
+        buildUser({ id: 999, role: UserRole.ADMIN }),
+        1,
+        {} as never,
+      ),
+    ).resolves.toBeDefined();
+  });
+
+  it('still blocks an admin on a VALIDATED ad, which is content-edit only', async () => {
+    const { service, adRepository } = buildHarness();
+    adRepository.findByIdWithRelations.mockResolvedValue(
+      buildAd({ sellerId: 10, status: AdStatus.VALIDATED }),
+    );
+
+    await expect(
+      service.updateAd(
+        buildUser({ id: 999, role: UserRole.ADMIN }),
+        1,
+        {} as never,
+      ),
+    ).rejects.toThrow(ForbiddenException);
   });
 });
 

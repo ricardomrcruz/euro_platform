@@ -28,7 +28,7 @@ export class AdController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateAdDto,
   ) {
-    return this.adService.updateAd(user.id, id, dto);
+    return this.adService.updateAd(user, id, dto);
   }
 
   // Content-only edit for a VALIDATED ad -- see Ad.canEditContent()/resubmitForReview().
