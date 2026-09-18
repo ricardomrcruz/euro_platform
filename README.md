@@ -168,15 +168,23 @@ start (Postgres's own `public` schema is used by `euro-platform-api`).
 
 ## Seeding vehicle catalog data
 
-`euro-platform-api` includes a script that populates the vehicle make/model catalog from
-[Wikidata](https://www.wikidata.org/) (free, public SPARQL endpoint, no API key needed):
+`euro-platform-api` includes scripts that populate the vehicle catalog. All of them are
+safe to re-run — they look rows up by name first, so they fill gaps rather than duplicating.
 
 ```bash
 cd euro-platform-api
-npm run seed:catalog
+npm run seed:catalog          # makes/models from Wikidata (public SPARQL, no API key)
+npm run seed:vehicle-catalog  # makes/models/trims from the bundled catalog dataset
+npm run seed:powertrains      # curated engine/output figures onto existing trims
 ```
 
-Safe to re-run — it only fills gaps and won't duplicate existing rows.
+`seed:powertrains` is the one to re-run after adding an entry to
+`src/vehicle/seed/powertrain-data.ts` — it creates any trim named there that doesn't exist
+yet and refreshes the spec figures on ones it already created, so the dataset can be
+improved in place.
+
+These are manual commands, not part of the deploy: unlike migrations (which run on boot via
+`migrationsRun`), seeding a deployed database means running the script against it directly.
 
 ## Testing
 
@@ -185,7 +193,15 @@ cd euro-auth               # or euro-platform-api or euro-platform-front
 npm test
 ```
 
-Backends also have `npm run test:e2e` and `npm run test:cov`.
+`euro-platform-api` carries the real suite — unit specs live in a `specs/` folder per module
+(`src/ad/specs/`, `src/auction/specs/`) and cover the Ad/Auction state machines, commission
+maths, bid placement including the SERIALIZABLE retry loop, and AdService's
+ownership/visibility rules. Backends also have `npm run test:e2e` and `npm run test:cov`.
+
+`euro-auth` and `euro-platform-front` have only a thin smoke test each. Note both backends
+pin Jest to 29.x and declare `jest-util` explicitly: Jest 30's resolver depends on a native
+binding (`unrs-resolver`) that fails to load on Windows, breaking `npm test` at config
+validation.
 
 ## CI/CD and staging deployment
 
@@ -212,3 +228,9 @@ above, and doesn't touch any of this.
 ## Notes on scope
 
 This is a school project. The notification system is a stub (logs only, no real email).
+
+## Known gaps
+
+- Tests aren't gated in CI — `ci.yml` builds only, so a failing suite won't block a merge.
+- Coverage is thin outside `euro-platform-api`: `euro-auth` and `euro-platform-front` each
+  have a single smoke test, and there are no end-to-end tests despite `test:e2e` existing.
