@@ -68,6 +68,15 @@ export const POWERTRAINS_BY_MODEL: Record<string, Record<string, TrimRow[]>> = {
         ],
       },
       {
+        // US-market Mk7.5 GTI SE: 6-speed manual, lower output than the EU DSG-only "GTI"
+        // entry above -- kept as its own trim rather than a second powertrain on "GTI" since
+        // the table only allows one row per (trim, fuelType).
+        name: 'GTI SE',
+        powertrains: [
+          { fuelType: FuelType.GASOLINE, engine: '2.0 TSI', displacement: 2.0, horsepower: 228, torque: 350, transmission: Transmission.MANUAL, drivetrain: Drivetrain.FWD, weight: 1385 },
+        ],
+      },
+      {
         name: 'R',
         powertrains: [
           { fuelType: FuelType.GASOLINE, engine: '2.0 TSI', displacement: 2.0, horsepower: 320, torque: 420, transmission: Transmission.SEMI_AUTOMATIC, drivetrain: Drivetrain.AWD, weight: 1551 },
