@@ -1,0 +1,12 @@
+[
+  {
+    "origin": [
+      "http://localhost:4200",
+      "http://localhost",
+      "https://euro-platform-font-six.vercel.app"
+    ],
+    "method": ["PUT", "GET", "HEAD"],
+    "responseHeader": ["Content-Type", "Content-Length"],
+    "maxAgeSeconds": 3600
+  }
+]
