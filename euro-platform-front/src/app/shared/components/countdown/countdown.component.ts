@@ -1,5 +1,7 @@
 import { Component, computed, inject, input, OnDestroy, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { TranslateService } from '@ngx-translate/core';
+import type { AuctionState } from '../../../auction/interfaces/auction.interface';
 
 const SECONDS_PER_MINUTE = 60;
 const SECONDS_PER_HOUR = 60 * SECONDS_PER_MINUTE;
@@ -32,12 +34,21 @@ function formatDuration(totalSeconds: number, t: (key: string) => string): strin
 @Component({
   selector: 'app-countdown',
   standalone: true,
+  providers: [DatePipe],
   template: `{{ display() }}`,
 })
 export class CountdownComponent implements OnDestroy {
   private readonly translate = inject(TranslateService);
+  private readonly datePipe = inject(DatePipe);
 
   endDate = input.required<Date>();
+  // Optional -- when provided and not LIVE, the countdown stops immediately (e.g. a buy-now
+  // sale doesn't change endDate, so without this it would keep counting toward a date the
+  // auction already closed well ahead of).
+  state = input<AuctionState>();
+  // Only set for a buy-now close -- shown instead of endDate once ended, since endDate would
+  // still be the original scheduled date, not when it actually sold.
+  closedAt = input<Date>();
 
   private readonly nowMs = signal(Date.now());
   private readonly timer = setInterval(() => this.nowMs.set(Date.now()), 1000);
@@ -46,8 +57,12 @@ export class CountdownComponent implements OnDestroy {
     // Read currentLang() so this recomputes (and re-translates) when the user toggles language.
     this.translate.currentLang();
 
+    const state = this.state();
     const remainingMs = this.endDate().getTime() - this.nowMs();
-    if (remainingMs <= 0) return this.translate.instant('countdown.ended');
+    if ((state && state !== 'LIVE') || remainingMs <= 0) {
+      const date = this.datePipe.transform(this.closedAt() ?? this.endDate(), 'short');
+      return this.translate.instant('countdown.endedOn', { date });
+    }
 
     const totalSeconds = Math.floor(remainingMs / 1000);
     return formatDuration(totalSeconds, (key) => this.translate.instant(key));

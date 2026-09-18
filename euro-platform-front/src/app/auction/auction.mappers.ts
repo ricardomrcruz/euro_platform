@@ -20,6 +20,7 @@ export function toAuctionCardData(auction: Auction): AuctionCardData {
     location: ad.location ?? '',
     currentBid: auction.currentHighestBid ?? auction.reservePrice,
     endDate: new Date(auction.endDate),
+    closedAt: auction.closedAt ? new Date(auction.closedAt) : undefined,
     // No "ad first listed" timestamp exists on Auction -- startDate is the closest proxy.
     listedAt: new Date(auction.startDate),
     mileage: ad.vehicle.mileage ?? 0,
@@ -113,6 +114,7 @@ export function toAuctionDetailData(auction: Auction, bids: Bid[] = []): Auction
     sellerName: ad.sellerName ?? `Seller #${ad.sellerId}`,
     sellerType: 'private',
     endDate: new Date(auction.endDate),
+    closedAt: auction.closedAt ? new Date(auction.closedAt) : undefined,
     bidsCount: bids.length,
     viewsCount: 0,
     watchingCount: 0,

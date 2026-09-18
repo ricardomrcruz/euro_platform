@@ -20,7 +20,7 @@
       class="absolute bottom-2 left-2 flex items-center gap-2 bg-surface-900/80 px-2 py-1 text-xs font-medium text-white"
     >
       <i class="pi pi-clock text-[0.7rem]"></i>
-      <app-countdown [endDate]="data().endDate" />
+      <app-countdown [endDate]="data().endDate" [state]="data().state" [closedAt]="data().closedAt" />
       <span class="opacity-60">|</span>
       <span>
         {{ (data().state === 'LIVE' ? 'card.bid' : 'card.finalBid') | translate }}

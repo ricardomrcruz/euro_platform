@@ -41,6 +41,7 @@ export interface AuctionSpecs {
 // thumbnailUrls is padded/cycled to exactly 7 entries for the 2-col x 4-row grid (the 8th
 // tile is the "see all" overlay, driven by totalPhotoCount); photoUrls is the real,
 // deduplicated set (cover photo first) that the fullscreen slideshow browses instead.
+// closedAt is only set for a buy-now close -- endDate stays accurate otherwise.
 export interface AuctionDetailData {
   id: number;
   title: string;
@@ -58,6 +59,7 @@ export interface AuctionDetailData {
   sellerName: string;
   sellerType: 'dealer' | 'private';
   endDate: Date;
+  closedAt?: Date;
   bidsCount: number;
   viewsCount: number;
   watchingCount: number;

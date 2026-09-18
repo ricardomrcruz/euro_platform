@@ -20,10 +20,14 @@
             <ul class="mt-4 divide-y divide-surface-600">
               @for (ad of pendingAds(); track ad.id) {
                 <li class="flex gap-3 py-4">
-                  <img [src]="photoUrl(ad)" [alt]="ad.title" class="h-16 w-16 flex-none object-cover" />
+                  <a [routerLink]="['/sell', ad.id]" class="flex-none">
+                    <img [src]="photoUrl(ad)" [alt]="ad.title" class="h-16 w-16 object-cover" />
+                  </a>
                   <div class="min-w-0 flex-1">
                   <div class="flex items-center justify-between gap-2">
-                    <span class="font-medium text-white">{{ ad.title }}</span>
+                    <a [routerLink]="['/sell', ad.id]" class="font-medium text-white hover:text-primary hover:underline">
+                      {{ ad.title }}
+                    </a>
                     <p-tag [value]="('ad.status.' + ad.status) | translate" [severity]="statusSeverity(ad.status)" />
                   </div>
                   <p class="mt-1 text-sm text-surface-300">
@@ -32,6 +36,12 @@
                   </p>
 
                   <div class="mt-3 flex flex-wrap items-center gap-2">
+                    <p-button
+                      [label]="'admin.reviewAd' | translate"
+                      [size]="'small'"
+                      [outlined]="true"
+                      [routerLink]="['/sell', ad.id]"
+                    />
                     <p-button
                       [label]="'admin.validate' | translate"
                       [size]="'small'"
@@ -157,7 +167,11 @@
                       <p-tag [value]="'profile.myAds.launch.live' | translate" severity="success" />
                       <span class="text-surface-300">
                         {{ 'profile.myAds.launch.endsIn' | translate }}
-                        <app-countdown [endDate]="endDateOf(auction)" class="font-semibold text-white" />
+                        <app-countdown
+                          [endDate]="endDateOf(auction)"
+                          [state]="auction.state"
+                          class="font-semibold text-white"
+                        />
                       </span>
                     </div>
                   } @else {

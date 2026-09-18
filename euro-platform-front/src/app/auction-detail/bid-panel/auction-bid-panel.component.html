@@ -24,7 +24,9 @@
       </div>
       <div class="flex items-center justify-between py-2">
         <dt class="text-surface-300">{{ 'auctionDetail.bidPanel.ending' | translate }}</dt>
-        <dd class="font-medium text-white"><app-countdown [endDate]="d.endDate" /></dd>
+        <dd class="font-medium text-white">
+          <app-countdown [endDate]="d.endDate" [state]="d.state" [closedAt]="d.closedAt" />
+        </dd>
       </div>
       <div class="flex items-center justify-between py-2">
         <dt class="text-surface-300">{{ 'auctionDetail.bidPanel.bids' | translate }}</dt>

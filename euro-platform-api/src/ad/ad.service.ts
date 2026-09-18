@@ -85,10 +85,16 @@ export class AdService {
 
   // Only DRAFT/REJECTED ads are editable (ad.canEdit()) -- replaces every field, including
   // the vehicle (a new Vehicle row is created via the same factory path as createAd; the old
-  // one is left orphaned, same tolerance as elsewhere in this module).
-  async updateAd(sellerId: number, adId: number, dto: UpdateAdDto): Promise<Ad> {
-    const ad = await this.findOwnedOrThrow(adId, sellerId);
-    if (!ad.canEdit()) {
+  // one is left orphaned, same tolerance as elsewhere in this module). Admins additionally
+  // edit ads sitting in REVIEW: correcting a listing is part of the moderation pass, so they
+  // can fix it in place instead of bouncing it back to the seller over a typo.
+  async updateAd(currentUser: RequestUser, adId: number, dto: UpdateAdDto): Promise<Ad> {
+    const ad = await this.findByIdOrThrow(adId);
+    const isAdmin = currentUser.role === UserRole.ADMIN;
+    if (!isAdmin && ad.sellerId !== currentUser.id) {
+      throw new ForbiddenException('Not the owner of this ad');
+    }
+    if (!ad.canEdit() && !(isAdmin && ad.status === AdStatus.REVIEW)) {
       throw new ForbiddenException('Ad cannot be edited in its current status');
     }
 

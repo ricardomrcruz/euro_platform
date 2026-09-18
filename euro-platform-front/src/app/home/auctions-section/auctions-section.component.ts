@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
+import { PrimeTemplate } from 'primeng/api';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuctionCardComponent } from '../../shared/components/auction-card/auction-card.component';
 import { AuctionService } from '../../auction/auction.service';
@@ -57,7 +58,7 @@ const BODY_STYLE_FILTER_OPTIONS: FilterOption[] = [
 @Component({
   selector: 'app-auctions-section',
   standalone: true,
-  imports: [CommonModule, FormsModule, Select, AuctionCardComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, Select, PrimeTemplate, AuctionCardComponent, TranslatePipe],
   templateUrl: './auctions-section.component.html',
 })
 export class AuctionsSectionComponent implements OnInit {

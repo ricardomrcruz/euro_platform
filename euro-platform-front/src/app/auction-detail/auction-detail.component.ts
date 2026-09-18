@@ -117,6 +117,13 @@ export class AuctionDetailComponent implements OnDestroy {
     this.loadAuction(Number(this.id()));
   }
 
+  // The sticky quick-stats bar's own "place bid" button doesn't duplicate the real bid
+  // form (amount input, buy-now, login/seller/not-live gating) -- it just jumps to the
+  // actual AuctionBidPanelComponent below, the one source of truth for placing a bid.
+  scrollToBidPanel(): void {
+    document.getElementById('bid-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   // A dedicated, top-center, larger toast -- distinct from the routine bottom-right "new bid"
   // notices, since an auction actually ending is the one moment on this page worth
   // interrupting the user for. Reads the just-refreshed detail() rather than the bare

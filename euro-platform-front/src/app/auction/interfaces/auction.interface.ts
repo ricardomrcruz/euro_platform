@@ -48,10 +48,13 @@ export interface AuctionAdSummary {
   photos: AuctionPhoto[];
 }
 
+// closedAt is only set when the auction closed via buy-now -- endDate stays accurate for
+// every other way it can close, so this is the one case where endDate alone would mislead.
 export interface Auction {
   id: number;
   startDate: string;
   endDate: string;
+  closedAt?: string;
   reservePrice: number;
   buyNowPrice?: number;
   currentHighestBid?: number;

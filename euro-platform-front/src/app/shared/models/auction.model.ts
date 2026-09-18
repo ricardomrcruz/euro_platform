@@ -1,5 +1,6 @@
 import type { AuctionState } from '../../auction/interfaces/auction.interface';
 
+// closedAt is only set for a buy-now close -- endDate stays accurate otherwise.
 export interface AuctionCardData {
   id: number;
   photoUrl: string;
@@ -8,6 +9,7 @@ export interface AuctionCardData {
   location: string;
   currentBid: number;
   endDate: Date;
+  closedAt?: Date;
   listedAt: Date;
   mileage: number;
   badge?: 'NO RESERVE';
