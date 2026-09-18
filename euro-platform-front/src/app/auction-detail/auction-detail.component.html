@@ -46,7 +46,12 @@
         </div>
       </div>
 
-      <p-button [label]="'auctionDetail.quickStats.placeBid' | translate" [size]="'small'" [raised]="true" />
+      <p-button
+        [label]="'auctionDetail.quickStats.placeBid' | translate"
+        [size]="'small'"
+        [raised]="true"
+        (onClick)="scrollToBidPanel()"
+      />
     </div>
 
     <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -59,7 +64,7 @@
       </div>
 
       <div class="self-start lg:col-span-1">
-        <div class="sticky top-6 space-y-6">
+        <div id="bid-panel" class="sticky top-6 space-y-6">
           <app-auction-bid-panel [detail]="d" (bidPlaced)="refreshAuction()" />
 
           @if (otherAuctions().length > 0) {
